@@ -43,7 +43,7 @@ If not — if experience cannot be turned into reusable skill — that is also a
 
 ### M0.3 — feasibility anchors
 
-- Ceiling ~0.48 reachable (expert-level, 4.5h/domain)
+- Ceiling ~0.48 reachable (expert-level)
 - LoRA fine-tuning viable (+4.4pp on held-out config, see results/m0_3_lora*.json)
 - Self-distillation **negative** (−16.5pp) — external-information motivation for E3 confirmed
 
