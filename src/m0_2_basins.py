@@ -1,17 +1,16 @@
-"""M0.2 吸引盆可视化：PTRM 并行 rollouts 的潜在空间结构（E6a 潜在空间证据通道工具）
+"""M0.2 basin visualization: latent-space structure of PTRM parallel rollouts (tool for the E6a latent-space evidence channel)
 
-对同一谜题的 K 个噪声 rollout 全程跟踪 z_H[:,0]（q-head 读取的 puzzle-emb 位），量化：
-  spread(t)   rollout 两两 RMS 距离（对 ||v|| 归一化）随步数变化 → 单盆收敛 / 多盆分叉
-  q_corr      q-head 最终分数 vs rollout 正确性：Spearman ρ + AUC（选择机制有效性）
-  cohens_d    正确/错误 rollout 终点态质心距离效应量（簇间可分性）
-  purity      终点态空间 1-NN 正确性一致性（聚类纯度，随机 ≈ p²+(1-p)²）
+Tracks z_H[:,0] (the puzzle-emb slot read by q-head) over K noisy rollouts of the same puzzle, quantifying:
+  spread(t)   pairwise RMS distance between rollouts (normalized by ||v||) over steps -> single-basin convergence / multi-basin divergence
+  q_corr      q-head final score vs rollout correctness: Spearman rho + AUC (selector effectiveness)
+  cohens_d    effect size of centroid distance between correct/incorrect rollout endpoints (cluster separability)
+  purity      1-NN correctness consistency of endpoints (cluster purity; chance ~ p^2+(1-p)^2)
 
-产出（--out 目录）:
-  metrics.json   逐谜题指标 + 聚合
-  basins_traj.npz  所有谜题潜变量轨迹（供复用/重画）
-  basins_pca.png   PCA 图（例谜题轨迹 + 全谜题质心对齐散点）
-  basins_metrics.png  spread 曲线 + q/正确性关系
-"""
+Outputs (--out dir):
+  metrics.json       per-puzzle metrics + aggregates
+  basins_traj.npz    latent trajectories for all puzzles (for reuse/replotting)
+  basins_pca.png     PCA plot (example puzzle trajectories + all-puzzle centroid-aligned scatter)
+  basins_metrics.png spread curves + q/correctness relationship"""
 import argparse
 import json
 import os
@@ -22,7 +21,7 @@ import torch
 
 from eval_ptrm import load_model, load_test_data
 
-matplotlib = None  # 延迟导入，只有 --plot 才需要
+matplotlib = None  # lazy import, only needed with --plot
 
 
 def spearman(x, y):
@@ -35,7 +34,7 @@ def spearman(x, y):
 
 
 def auc(q, y):
-    """q 升序（默认）排后正例位置 → Mann-Whitney U → AUC（正例越靠后=越高分=越大）"""
+    """rank of positives after ascending-q (default) order -> Mann-Whitney U -> AUC (later positive = higher score = larger)"""
     order = torch.argsort(q)
     ys = y[order]
     n1 = ys.sum().item()
@@ -48,7 +47,7 @@ def auc(q, y):
 
 
 def puzzle_metrics(traj, q, ok):
-    """traj [T,K,512], q [K], ok [K] → 指标 dict"""
+    """traj [T,K,512], q [K], ok [K] -> metrics dict"""
     T, K, _ = traj.shape
     spread = []
     for t in range(T):
@@ -70,7 +69,7 @@ def puzzle_metrics(traj, q, ok):
         D.fill_diagonal_(float("inf"))
         nn = D.min(1).indices
         purity = (ok[nn] == ok).float().mean().item()
-    # 簇内紧密度：正确/错误终点态各自相对质心的 RMS spread（归一化，与 spread 同口径）
+    # intra-cluster tightness: RMS spread of correct/incorrect endpoints around their own centroid (normalized, same convention as spread)
     in_class = {"good": float("nan"), "bad": float("nan")}
     if len(good) >= 2:
         in_class["good"] = (torch.sqrt(((good - good.mean(0)) ** 2).mean())
@@ -92,7 +91,7 @@ def puzzle_metrics(traj, q, ok):
 
 
 def collect(model, inputs, labels, ids, K, D, sigma, save_steps):
-    """K  rollout 全程潜变量：返回 per-puzzle 数组"""
+    """K-rollout full latent trajectories: returns per-puzzle arrays"""
     N = inputs.shape[0]
     PPC = max(1, 512 // K)
     n_steps = len(save_steps)
@@ -137,7 +136,7 @@ def make_plots(out_dir, metrics, traj_data, save_steps):
     _, K, _ = traj_data[first_key].shape
     T = len(save_steps)
 
-    # ---- 图 1：例谜题轨迹（单谜题 PCA）+ 全谜题质心对齐散点 ----
+    # ---- figure 1: example-puzzle trajectories (per-puzzle PCA) + all-puzzle centroid-aligned scatter ----
     fig, axes = plt.subplots(3, 3, figsize=(13, 13))
     examples = [m for m in metrics["per_puzzle"]
                 if m["n_good"] not in (0, m["n_total"])][:9]
@@ -164,7 +163,7 @@ def make_plots(out_dir, metrics, traj_data, save_steps):
     fig.savefig(os.path.join(out_dir, "basins_pca.png"), dpi=120, bbox_inches="tight")
     plt.close(fig)
 
-    # ---- 图 2：聚合指标 ----
+    # ---- figure 2: aggregate metrics ----
     fig, axes = plt.subplots(1, 3, figsize=(15, 4.2))
     sp = np.array([m["spread"] for m in metrics["per_puzzle"]])
     mu, sd = sp.mean(0), sp.std(0)
@@ -209,7 +208,7 @@ def main():
     ap.add_argument("--n", type=int, default=40)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--steps", default="0,4,8,16,24,32,40,47",
-                    help="保存潜变量的步集合")
+                    help="steps to save latents")
     ap.add_argument("--out", default="outputs/2026-08-10/overnight/basins")
     args = ap.parse_args()
 
@@ -224,7 +223,7 @@ def main():
     npz_path = os.path.join(args.out, "basins_traj.npz")
     json_path = os.path.join(args.out, "metrics.json")
     if os.path.exists(npz_path) and os.path.exists(json_path):
-        # 已采集过 → 只重画（换图参数时免重跑 4 分钟推理）
+        # already collected -> replot only (avoids re-running ~4min inference when changing plot params)
         print("found existing data, replot only", flush=True)
         loaded = np.load(npz_path)
         traj_data = {int(k[1:]): v for k, v in loaded.items()}
@@ -249,7 +248,7 @@ def main():
             "ckpt": args.ckpt, "n_puzzles": len(per_puzzle), "K": args.K,
             "D": args.D, "sigma": args.sigma, "steps": save_steps,
             "aggregate": ag, "per_puzzle": per_puzzle,
-            "note": "spread_ratio<1=收敛(单盆); q_auc>0.5=q-head 能选对; purity>chance(p^2+(1-p)^2)=终点态可分",
+            "note": "spread_ratio<1=converged (single basin); q_auc>0.5=q-head selects correctly; purity>chance(p^2+(1-p)^2)=endpoints separable",
         }
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(results, f, ensure_ascii=False, indent=2)

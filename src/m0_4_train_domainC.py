@@ -1,15 +1,14 @@
-"""M0.4 域 C 可学习性 smoke：TRM 从零训组合域（E4 前置 · M0.4 后档）
+"""M0.4 domain-C learnability training: TRM from scratch on the composition domain (E4 prerequisite, M0.4 auxiliary)
 
-- 任务：x=(c*(a+1))%10, y=(a*(c+1))%10（乘法交互非线性 f）
-- 数据：train 24 组合 × 500 = 12K；test 12 全新组合（鸭嘴兽：零次推断，1 样本/组合）
-- 协议：与 m1_train_domainB.py 完全一致（batch 128 · lr 1e-4 · fused AdamW ·
-  mlp_t=True pos_encodings="none" · ACTLossHead wrapped 训练）
-- eval：exact = 输出位 0+1 都正确（x,y 两坐标位，域 C 语义）；cell = 全 81 位
-- 步数：2000（12K 样本 ≈ 21 epoch；域 C 任务维度远小于域 B，2000 步够判可学习性）
-- 判读：train exact 显著 > 10%（随机水平）→ f 可学；test 12 鸭嘴兽外推 > 随机
-  （注意 n=12 噪声 ±14pp，外推判据按全组合正确数报告，不单独抠单点）
-用法: python m0_4_train_domainC.py [--steps 2000] [--out 输出目录]
-"""
+- task: x=(c*(a+1))%10, y=(a*(c+1))%10 (multiplicative-interaction nonlinear f)
+- data: train 24 combinations x 500 = 12K; test 12 novel combinations (platypus: zero-shot inference, 1 sample/combination)
+- protocol: identical to m1_train_domainB.py (batch 128 · lr 1e-4 · fused AdamW ·
+  mlp_t=True pos_encodings="none" · ACTLossHead-wrapped training)
+- eval: exact = both output slots 0+1 correct (x,y coordinate slots, domain-C semantics); cell = all 81 slots
+- steps: 2000 (12K samples ≈ 21 epochs; the domain-C task is much smaller than domain B, 2000 steps suffice for learnability)
+- reading: train exact significantly > 10% (chance) -> f learnable; test 12 platypus extrapolation > chance
+  (note n=12 noise ±14pp; report extrapolation by full-combination correct counts, not individual points)
+Usage: python m0_4_train_domainC.py [--steps 2000] [--out output-dir]"""
 import argparse
 import json
 import os
@@ -41,7 +40,7 @@ def load_eval_set(data_dir, n=2000, split="test", seed=0):
 
 
 def eval_result(model, inputs, labels, ids):
-    """K=1 D=16 标准 eval；域 C exact = 位 0+1 都正确"""
+    """K=1 D=16 standard eval; domain-C exact = slots 0+1 both correct"""
     emod = model
     emod.config.halt_max_steps = 16
     with torch.inference_mode():
@@ -90,7 +89,7 @@ def main():
     train_in = np.load(f"{DATA}/train/all__inputs.npy", mmap_mode="r")
     train_lb = np.load(f"{DATA}/train/all__labels.npy", mmap_mode="r")
     rng = np.random.default_rng(0)
-    eval_in, eval_lb, eval_ids = load_eval_set(DATA, n=12)      # 12 鸭嘴兽全用
+    eval_in, eval_lb, eval_ids = load_eval_set(DATA, n=12)      # use all 12 platypus
     tr_in, tr_lb, tr_ids = load_eval_set(DATA, n=2000, split="train")
 
     with torch.device("cuda"):

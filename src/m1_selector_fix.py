@@ -1,11 +1,10 @@
-"""M1 选择器修复实验：结果一致性投票 vs q 选择（域 B，E1 失败分支行动 A）
+"""M1 selector-repair experiment: result-consistency voting vs q selection (domain B, E1 failure-branch action A)
 
-瓶颈假设：q-head 跨域不泛化（域 B AUC 0.57）——rollout 里信息足够但 q 选不出。
-判别：同一批 rollouts（K=30 D=48 σ=0.2，500 test 谜题，与 K 曲线同源）上，
-  q 选择（现状 0.476）vs 纯多数表决 vs 表决+q tiebreak ——
-  vote > q 选择 → 假设成立（选择器修复有效，探索机制有路径）；
-  vote ≈ q 选择 → 假设证伪（采样信息不足，需语义级探索）。
-"""
+Bottleneck hypothesis: q-head does not generalize across domains (domain-B AUC 0.57) — the rollouts contain enough information but q cannot select it.
+Discrimination: on the same batch of rollouts (K=30 D=48 sigma=0.2, 500 test puzzles, same source as the K-curve),
+  q selection (current 0.476) vs pure majority voting vs voting+q tiebreak ——
+  vote > q selection -> hypothesis holds (selector repair effective, the exploration mechanism has a path);
+  vote ≈ q selection -> hypothesis falsified (sampling information insufficient, semantic-level exploration needed)."""
 import json
 import os
 import time
@@ -19,7 +18,7 @@ CKPT = "outputs/2026-08-10/m1_domainB/step_4000"
 DATA = "../data/domain-b-rpn"
 OUT = "outputs/2026-08-10/m1_domainB/selector_fix.json"
 K, D, SIGMA, N = 30, 48, 0.2, 500
-CHUNK = 10  # 每批谜题数（CHUNK*K 序列）
+CHUNK = 10  # puzzles per batch (CHUNK*K sequences)
 
 meta = json.load(open(f"{DATA}/dataset.json"))
 inputs, labels, ids, idx = load_test_data(DATA, N, 0)
@@ -27,13 +26,13 @@ model = load_model(CKPT, "config/arch/trm.yaml", meta["vocab_size"], meta["seq_l
                    meta["num_puzzle_identifiers"])
 model.config.halt_max_steps = D
 
-pred0 = np.zeros((N, K), dtype=np.int64)  # 结果位预测 [谜题, rollout]
-qs = np.zeros((N, K), dtype=np.float32)   # 最终步 q 值
+pred0 = np.zeros((N, K), dtype=np.int64)  # result-slot predictions [puzzle, rollout]
+qs = np.zeros((N, K), dtype=np.float32)   # final-step q values
 t0 = time.time()
 with torch.inference_mode():
     for start in range(0, N, CHUNK):
         bs = min(CHUNK, N - start)
-        b = inputs[start:start + bs].repeat_interleave(K, 0)  # 谜题内 rollout 分组
+        b = inputs[start:start + bs].repeat_interleave(K, 0)  # group rollouts within a puzzle
         pid = ids[start:start + bs].repeat_interleave(K)
         batch = {"inputs": b, "puzzle_identifiers": pid}
         with torch.device("cuda"):
@@ -54,12 +53,12 @@ labels0 = labels[:, 0].cpu().numpy()
 def acc(selected):
     return (selected == labels0).mean()
 
-# 1. q 选择（现状）
+# 1. q selection (current)
 q_sel = pred0[np.arange(N), qs.argmax(1)]
-# 2. 纯多数表决（tie 随机）
+# 2. pure majority vote (random tie-break)
 rng = np.random.default_rng(0)
 vote = np.array([np.bincount(pred0[i], minlength=13).argmax() for i in range(N)])
-# 3. 表决 + q tiebreak：多数集合内取 q 最大
+# 3. vote + q tie-break: max q within the majority set
 vote_q = np.zeros(N, dtype=np.int64)
 for i in range(N):
     vals, counts = np.unique(pred0[i], return_counts=True)
@@ -75,7 +74,7 @@ results = {
     "q_select_exact": round(acc(q_sel), 4),
     "majority_vote_exact": round(acc(vote), 4),
     "vote_q_tiebreak_exact": round(acc(vote_q), 4),
-    "ref_K1_D48_exact": 0.478,  # M1c K 曲线（同 eval 集）
+    "ref_K1_D48_exact": 0.478,  # M1c K-curve (same eval set)
     "ref_q_select_K10_exact": 0.476,
 }
 print(json.dumps(results, indent=2), flush=True)

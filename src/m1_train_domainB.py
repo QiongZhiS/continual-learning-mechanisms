@@ -1,15 +1,14 @@
-"""M1b 域 B smoke 训练：TRM 从零训 RPN 栈机算术
+"""M1b domain-B training: TRM from scratch on RPN stack-machine arithmetic
 
-- 从零初始化（无 checkpoint），固定 lr 1e-4 无衰减（yaml 官方超参，避开 cosine 衰减冻结坑）
-- batch 128 · wd 0.1 · betas (0.9,0.95) · fused AdamW（M0.1 patch 同款）
-- mlp_t=True, pos_encodings="none"（与 eval_ptrm 加载配置完全一致，无隐藏不一致）
-- eval：K=1 D=16，exact = 输出位 0 正确率（结果位），cell = 全 81 位平均
-- 每 EVAL_EVERY 步存 checkpoint + eval，结果写 json
---aug-batch（通道③ 判别器）：逐样本均匀采样等价类形式（ADD 子树交换掩码，
-含 mask=0 原形式）——数据集/尺寸/pass/步数/计算全部与基线匹配，
-唯一变量 = 训练分布（规范形 vs 等价类均匀）。交换函数复用 m1_gen_domainB。
-用法: python m1_train_domainB.py --steps 3000 [--lr 1e-4] [--out 输出目录] [--aug-batch]
-"""
+- from-scratch init (no checkpoint), fixed lr 1e-4 without decay (official yaml hyperparams, avoids the cosine-decay frozen-warmup pitfall)
+- batch 128 · wd 0.1 · betas (0.9,0.95) · fused AdamW (same as the M0.1 local patch)
+- mlp_t=True, pos_encodings="none" (identical to the eval_ptrm load config, no hidden mismatch)
+- eval: K=1 D=16, exact = output slot 0 accuracy (result slot), cell = mean over all 81 slots
+- saves a checkpoint + eval every EVAL_EVERY steps, results written to json
+--aug-batch (round-3 discriminator): per-sample uniform sampling of equivalence-class forms (ADD-subtree-swap masks,
+including mask=0 original form) — dataset/size/pass/steps/compute all matched to the baseline,
+the only variable = training distribution (canonical form vs uniform over equivalence classes). Swap function reused from m1_gen_domainB.
+Usage: python m1_train_domainB.py --steps 4000 [--lr 1e-4] [--out output-dir] [--aug-batch]"""
 import argparse
 import json
 import os
@@ -24,15 +23,15 @@ from m1_gen_domainB import (PAD, apply_swap_mask, collect_adds, parse_seq,
 from models.losses import ACTLossHead
 from models.recursive_reasoning.trm import TinyRecursiveReasoningModel_ACTV1
 
-# PTRM_DATA 覆盖：通道③ 增广数据集（默认不变，零行为影响）
+# PTRM_DATA override: round-3 augmented dataset (unchanged by default, zero behavior impact)
 DATA = os.environ.get("PTRM_DATA", "../data/domain-b-rpn")
 BS = 128
 EVAL_EVERY = 500
 
 
 def load_eval_set(data_dir, n=2000, split="test", seed=0):
-    """split=test: 前 n 个全新结构；split=train: 固定 seed 采样 n 个训练样本
-    （训练侧上限判别：train acc vs test acc = 泛化缺口）"""
+    """split=test: first n novel structures; split=train: fixed-seed sample of n train samples
+    (train-side ceiling check: train acc vs test acc = generalization gap)"""
     t = os.path.join(data_dir, split)
     inputs = np.load(os.path.join(t, "all__inputs.npy"), mmap_mode="r")
     labels = np.load(os.path.join(t, "all__labels.npy"), mmap_mode="r")
@@ -46,9 +45,9 @@ def load_eval_set(data_dir, n=2000, split="test", seed=0):
 
 
 def aug_batch_forms(rows, rng):
-    """通道③ 判别器：对每行均匀采样其等价类（ADD 子树交换掩码，含 mask=0
-    原形式）。行 = RPN 程序左对齐 + PAD 填充；输出长度不变（交换不改变
-    token 多重集）。"""
+    """Round-3 discriminator: uniformly sample one equivalence-class form per row (ADD-subtree-swap mask, incl. mask=0
+    original form). Rows = RPN programs left-aligned + PAD fill; output length unchanged (swaps do not change
+    the token multiset)."""
     out = np.empty_like(rows)
     for i, row in enumerate(rows):
         seq = row[row != PAD].tolist()
@@ -66,7 +65,7 @@ def aug_batch_forms(rows, rng):
 
 
 def eval_result(model, inputs, labels, ids):
-    """K=1 D=16 标准 eval；exact = 结果位（位 0）正确率"""
+    """K=1 D=16 standard eval; exact = result-slot (slot 0) accuracy"""
     emod = model  # unwrapped
     emod.config.halt_max_steps = 16
     with torch.inference_mode():
@@ -90,10 +89,10 @@ def main():
     ap.add_argument("--steps", type=int, default=3000)
     ap.add_argument("--lr", type=float, default=1e-4)
     ap.add_argument("--out", default="outputs/2026-08-10/m1_domainB")
-    ap.add_argument("--resume", default=None, help="续训 checkpoint 路径")
+    ap.add_argument("--resume", default=None, help="checkpoint path to resume from")
     ap.add_argument("--start-step", type=int, default=0)
     ap.add_argument("--aug-batch", action="store_true",
-                    help="通道③ 判别器：逐样本等价类均匀采样（匹配尺寸/步数/计算）")
+                    help="round-3 discriminator: per-sample uniform equivalence-class sampling (matched size/steps/compute)")
     args = ap.parse_args()
 
     os.makedirs(args.out, exist_ok=True)
@@ -108,9 +107,9 @@ def main():
 
     with torch.device("cuda"):
         m = TinyRecursiveReasoningModel_ACTV1(arch_cfg)
-    model = ACTLossHead(m, "stablemax_cross_entropy")  # wrapped 训练
+    model = ACTLossHead(m, "stablemax_cross_entropy")  # wrapped training
     if args.resume:
-        # checkpoint 自带 model. 前缀，wrapped 模型期望同前缀 → 直接加载
+        # checkpoint carries the model. prefix; wrapped model expects the same prefix -> load directly
         model.load_state_dict(torch.load(args.resume, map_location="cuda"), assign=True)
         print(f"resumed from {args.resume}", flush=True)
     model.train()
@@ -121,7 +120,7 @@ def main():
     train_lb = np.load(f"{DATA}/train/all__labels.npy", mmap_mode="r")
     rng = np.random.default_rng(0)
     eval_in, eval_lb, eval_ids = load_eval_set(DATA)
-    tr_in, tr_lb, tr_ids = load_eval_set(DATA, n=2000, split="train")  # 训练侧上限判别
+    tr_in, tr_lb, tr_ids = load_eval_set(DATA, n=2000, split="train")  # train-side ceiling check
 
     with torch.device("cuda"):
         carry = model.initial_carry({
@@ -150,7 +149,7 @@ def main():
                 opt.step()
             ckpt_path = f"{args.out}/step_{step}"
             torch.save(model.state_dict(), ckpt_path)
-            # eval 用 unwrapped 模型（从 checkpoint 重建，端到端验证）
+            # eval uses the unwrapped model (rebuilt from checkpoint, end-to-end verification)
             m2 = TinyRecursiveReasoningModel_ACTV1(arch_cfg)
             state = {k.removeprefix("model."): v for k, v in torch.load(ckpt_path,
                                                                         map_location="cuda").items()}

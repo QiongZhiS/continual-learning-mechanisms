@@ -1,8 +1,7 @@
-"""M0.3d 补验证 1：种子方差快测——同配方（固定 lr=5e-5 续训 500 步）2 个新种子
+"""M0.3d supplementary check 1: seed-variance quick test — same recipe (fixed lr=5e-5, continue 500 steps) with 2 new seeds
 
-种子数 5→3（见实验方案 §5.5）的稳健性检验。M0.3a 已有 seed 0 同配方数据点：500 步 → 0.485。
-若 500 步 test exact 方差超 ±3pp（200 样本噪声带宽），砍种子方案需回补。
-"""
+Robustness check for the seed-count 5->3 decision (see experiment proposal §5.5). M0.3a already has a same-recipe seed-0 point: 500 steps -> 0.485.
+If 500-step test exact variance exceeds ±3pp (200-sample noise band), the reduced-seed scheme needs topping up."""
 import json
 import os
 import time
@@ -22,7 +21,7 @@ BS = 128
 STEPS = 500
 LR = 5e-5
 SEEDS = [1, 2]
-BASE = {"step_23437": 0.330, "seed0_+500": 0.485}  # M0.3a 已有数据点
+BASE = {"step_23437": 0.330, "seed0_+500": 0.485}  # M0.3a existing data point
 
 os.makedirs(OUT, exist_ok=True)
 meta = json.load(open(f"{DATA}/test/dataset.json"))

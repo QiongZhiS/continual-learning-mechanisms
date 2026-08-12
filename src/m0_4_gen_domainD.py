@@ -1,24 +1,23 @@
-"""M0.4 域 D 实例化：D1 囚徒困境 IPD（E6a 序列第 4 域 · 空白4 社会智能）
+"""M0.4 domain-D instantiation: D1 iterated prisoner's dilemma IPD (4th domain in the E6a sequence, gap 4: social intelligence)
 
-规格（域 D 实例化设计已冻结；本脚本固化实例参数）：
-- 2 人 × 100 轮；收益矩阵 R=3 / S=0 / T=5 / P=1（payoff[my, opp]）
-- 对手池 8 个：{always-cooperate, always-defect, tit-for-tat,
-  慷慨 tit-for-tat(容忍 0.1), random, 惩罚者, 伪装者-潜伏型, 伪装者-概率型}
-  - 惩罚者（冻结定义）：先合作；对手上轮 D → 本轮单轮惩罚 D，对手 C → 恢复 C
-  - 潜伏型：前 30 轮 C，之后全 D
-  - 概率型：每轮 0.8 C / 0.2 D，无报复机制
-- 观测 L1（冻结布局，vocab: 0=C 1=D 2-9=数值 12=PAD）：
-  位 0 = 轮数分桶 round//10（0-9）
-  位 1-10 = 我方最近 10 轮动作（位 1 = 最近一轮；空历史 = PAD）
-  位 11-20 = 对手最近 10 轮动作
-  位 21 = 我方累计收益分桶 min(score//50, 9)
-  位 22 = 对手累计收益分桶
-  位 23+ = PAD
-- label：位 0 = 本模型动作（0/1），其余 PAD（参考数据集；训练方案 E6a 前另定）
-- 判据锚：适配性溢价 = 策略期望收益 > TFT 基线 × (1+ε)，ε=0.1（灵敏度 0.05/0.2 报告）
-- 天花板 = 解析最优响应 rollout（随机对手多局平均），不依赖无机制基线标定
-- 参考数据集：每对手 50 局 × 100 轮（最优响应策略 rollout）= 40K (观测, 动作) 对
-"""
+Spec (domain-D instance design frozen; this script fixes the instance parameters):
+- 2 players x 100 rounds; payoff matrix R=3 / S=0 / T=5 / P=1 (payoff[my, opp])
+- opponent pool of 8: {always-cooperate, always-defect, tit-for-tat,
+  generous tit-for-tat (tolerance 0.1), random, punisher, masquerader-latent, masquerader-probabilistic}
+  - punisher (frozen definition): cooperate first; if opponent played D last round -> single-round D punishment this round; opponent C -> resume C
+  - latent: C for the first 30 rounds, then all D
+  - probabilistic: 0.8 C / 0.2 D per round, no retaliation mechanism
+- observation L1 (frozen layout, vocab: 0=C 1=D 2-9=numeric 12=PAD):
+  slot 0 = round bucket round//10 (0-9)
+  slots 1-10 = my last 10 actions (slot 1 = most recent; empty history = PAD)
+  slots 11-20 = opponent's last 10 actions
+  slot 21 = my cumulative score bucket min(score//50, 9)
+  slot 22 = opponent cumulative score bucket
+  slot 23+ = PAD
+- label: slot 0 = this model's action (0/1), rest PAD (reference dataset; training protocol to be pre-registered before E6a)
+- criterion anchor: adaptation premium = policy expected payoff > TFT baseline x (1+eps), eps=0.1 (sensitivity 0.05/0.2 reported)
+- ceiling = analytical best-response rollout (averaged over multiple random-opponent games), no mechanism-free baseline calibration needed
+- reference dataset: 50 games x 100 rounds per opponent (best-response rollout) = 40K (observation, action) pairs"""
 import json
 import os
 
@@ -26,23 +25,23 @@ import numpy as np
 
 OUT = "../data/domain-d-ipd"
 N_ROUNDS = 100
-N_GAMES = 50          # 参考数据集每对手局数
-CEIL_GAMES = 200      # 天花板 rollout 局数（随机对手降噪）
+N_GAMES = 50          # games per opponent in the reference dataset
+CEIL_GAMES = 200      # ceiling rollout games (denoising over random opponents)
 C, D = 0, 1
 PAD = 12
 SEQ_LEN = 81
 R, S, T, P = 3, 0, 5, 1
 PAYOFF = np.array([[R, S], [T, P]])          # payoff[my_action, opp_action]
-SLEEPER_CUT = 30     # 潜伏型合作轮数
-GTFT_EPS = 0.1       # 慷慨 TFT 容忍度
-PD_PROB_C = 0.8      # 概率型合作概率
-SCORE_BUCKET = 50    # 收益分桶粒度（0-500 → 0-9）
+SLEEPER_CUT = 30     # sleeper cooperation rounds
+GTFT_EPS = 0.1       # generous-TFT tolerance
+PD_PROB_C = 0.8      # probabilistic-type cooperation probability
+SCORE_BUCKET = 50    # score-bucket granularity (0-500 -> 0-9)
 
 OPPONENTS = ["always-cooperate", "always-defect", "tit-for-tat",
              "generous-tft", "random", "punisher", "sleeper", "prob-deceiver"]
 
 
-# ---- 对手策略：fn(round_idx, my_hist, opp_hist, rng) -> action ----
+# ---- opponent strategies: fn(round_idx, my_hist, opp_hist, rng) -> action ----
 
 def strat_always_cooperate(r, mh, oh, rng):
     return C
@@ -59,7 +58,7 @@ def strat_tft(r, mh, oh, rng):
 def strat_generous_tft(r, mh, oh, rng):
     if r == 0 or oh[-1] == C:
         return C
-    return C if rng.random() < GTFT_EPS else D  # 被背叛后 ε 概率宽恕
+    return C if rng.random() < GTFT_EPS else D  # epsilon-probability forgiveness after betrayal
 
 
 def strat_random(r, mh, oh, rng):
@@ -69,7 +68,7 @@ def strat_random(r, mh, oh, rng):
 def strat_punisher(r, mh, oh, rng):
     if r == 0:
         return C
-    return D if oh[-1] == D else C  # 单轮惩罚后恢复
+    return D if oh[-1] == D else C  # recover after the single-round punishment
 
 
 def strat_sleeper(r, mh, oh, rng):
@@ -90,32 +89,32 @@ STRATS = {"always-cooperate": strat_always_cooperate,
           "prob-deceiver": strat_prob_deceiver}
 
 
-# ---- 最优响应策略（天花板，解析推导后 rollout 验证） ----
+# ---- best-response strategies (ceiling; derived analytically, verified by rollout) ----
 
 def optimal_vs(opp):
-    """对手类 → 最优响应策略（解析）。返回 fn(round_idx, my_hist, opp_hist, rng)。"""
+    """Opponent class -> best-response strategy (analytical). Returns fn(round_idx, my_hist, opp_hist, rng)."""
     if opp == "always-cooperate":
-        return lambda r, mh, oh, rng: D                      # 全 D：500
+        return lambda r, mh, oh, rng: D                      # all-D: 500
     if opp == "always-defect":
-        return lambda r, mh, oh, rng: D                      # 全 D：100（C 得 0）
+        return lambda r, mh, oh, rng: D                      # all-D: 100 (C scores 0)
     if opp in ("tit-for-tat", "punisher"):
-        return lambda r, mh, oh, rng: D if r == N_ROUNDS - 1 else C  # 99C+终局D：302
+        return lambda r, mh, oh, rng: D if r == N_ROUNDS - 1 else C  # 99C+final-D: 302
     if opp == "generous-tft":
-        return lambda r, mh, oh, rng: D if r == N_ROUNDS - 1 else C  # 全C+终局D：~302
+        return lambda r, mh, oh, rng: D if r == N_ROUNDS - 1 else C  # all-C+final-D: ~302
     if opp == "random":
-        return lambda r, mh, oh, rng: D                      # 全 D：期望 300
+        return lambda r, mh, oh, rng: D                      # all-D: expected 300
     if opp == "sleeper":
         return lambda r, mh, oh, rng: D if r >= SLEEPER_CUT else C  # 30C+70D：440
     if opp == "prob-deceiver":
-        return lambda r, mh, oh, rng: D                      # 全 D：期望 420
+        return lambda r, mh, oh, rng: D                      # all-D: expected 420
     raise ValueError(opp)
 
 
-# ---- 环境与编码 ----
+# ---- environment and encoding ----
 
 def play(policy, opp, rng, record=False):
-    """一局 IPD。policy/opp = fn(r, my_hist, opp_hist, rng)。
-    record=True → 返回 (观测序列, 动作序列, 收益)。"""
+    """One IPD game. policy/opp = fn(r, my_hist, opp_hist, rng).
+    record=True -> returns (observation sequence, action sequence, payoff)."""
     my_hist, opp_hist = [], []
     my_score = opp_score = 0
     if record:
@@ -153,7 +152,7 @@ def encode_label(action):
     return lab
 
 
-# ---- 产出 ----
+# ---- outputs ----
 
 def write_dataset():
     d = os.path.join(OUT, "train")
@@ -170,12 +169,12 @@ def write_dataset():
     np.save(os.path.join(d, "all__inputs.npy"), np.stack(inputs))
     np.save(os.path.join(d, "all__labels.npy"), np.stack(labels))
     np.save(os.path.join(d, "all__puzzle_identifiers.npy"), np.zeros(n, dtype=np.int32))
-    print(f"train: {n} samples ({N_GAMES} 局 × {len(OPPONENTS)} 对手 × {N_ROUNDS} 轮) -> {d}",
+    print(f"train: {n} samples ({N_GAMES} games x {len(OPPONENTS)} opponents x {N_ROUNDS} rounds) -> {d}",
           flush=True)
 
 
 def ceiling():
-    """每对手：最优响应期望收益（CEIL_GAMES 局平均）+ TFT 基线期望收益。"""
+    """Per opponent: best-response expected payoff (CEIL_GAMES average) + TFT baseline expected payoff."""
     rng = np.random.default_rng(0)
     rng_tft = np.random.default_rng(1)
     ceils, tfts = {}, {}
@@ -193,16 +192,16 @@ def main():
 
     ceils, tfts = ceiling()
     tft_pool_mean = round(float(np.mean(list(tfts.values()))), 2)
-    print("天花板（最优响应期望收益）vs TFT 基线（池均值基线 = "
+    print("ceiling (best-response expected payoff) vs TFT baseline (pool-mean baseline = "
           f"{tft_pool_mean}）:", flush=True)
     for opp in OPPONENTS:
         print(f"  {opp:18s} ceil={ceils[opp]:7.2f}  tft={tfts[opp]:7.2f}", flush=True)
 
-    # 解析断言（天花板 sanity：与手算一致）
+    # analytical assertions (ceiling sanity: matches hand computation)
     assert abs(ceils["always-cooperate"] - 500) < 1e-6, ceils["always-cooperate"]
     assert abs(ceils["always-defect"] - 100) < 1e-6
     assert abs(ceils["sleeper"] - 440) < 1e-6
-    assert abs(ceils["prob-deceiver"] - 420) < 1.0  # 随机对手，200 局降噪
+    assert abs(ceils["prob-deceiver"] - 420) < 1.0  # random opponent, denoised over 200 games
     assert abs(ceils["random"] - 300) < 1.0
     assert abs(ceils["tit-for-tat"] - 302) < 1e-6
     assert abs(ceils["punisher"] - 302) < 1e-6

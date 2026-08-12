@@ -1,7 +1,6 @@
-"""临时 eval：lora_1000 ckpt（LoraCasted 包裹 → key 带 .linear. 前缀）→ unwrapped 模型
+"""Helper eval: lora_1000 ckpt (LoraCasted-wrapped -> keys carry .linear. prefix) -> unwrapped model
 
-key 重映射: `xxx.linear.weight/bias` → `xxx.weight/bias`（lora_A/B 已在保存时剔除）
-"""
+key remap: `xxx.linear.weight/bias` -> `xxx.weight/bias` (lora_A/B already stripped at save time)"""
 import json
 import yaml
 import torch

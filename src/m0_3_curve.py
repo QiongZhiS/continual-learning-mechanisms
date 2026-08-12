@@ -1,8 +1,7 @@
-"""M0.3a 域 A 天花板标定：从 precise-muskox 续训 2000 步，每 500 步存 checkpoint + K=1 D=16 eval
+"""M0.3a domain-A ceiling calibration: continue training from the pretrained checkpoint for 2000 steps, save a checkpoint every 500 steps + K=1 D=16 eval
 
-产出步数-准确率饱和曲线点（x = 全局步数 23437+500k），与已有两点（5468→?, 23437→0.33）拼接。
-固定 lr=5e-5 无 warmup（干净续训，避免 pretrain.py load_checkpoint 从 step 0 重走 warmup）。
-"""
+Produces steps-vs-accuracy saturation curve points (x = global step 23437+500k), joined with existing points (5468->?, 23437->0.33).
+Fixed lr=5e-5 without warmup (clean continuation, avoids pretrain.py load_checkpoint restarting warmup from step 0)."""
 import json
 import os
 import time
@@ -37,7 +36,7 @@ arch_cfg.update(dict(batch_size=BS, vocab_size=meta["vocab_size"], seq_len=meta[
 with torch.device("cuda"):
     model = TinyRecursiveReasoningModel_ACTV1(arch_cfg)
 model = ACTLossHead(model, "stablemax_cross_entropy")
-# checkpoint 自带 model. 前缀；目标 = ACTLossHead 包装模型（同样期望 model. 前缀）→ 直接用
+# checkpoint carries the model. prefix; target = ACTLossHead-wrapped model (also expects model. prefix) -> use directly
 state = torch.load(CKPT, map_location="cuda")
 model.load_state_dict(state, assign=True)
 model.train()
@@ -48,10 +47,10 @@ train_in = np.load(f"{DATA}/train/all__inputs.npy", mmap_mode="r")
 train_lb = np.load(f"{DATA}/train/all__labels.npy", mmap_mode="r")
 rng = np.random.default_rng(0)
 
-# eval 数据（K=1 D=16 与 M0.1 曲线同源，200 谜题 seed=0）
+# eval data (K=1 D=16, same source as the M0.1 curve, 200 puzzles seed=0)
 inputs, labels, ids, idx = load_test_data(DATA, 200, 0)
 
-# 占位 batch 必须含 labels：ACTLossHead 从 new_carry.current_data["labels"] 取 loss 目标
+# placeholder batch must contain labels: ACTLossHead takes loss targets from new_carry.current_data["labels"]
 with torch.device("cuda"):
     carry = model.initial_carry({
         "inputs": torch.zeros(BS, 81, dtype=torch.int32, device="cuda"),
@@ -75,7 +74,7 @@ for step in range(0, TOTAL + 1, EVAL_EVERY):
             opt.step()
         ckpt_path = f"{OUT}/step_{BASE_STEP + step}"
         torch.save(model.state_dict(), ckpt_path)
-        # eval：重建未包装模型（端到端验证 checkpoint 可加载）
+        # eval: rebuild the unwrapped model (end-to-end verification that the checkpoint loads)
         em, ca = None, None
         try:
             emod = __import__("eval_ptrm").load_model(

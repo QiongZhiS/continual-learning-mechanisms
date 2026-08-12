@@ -11,7 +11,7 @@
     "auc_mean": 0.5692,
     "auc_min": 0.0536,
     "margin_mean": 0.1054,
-    "note": "\u57df A \u53c2\u7167 (M0.2): AUC=1.0, \u53cc\u7c7b 4/40, margin +5.1 vs -9.2"
+    "note": "Domain-A reference (M0.2): AUC=1.0, both-class puzzles 4/40, margin +5.1 vs -9.2"
   },
   "per_puzzle": [
     {

@@ -1,19 +1,18 @@
-"""domain_distance.py — 域间结构距离计算器（M0.4 后档）
+"""domain_distance.py — structural distance calculator between domains (M0.4 auxiliary)
 
-⚠️ 定位：**辅助报告**用。相似度梯度的冻结物 = 行为距离
-（零样本迁移率矩阵），结构距离不参与冻结。
+Role: auxiliary reporting only. The frozen similarity gradient is the behavioral
+distance (zero-shot transfer matrix); structural distance does not participate in the freeze.
 
-语义：
-- family 不同 -> 距离 1.0（跨族 = 最大距离，如 puzzle vs game）
-- family 相同 -> 加权特征距离：
-    syntax 不同       +0.40
-    ops 交集比例      +0.25 * (1 - jaccard)
-    depth 范围差异    +0.20 * 归一化差
-    value_range 差    +0.15 * 归一化差
-  （权重是启发式，仅辅助解释用）
+Semantics:
+- different family -> distance 1.0 (cross-family = max distance, e.g. puzzle vs game)
+- same family -> weighted feature distance:
+    syntax different        +0.40
+    ops intersection ratio  +0.25 * (1 - jaccard)
+    depth range difference  +0.20 * normalized diff
+    value_range difference  +0.15 * normalized diff
+  (weights are heuristic, for interpretation only)
 
-输出：4x4 矩阵（A-D；E/F/G 待填）
-"""
+Output: 4x4 matrix (A-D; E/F/G to be added when pre-registered)"""
 from __future__ import annotations
 
 import itertools
@@ -31,12 +30,12 @@ WEIGHTS = {
 def _jaccard(a, b):
     sa, sb = set(a), set(b)
     if not sa and not sb:
-        return 1.0  # 都无 ops -> 该项无差异
+        return 1.0  # neither has ops -> no difference on this term
     return len(sa & sb) / len(sa | sb)
 
 
 def _range_norm_diff(a, b):
-    """值域归一化差异：相对跨度差 / 2（∈[0,1]），None 视为不参与。"""
+    """Normalized value-range difference: relative span difference / 2 (in [0,1]); None treated as not participating."""
     if a is None or b is None:
         return 0.0
     lo_a, hi_a = a
@@ -82,7 +81,7 @@ def distance_matrix(domains: list[str]) -> dict[str, dict[str, float]]:
 if __name__ == "__main__":
     domains = [d for d in ["A", "B", "C", "D"] if DOMAIN_PARAMS[d]]
     mat = distance_matrix(domains)
-    print("structural distance matrix (A-D, 辅助报告用，非冻结物):")
+    print("structural distance matrix (A-D, auxiliary reporting, not frozen):")
     print("    " + "  ".join(f"{d:>5}" for d in domains))
     for d1 in domains:
         row = " ".join(

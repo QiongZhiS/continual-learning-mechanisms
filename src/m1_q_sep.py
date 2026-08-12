@@ -1,10 +1,9 @@
-"""M1c q 分离度（E7b 触发前提）：域 B 上 q-head 是否像域 A 一样饱和？
+"""M1c q separability (E7b trigger precondition): is q-head as saturated on domain B as on domain A?
 
-域 A（M0.2）：q AUC=1.0 完美分离正确/错误 rollout → 无冲突事件空间 → E7b 无测量空间。
-域 B 检查：若同样饱和（AUC≈1.0 + 双类谜题比例低）→ E7b 前提失败跨域成立，降级；
-若分离弱（AUC<1 或双类谜题多）→ 冲突事件空间存在 → E7b 前提成立。
-采集：K=50 D=48 σ=0.2，n=100 谜题，最终步 q 值 + 每 rollout 结果位正确性。
-"""
+Domain A (M0.2): q AUC=1.0 perfectly separates correct/incorrect rollouts -> no conflict-event space -> no E7b measurement space.
+Domain-B check: if equally saturated (AUC≈1.0 + low both-class puzzle ratio) -> the E7b precondition fails across domains, downgrade;
+if weakly separable (AUC<1 or many both-class puzzles) -> a conflict-event space exists -> the E7b precondition holds.
+Collection: K=50 D=48 sigma=0.2, n=100 puzzles, final-step q values + per-rollout result-slot correctness."""
 import json
 import os
 import time
@@ -42,7 +41,7 @@ with torch.inference_mode():
         pred_ok = (outputs["logits"].argmax(-1)[:, 0] == labels[pi, 0]).cpu().numpy()
         per_puzzle.append({"q": q.tolist(), "ok": pred_ok.tolist()})
 
-# 聚合
+# aggregation
 n_both = n_only_good = n_only_bad = 0
 aucs, margins = [], []
 for m in per_puzzle:
@@ -55,7 +54,7 @@ for m in per_puzzle:
     else:
         n_both += 1
         q_good, q_bad = q[ok], q[~ok]
-        aucs.append(float((q_good[:, None] > q_bad[None, :]).mean()))  # 秩比较
+        aucs.append(float((q_good[:, None] > q_bad[None, :]).mean()))  # rank comparison
         margins.append(float(q_good.mean() - q_bad.mean()))
 
 summary = {
@@ -65,7 +64,7 @@ summary = {
     "auc_mean": round(float(np.mean(aucs)), 4) if aucs else None,
     "auc_min": round(float(np.min(aucs)), 4) if aucs else None,
     "margin_mean": round(float(np.mean(margins)), 4) if margins else None,
-    "note": "域 A 参照 (M0.2): AUC=1.0, 双类 4/40, margin +5.1 vs -9.2",
+    "note": "Domain-A reference (M0.2): AUC=1.0, both-class 4/40, margin +5.1 vs -9.2",
 }
 print(json.dumps(summary, indent=2), flush=True)
 json.dump({"summary": summary, "per_puzzle": per_puzzle},

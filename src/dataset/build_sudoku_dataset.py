@@ -1,3 +1,8 @@
+"""Build sudoku datasets from the sapientinc/sudoku-extreme Hugging Face hub repo.
+
+Downloads from the HF hub (requires network), applies optional subsampling and
+equivalent-form augmentation, writes train/test splits + identifiers.json to --output-dir.
+"""
 from typing import Optional
 import os
 import csv

@@ -1,19 +1,18 @@
-"""M1 语义级探索（E1 失败分支行动 B）：等价语义扰动（ESE）多数表决
+"""M1 semantic-level exploration (E1 failure-branch action B): equivalence-semantic perturbation (ESE) majority voting
 
-失败机制（已证伪前因）：域 B 的 z_L 噪声 = 同质抖动（rollout 间无增量信息，
-投票 0.478 = 深扩展基线）。未判别的问题：**模型的错误是"输入位置性的"
-（对 token 位置/操作数顺序敏感）还是"规则性的"（学错了规则）**。
+Failure mechanism (falsified antecedent): domain-B z_L noise (latent noise injected at layer L) = homogeneous jitter
+(no incremental information across rollouts, voting 0.478 = deep-expansion baseline). Unresolved question: is the model's error
+"input-positional" (sensitive to token positions / operand order) or "rule-based" (learned the wrong rule)?
 
-ESE 判别设计：对程序 P 做 K 个**语义等价扰动**（加法交换律交换 ADD 子树，
-答案数学上不变），每个变体 rollout D=48，多数表决。
-- ESE 表决 > K=1 D=48 基线（0.478）→ 错误是输入位置性的，语义扰动打破
-  系统性 → 语义级探索有效（输入侧扰动是域无关的探索载体）
-- ≈ 基线 → 错误是规则性的（模型对等价程序同样错），输入侧扰动救不了
-  → 语义级探索失效，失败是根本性的（需训练侧修复）
+ESE discrimination design: for program P, generate K **semantically equivalent perturbations** (swap ADD subtrees via additive commutativity,
+answer mathematically unchanged), rollout each variant D=48, majority vote.
+- ESE vote > K=1 D=48 baseline (0.478) -> error is input-positional, semantic perturbation breaks
+  systematicity -> semantic-level exploration effective (input-side perturbation is a domain-agnostic exploration carrier)
+- ≈ baseline -> error is rule-based (the model fails equivalently on equivalent programs), input-side perturbation cannot help
+  -> semantic-level exploration fails, the failure is fundamental (needs a train-side fix)
 
-对照：σ=0 纯语义 / σ=0.2 语义 + latent 混合（z_L 噪声在变体上是否叠加增益）。
-变体等价性由独立栈求值器在冒烟阶段验证（变体答案必须 == 原答案）。
-"""
+Controls: sigma=0 pure semantic / sigma=0.2 semantic + latent mixture (does z_L noise add gain on variants?).
+Variant equivalence verified by the standalone stack evaluator at the smoke stage (variant answer must == original answer)."""
 import json
 import os
 import sys
@@ -33,7 +32,7 @@ ADD, SUB, PAD = 10, 11, 12
 
 
 class Node:
-    """op < 10 = 叶子值；op ∈ {ADD, SUB} = 内部节点"""
+    """op < 10 = leaf value; op in {ADD, SUB} = internal node"""
     __slots__ = ("op", "left", "right")
 
     def __init__(self, op, left=None, right=None):
@@ -41,7 +40,7 @@ class Node:
 
 
 def parse(seq):
-    """RPN token → AST（栈机逆推；程序保证单根）"""
+    """RPN tokens -> AST (stack-machine reversal; programs guaranteed single-root)"""
     stack = []
     for t in seq:
         if t == PAD:
@@ -55,14 +54,14 @@ def parse(seq):
 
 
 def serialize(node):
-    """AST → RPN token 列表（与 m1_gen_domainB.fill 一致：左 + 右 + op）"""
+    """AST -> RPN token list (consistent with m1_gen_domainB.fill: left + right + op)"""
     if node.op < 10:
         return [node.op]
     return serialize(node.left) + serialize(node.right) + [node.op]
 
 
 def stack_eval(seq):
-    """独立栈求值器（冒烟验证变体等价性用；与 fill 的递归实现不同源）"""
+    """Standalone stack evaluator (smoke-verifies variant equivalence; different implementation from fill's recursion)"""
     st = []
     for t in seq:
         if t in (ADD, SUB):
@@ -91,7 +90,7 @@ def copy_tree(node):
 
 
 def random_walk(node, add_nodes, steps, rng):
-    """随机游走 steps 步，每步随机选一个 ADD 节点交换左右子树"""
+    """Random walk of steps moves; each move swaps the subtrees of a randomly chosen ADD node"""
     out = copy_tree(node)
     for _ in range(steps):
         target = add_nodes[rng.integers(len(add_nodes))]
@@ -100,10 +99,10 @@ def random_walk(node, add_nodes, steps, rng):
 
 
 def variants(node, K, rng):
-    """K 个变体，**第 0 个 = 原程序**（= K=1 D=48 配对基线），其余 = 互异
-    随机游走变体（1-3 步，扰动空间 = ADD 节点组合）。无 ADD 节点（如
-    `a b -`）→ 变体池只有原程序，如实填充（语义探索对该谜题结构性不可用，
-    由调用方以 pool_size 分层报告）。返回 (variants, pool_size)。"""
+    """K variants; **variant 0 = original program** (= K=1 D=48 paired baseline), rest = distinct
+    random-walk variants (1-3 moves; perturbation space = ADD-node combinations). No ADD nodes (e.g.
+    `a b -`) -> variant pool is just the original, filled honestly (semantic exploration structurally
+    unavailable for that puzzle; caller reports stratified by pool_size). Returns (variants, pool_size)."""
     adds = collect_add(node, [])
     out, seen = [node], {tuple(serialize(node))}
     max_steps = min(3, len(adds))
@@ -111,14 +110,14 @@ def variants(node, K, rng):
     while len(out) < K and guard < 20 * K:
         guard += 1
         if max_steps == 0:
-            break  # 无 ADD：只用原程序
+            break  # no ADD: use only the original
         t = random_walk(node, adds, rng.integers(1, max_steps + 1), rng)
         s = tuple(serialize(t))
         if s not in seen:
             seen.add(s)
             out.append(t)
     while len(out) < K:
-        out.append(node)  # 扰动空间穷尽，填充原程序
+        out.append(node)  # perturbation space exhausted, fill with the original
     return out, len(seen)
 
 
@@ -131,8 +130,8 @@ def encode_variants(vs):
 
 
 def run_sigma(model, inputs, ids, labels0, sigma, rng):
-    """K 个语义变体 rollout + 多数表决。
-    返回 (acc_vote, pred0, pool_sizes)；pred0[:,0] = 原程序 rollout（配对基线）"""
+    """Rollout K semantic variants + majority vote.
+    Returns (acc_vote, pred0, pool_sizes); pred0[:,0] = original-program rollout (paired baseline)"""
     N0 = inputs.shape[0]
     pred0 = np.zeros((N0, K), dtype=np.int64)
     pool = np.zeros(N0, dtype=np.int64)
@@ -177,7 +176,7 @@ def main():
 
     rng = np.random.default_rng(0)
 
-    # 冒烟自检（N=20）：parse/serialize 往返 + 变体等价性（独立求值器）
+    # smoke self-check (N=20): parse/serialize round-trip + variant equivalence (standalone evaluator)
     bad_roundtrip = bad_equiv = 0
     for i in range(20):
         toks = inputs[i].cpu().numpy()
@@ -192,11 +191,11 @@ def main():
             if stack_eval(serialize(v)) != ans:
                 bad_equiv += 1
     print(f"smoke: roundtrip_bad={bad_roundtrip} equiv_bad={bad_equiv} "
-          f"(n=20, 变体必须与原程序答案一致)", flush=True)
-    assert bad_roundtrip == 0 and bad_equiv == 0, "ESE 前置条件失败"
+          f"(n=20, variants must match the original answer)", flush=True)
+    assert bad_roundtrip == 0 and bad_equiv == 0, "ESE precondition failed"
 
     results = {"K": K, "D": D, "n": N_use,
-               "ref_K1_D48_exact": 0.478}  # M1c K 曲线（同 eval 集）
+               "ref_K1_D48_exact": 0.478}  # M1c K-curve (same eval set)
     for sigma in (0.0, 0.2):
         acc, pred0, pool, n_unique = run_sigma(model, inputs, ids, labels0,
                                                sigma, rng)
@@ -210,7 +209,7 @@ def main():
             "inconsistent_subset_acc": round(float((pred0[~cons, 0] == labels0[~cons]).mean()), 4),
             "pools": {},
         }
-        # 变体池大小分层（配对：同谜题上 原程序 rollout vs 表决）
+        # stratified by variant-pool size (paired: original-program rollout vs vote on the same puzzle)
         for lo, hi in [(1, 1), (2, 2), (3, 99)]:
             m = (pool >= lo) & (pool <= hi)
             if m.sum() == 0:
@@ -224,7 +223,7 @@ def main():
             }
         results[f"sigma={sigma}"] = r
         print(json.dumps({f"sigma={sigma}": r}, indent=2), flush=True)
-        if sigma == 0.0:  # 明细落盘，供后续分析
+        if sigma == 0.0:  # dump details for later analysis
             np.savez("outputs/2026-08-10/m1_domainB/sem_explore_detail.npz",
                      pred0=pred0, pool=pool, labels0=labels0)
     json.dump(results, open(OUT, "w"), indent=2)

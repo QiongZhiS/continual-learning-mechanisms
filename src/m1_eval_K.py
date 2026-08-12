@@ -1,10 +1,9 @@
-"""M1c E1 主效应：域 B K 曲线（探索机制在符号域成立？）
+"""M1c E1 main effect: domain-B K-curve (does the exploration mechanism hold in the symbolic domain?)
 
-配置与 M0.1 同源：test 500 谜题（域 B test 前 500），
-K=1 D=16 σ=0（标准基线）· K=1 D=48 σ=0（无噪声深扩展）· K=10/100 D=48 σ=0.2（PTRM）。
-exact = 输出位 0（结果位）正确率（域 B 语义）。
-判据：K=10/100 相对 K=1 显著提升 → 探索机制跨域成立（E1 主判据）。
-"""
+Config same source as M0.1: test 500 puzzles (first 500 of the domain-B test set),
+K=1 D=16 sigma=0 (standard baseline) · K=1 D=48 sigma=0 (noise-free deep expansion) · K=10/100 D=48 sigma=0.2 (PTRM).
+exact = output slot 0 (result slot) accuracy (domain-B semantics).
+Criterion: K=10/100 significantly better than K=1 -> the exploration mechanism holds across domains (E1 main criterion)."""
 import json
 import os
 import sys
@@ -30,7 +29,7 @@ for K, D, sigma in [(1, 16, 0.0), (1, 48, 0.0), (10, 48, 0.2), (100, 48, 0.2)]:
     model.config.halt_max_steps = D
     t0 = time.time()
     pred, _ = ptrm_infer(model, inputs, ids, K, D, sigma)
-    exact = (pred[:, 0] == labels[:, 0]).float().mean().item()  # 结果位
+    exact = (pred[:, 0] == labels[:, 0]).float().mean().item()  # result slot
     cell = (pred == labels).float().mean().item()
     dt = time.time() - t0
     results[f"K={K}_D={D}_s={sigma}"] = {"exact": round(exact, 4), "cell": round(cell, 4),

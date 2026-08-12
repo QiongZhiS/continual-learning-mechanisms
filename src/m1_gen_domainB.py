@@ -1,22 +1,21 @@
-"""M1a 域 B 生成器：RPN 栈机算术（后缀表达式求值）
+"""M1a domain-B generator: RPN stack-machine arithmetic (postfix expression evaluation)
 
-设计（与域 A 数独格式同构）：
-- vocab: 0-9 数字 (10) + ADD=10 + SUB=11 + PAD=12 → vocab_size=13, pad_id=12
-- 所有中间结果 ∈ [0,9]（范围采样保证，无死循环）；ops v1 = {ADD, SUB}
-- 输入 81 位：RPN 程序左对齐 + PAD 填充
-- 输出 81 位：位置 0 = 结果（0-9），其余 PAD（ignore=pad_id → loss 只算结果位）
-- train: 1000 结构 × 101 值实例 = 101K（结构重复 = 规则学习多示例，对齐域 A 增强语义）
-- test: 2000 全新结构+实例（测规则泛化，非记忆）
-- 深度 ∈ {2,3,4}（token 数 7/15/31，均 ≤ 81）
+Design (isomorphic to the domain-A sudoku format):
+- vocab: digits 0-9 (10) + ADD=10 + SUB=11 + PAD=12 -> vocab_size=13, pad_id=12
+- all intermediate results in [0,9] (range-sampled, no infinite loops); ops v1 = {ADD, SUB}
+- input 81 slots: RPN program left-aligned + PAD fill
+- output 81 slots: slot 0 = result (0-9), rest PAD (ignore=pad_id -> loss only on the result slot)
+- train: 1000 structures x 101 value instances = 101K (structure repetition = multiple examples of rule learning, aligned with the domain-A augmentation semantics)
+- test: 2000 novel structures+instances (tests rule generalization, not memorization)
+- depth in {2,3,4} (token counts 7/15/31, all <= 81)
 
---aug（训练侧等价类增广，语义级探索判别的对照臂）：
-训练侧等价类注入——对每个 (结构,值) 实例枚举**全部** ADD 子树交换等价形式
-（2^#ADD 个，上限 --aug-cap，默认 16）加入训练集。交换 = 交换 ADD 节点左右子树，
-答案数学上不变（加法交换律；扰动器已在 m1_sem_explore.py 验证等价性）。
-- 原样本流与无增广完全一致：增广在 **test 生成之后**才消耗 rng → test 逐字节同基线
-- 训练集 = 各实例等价类全集的并集（去重；对称子树去重后可能少于 cap）
-- 每个变体用独立栈求值器 stack_eval 断言 == 原答案（等价性防线）
-"""
+--aug (train-side equivalence-class augmentation, control arm of the semantic-exploration discrimination):
+inject train-side equivalence classes — for each (structure, value) instance enumerate ALL ADD-subtree-swap equivalent forms
+(2^#ADD, capped at --aug-cap, default 16) into the training set. Swap = swap the ADD node's left/right subtrees,
+answer mathematically unchanged (additive commutativity; the perturber was validated equivalent in m1_sem_explore.py).
+- original sample stream identical to no-augmentation: augmentation consumes rng only AFTER test generation -> test byte-identical to baseline
+- training set = union of full equivalence classes per instance (dedup; symmetric-subtree dedup may reduce below cap)
+- every variant asserted == original answer by the standalone stack evaluator stack_eval (equivalence guard)"""
 import argparse
 import json
 import os
@@ -51,7 +50,7 @@ def sample_structure(rng, depth):
 
 
 def fill(rng, node, hi):
-    """填值并返回 (token 序列, 结果值)。值域 [0, hi] 由范围采样保证。"""
+    """Fill values and return (token sequence, result value). Value range [0, hi] guaranteed by range sampling."""
     if node.op is None:
         v = int(rng.integers(0, hi + 1))
         return [v], v
@@ -99,10 +98,10 @@ def make_instance(rng):
     return seq, v
 
 
-# ---- 通道③ 等价类增广（与 m1_sem_explore.py 的扰动器同构） ----
+# ---- round-3 equivalence-class augmentation (isomorphic to the m1_sem_explore.py perturber) ----
 
 def parse_seq(seq):
-    """RPN token → AST（叶子带值）。程序保证单根。"""
+    """RPN tokens -> AST (leaves carry values). Programs are guaranteed single-root."""
     stack = []
     for t in seq:
         if t == PAD:
@@ -116,14 +115,14 @@ def parse_seq(seq):
 
 
 def serialize(node):
-    """AST → RPN token 列表（与 fill 一致：左 + 右 + op）"""
+    """AST -> RPN token list (consistent with fill: left + right + op)"""
     if node.op < 10:
         return [node.op]
     return serialize(node.left) + serialize(node.right) + [node.op]
 
 
 def stack_eval(seq):
-    """独立栈求值器（等价性断言用；与 fill 的递归实现不同源）"""
+    """Standalone stack evaluator (for equivalence assertions; different implementation from fill's recursion)"""
     st = []
     for t in seq:
         if t in (ADD, SUB):
@@ -150,8 +149,8 @@ def collect_adds(node, acc):
 
 
 def apply_swap_mask(tree, mask):
-    """mask 第 i 位 = 1 → 交换第 i 个 ADD 节点的左右子树（左先序编号）。
-    答案不变（加法交换律）。"""
+    """mask bit i = 1 -> swap the left/right subtrees of the i-th ADD node (left-preorder numbering).
+    Answer unchanged (additive commutativity)."""
     out = copy_tree(tree)
     adds = collect_adds(out, [])
     for i, n in enumerate(adds):
@@ -161,8 +160,8 @@ def apply_swap_mask(tree, mask):
 
 
 def swap_variants(seq, cap):
-    """一个 (结构,值) 实例的全部 ADD 交换等价形式（含原程序；上限 cap 个）。
-    返回 (token 列表列表, 去重后形式数)。等价性由调用方用 stack_eval 断言。"""
+    """All ADD-swap equivalent forms of one (structure, value) instance (incl. original program; capped at cap forms).
+    Returns (list of token lists, deduped form count). Equivalence asserted by the caller with stack_eval."""
     tree = parse_seq(seq)
     k = len(collect_adds(tree, []))
     forms, seen = [], set()
@@ -175,9 +174,9 @@ def swap_variants(seq, cap):
 
 
 def augment(inputs, labels, cap):
-    """为每个训练样本追加其全部 ADD 交换等价形式（含原程序去重后跳过）。
-    确定性（掩码枚举，不消耗 rng）。返回 (增广后 inputs, labels, 增广统计)。
-    等价性逐样本断言。"""
+    """Append all ADD-swap equivalent forms of each training sample (deduped; skip the original).
+    Deterministic (mask enumeration, consumes no rng). Returns (augmented inputs, labels, augmentation stats).
+    Equivalence asserted per sample."""
     out_in, out_lb = list(inputs), list(labels)
     n_added = 0
     n_orig = len(inputs)
@@ -190,14 +189,14 @@ def augment(inputs, labels, cap):
         for s in forms:
             if stack_eval(s) != v:
                 bad += 1
-                continue  # 不等价的形式丢弃（理论上不发生，防线兜底）
+                continue  # drop non-equivalent forms (should not happen; defensive guard)
             inp, lab = encode(s, v)
             out_in.append(inp)
             out_lb.append(lab)
-        n_added += nf - 1  # 减 1 = 原程序已在基线集中
+        n_added += nf - 1  # minus 1 = original program already in the baseline set
     print(f"aug: +{n_added} variants (orig {n_orig} -> total {len(out_in)}), "
           f"equiv_bad={bad}, {time.time()-t0:.0f}s", flush=True)
-    assert bad == 0, "等价性断言失败：ADD 交换改变了答案"
+    assert bad == 0, "equivalence assertion failed: ADD swap changed the answer"
     return out_in, out_lb, {"n_added": n_added, "n_total": len(out_in),
                             "n_orig": n_orig, "equiv_bad": bad,
                             "cap": cap}
@@ -207,16 +206,16 @@ def main():
     global OUT_DIR
     ap = argparse.ArgumentParser()
     ap.add_argument("--aug", action="store_true",
-                    help="通道③：训练侧 ADD 等价类注入（全类枚举）")
-    ap.add_argument("--aug-cap", type=int, default=16, help="每实例等价形式上限")
-    ap.add_argument("--out", default=OUT, help="数据输出目录")
+                    help="round-3: train-side ADD equivalence-class injection (full-class enumeration)")
+    ap.add_argument("--aug-cap", type=int, default=16, help="max equivalent forms per instance")
+    ap.add_argument("--out", default=OUT, help="data output directory")
     args = ap.parse_args()
     OUT_DIR = args.out
     os.makedirs(OUT_DIR, exist_ok=True)
 
     rng = np.random.default_rng(42)
 
-    # train: 结构 × 值实例（原样本流，与基线逐字节一致）
+    # train: structures x value instances (original sample stream, byte-identical to baseline)
     structs = [sample_structure(rng, int(rng.integers(2, 5))) for _ in range(N_STRUCT)]
     inputs, labels = [], []
     for node in structs:
@@ -227,7 +226,7 @@ def main():
             inputs.append(inp)
             labels.append(lab)
 
-    # test: 全新结构（在增广之前生成 → rng 状态与基线一致 → 逐字节相同）
+    # test: novel structures (generated before augmentation -> rng state matches baseline -> byte-identical)
     test_inputs, test_labels = [], []
     for _ in range(N_TEST):
         seq, v = make_instance(rng)
@@ -238,7 +237,7 @@ def main():
 
     aug_info = None
     if args.aug:
-        # 增广在 test 之后：消耗 rng 只影响训练集扩展，不动 test
+        # augmentation runs after test: rng consumption only affects train-set expansion, not test
         inputs, labels, aug_info = augment(inputs, labels, args.aug_cap)
     write("train", inputs, labels)
 
@@ -251,7 +250,7 @@ def main():
     if aug_info:
         meta["aug"] = {"mode": "train_side_add_swap_full_class",
                        **aug_info}
-        meta["note"] += "; channel-3 equivariant-class injection"
+        meta["note"] += "; round-3 discriminator equivariant-class injection"
     json.dump(meta, open(os.path.join(OUT_DIR, "dataset.json"), "w"), indent=2)
     print(f"meta -> {os.path.join(OUT_DIR, 'dataset.json')}", flush=True)
 

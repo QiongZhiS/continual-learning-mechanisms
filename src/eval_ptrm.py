@@ -1,13 +1,12 @@
-"""PTRM 推理：K 并行 rollout + 高斯噪声 + q-head 选择（M0.1 K 曲线）
+"""PTRM inference: K parallel rollouts + Gaussian noise + q-head selection (M0.1 K-curve)
 
-用法（repo 目录下）:
-    python eval_ptrm.py --ckpt outputs/2026-08-09/<run>/step_<N> \
+Usage (from repo root):
+    python eval_ptrm.py --ckpt outputs/<run>/step_<N> \
         --data ../data/sudoku-extreme-1k-aug-100 \
         --K 1 10 100 --D 48 --sigma 0.2 --n 200
 
-基线: K=1 D=16 sigma=0（标准 eval，对齐训练配置）
-PTRM: K=10/100 D=48 sigma=0.2（论文 PPBench 配置）
-"""
+Baseline: K=1 D=16 sigma=0 (standard eval, matches training config)
+PTRM: K=10/100 D=48 sigma=0.2 (upstream PTRM paper PPBench config)"""
 import argparse
 import json
 import os
@@ -22,7 +21,7 @@ from models.recursive_reasoning.trm import TinyRecursiveReasoningModel_ACTV1
 
 def load_model(ckpt_path, arch_yaml, vocab_size, seq_len, n_identifiers):
     arch_cfg = yaml.safe_load(open(arch_yaml, encoding="utf-8"))
-    # hydra ${.hidden_size} 语法 yaml 不会解析 → 手工展开；name/loss 非 Config 字段
+    # hydra ${.hidden_size} syntax is not parsed by yaml -> expand manually; name/loss are not Config fields
     if isinstance(arch_cfg.get("puzzle_emb_ndim"), str):
         arch_cfg["puzzle_emb_ndim"] = arch_cfg["hidden_size"]
     arch_cfg.pop("name", None)
@@ -30,12 +29,12 @@ def load_model(ckpt_path, arch_yaml, vocab_size, seq_len, n_identifiers):
     arch_cfg.update(dict(
         batch_size=1, vocab_size=vocab_size, seq_len=seq_len,
         num_puzzle_identifiers=n_identifiers, causal=False,
-        mlp_t=True, pos_encodings="none",  # M0.1 用 MLP 变体（论文 sudoku 配置）
+        mlp_t=True, pos_encodings="none",  # M0.1 uses the MLP variant (upstream paper sudoku config)
     ))
     with torch.device("cuda"):
         model = TinyRecursiveReasoningModel_ACTV1(arch_cfg)
     state = torch.load(ckpt_path, map_location="cuda")
-    # checkpoint 保存的是带 loss head 的完整模型 → key 带 model. 前缀
+    # checkpoint saves the full model with loss head -> keys carry the model. prefix
     state = {k.removeprefix("model."): v for k, v in state.items()}
     model.load_state_dict(state, assign=True)
     model.eval()
@@ -58,9 +57,9 @@ def load_test_data(data_dir, n, seed):
 
 
 def ptrm_infer(model, inputs, ids, K, D, sigma, chunk_seq=512, save_latents=None):
-    """K 并行 rollout，每 deep step 注入 N(0, sigma^2) 噪声，q-head 选最佳 rollout。
+    """K parallel rollouts; inject N(0, sigma^2) noise each deep step; q-head selects the best rollout.
 
-    返回: best_pred [N, 81]（argmax 类别，与 label 同编码）
+    Returns: best_pred [N, 81] (argmax class, same encoding as labels)
     """
     N = inputs.shape[0]
     puzzles_per_chunk = max(1, chunk_seq // K)
@@ -75,7 +74,7 @@ def ptrm_infer(model, inputs, ids, K, D, sigma, chunk_seq=512, save_latents=None
                 "inputs": b.repeat(K, 1),
                 "puzzle_identifiers": ids[start:start + bs].repeat(K),
             }
-            # empty_carry 的占位 z 用默认 device 创建 → 需在 cuda 上下文中调用
+            # empty_carry placeholder z created on the default device -> must call inside a cuda context
             with torch.device("cuda"):
                 carry = model.initial_carry(batch)
             for step in range(D):
@@ -85,9 +84,9 @@ def ptrm_infer(model, inputs, ids, K, D, sigma, chunk_seq=512, save_latents=None
                 carry, outputs = model(carry, batch)
                 if save_latents is not None and start == 0 and step in save_latents:
                     q = outputs["q_halt_logits"].view(K, bs)
-                    pick = q.max(0).indices  # 该步 q 最大的 rollout
+                    pick = q.max(0).indices  # rollout with max q at this step
                     for pi in range(bs):
-                        # q-head 读 z_H[:, 0]（第一个 puzzle-emb 位置）→ M0.2 吸引盆看输出潜变量
+                        # q-head reads z_H[:, 0] (first puzzle-emb slot) -> M0.2 basins visualize the output latent
                         latents.setdefault(pi, {})[step] = \
                             carry.inner_carry.z_H[pick[pi], 0].float().cpu().numpy()
             q = outputs["q_halt_logits"].view(K, bs)
@@ -115,8 +114,8 @@ def main():
     ap.add_argument("--sigma", type=float, default=0.2)
     ap.add_argument("--n", type=int, default=200)
     ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--save-latents", default=None, help="保存 z_H 潜变量的步集合, 如 '0,8,16,24,32,40,47'")
-    ap.add_argument("--out", default=None, help="结果 json 路径")
+    ap.add_argument("--save-latents", default=None, help="steps to save z_H latents, e.g. '0,8,16,24,32,40,47'")
+    ap.add_argument("--out", default=None, help="result json path")
     args = ap.parse_args()
 
     meta = json.load(open(os.path.join(args.data, "test", "dataset.json")))
@@ -125,14 +124,14 @@ def main():
                        meta["num_puzzle_identifiers"])
 
     results = {"ckpt": args.ckpt, "n_puzzles": args.n, "seed": args.seed,
-               "curves": {}, "deviation_note": "AdamW 替换 adam-atan2; 数据缩 10x; 步数缩 ~15x"}
+               "curves": {}, "deviation_note": "AdamW replaced adam-atan2; data 10x smaller; steps ~15x fewer"}
 
     save_steps = None
     if args.save_latents:
         save_steps = [int(s) for s in args.save_latents.split(",")]
 
     for K in args.K:
-        # K=1 → 标准 eval 基线（D=16, σ=0，对齐训练配置）；K>1 → PTRM 配置（--D/--sigma）
+        # K=1 -> standard eval baseline (D=16, sigma=0, matches training config); K>1 -> PTRM config (--D/--sigma)
         D = 16 if K == 1 else args.D
         sigma = 0.0 if K == 1 else args.sigma
         t0 = time.time()

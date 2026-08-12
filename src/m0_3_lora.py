@@ -1,12 +1,11 @@
-"""M0.3b adapter 可微调性验证：LoRA 挂 TRM 全部 CastedLinear（SwiGLU gate_up/down + lm_head/q_head）
+"""M0.3b adapter fine-tunability check: LoRA on all TRM CastedLinear layers (SwiGLU gate_up/down + lm_head/q_head)
 
-冻结底座，只训 LoRA（rank 8），微调 1000 步，K=1 D=16 eval 对比基线 0.33。
-判据：test exact 显著提升 → adapter 在 TRM 上可微调 → E3-D 夜间增量微调可行。
+Freeze the base, train only LoRA (rank 16), fine-tune 1000 steps, K=1 D=16 eval vs baseline 0.33.
+Criterion: test exact improves significantly -> adapter is fine-tunable on TRM -> E3 plan D (nightly incremental fine-tuning) viable.
 
-训练用 ACTLossHead-wrapped 模型（batch_size=BS 构造，loss 从 wrapped forward 取）；
-eval 重建 unwrapped 模型（eval_ptrm.load_model + ptrm_infer，M0.3a 已验证路径）。
-checkpoint 存 wrapped state_dict 但剔除 LoRA 参数 → unwrapped 加载时无 unexpected keys。
-"""
+Training uses an ACTLossHead-wrapped model (batch built with BS, loss taken from the wrapped forward);
+eval rebuilds an unwrapped model (eval_ptrm.load_model + ptrm_infer, path validated in M0.3a).
+The checkpoint saves the wrapped state_dict with LoRA params stripped -> unwrapped load has no unexpected keys."""
 import json
 import os
 import time
@@ -34,12 +33,12 @@ meta = json.load(open(f"{DATA}/test/dataset.json"))
 
 
 class LoraCasted(torch.nn.Module):
-    """零初始化 B → 初始行为 = 原 CastedLinear，只新增低秩通路（dtype cast 照抄原层）"""
+    """Zero-init B -> initial behavior = original CastedLinear, only adds a low-rank path (dtype cast copied from the original layer)"""
     def __init__(self, linear, r, alpha):
         super().__init__()
         self.linear = linear
         self.scale = alpha / r
-        dev = linear.weight.device  # 参数必须与权重同设备（注入发生在模型 load 到 cuda 之后）
+        dev = linear.weight.device  # params must be on the same device as weights (injection happens after the model is loaded to cuda)
         self.lora_A = torch.nn.Parameter(torch.randn(linear.weight.shape[1], r,
                                                      device=dev) * 0.01)
         self.lora_B = torch.nn.Parameter(torch.zeros(r, linear.weight.shape[0], device=dev))
@@ -62,11 +61,11 @@ def make_model():
     with torch.device("cuda"):
         m = TinyRecursiveReasoningModel_ACTV1(arch_cfg)
     model = ACTLossHead(m, "stablemax_cross_entropy")
-    model.load_state_dict(torch.load(CKPT, map_location="cuda"), assign=True)  # checkpoint 自带 model. 前缀
+    model.load_state_dict(torch.load(CKPT, map_location="cuda"), assign=True)  # checkpoint carries the model. prefix
     return model
 
 
-# ---- LoRA 注入（替换全部 CastedLinear，不是 nn.Linear）----
+# ---- LoRA injection (replaces all CastedLinear, not nn.Linear) ----
 model = make_model()
 n_lin = n_param_lora = 0
 for name, mod in list(model.named_modules()):
@@ -90,7 +89,7 @@ train_lb = np.load(f"{DATA}/train/all__labels.npy", mmap_mode="r")
 rng = np.random.default_rng(1)
 inputs, labels, ids, idx = load_test_data(DATA, 200, 0)
 
-# 占位 batch 必须含 labels：ACTLossHead 从 new_carry.current_data["labels"] 取 loss 目标
+# placeholder batch must contain labels: ACTLossHead takes loss targets from new_carry.current_data["labels"]
 with torch.device("cuda"):
     carry = model.initial_carry({
         "inputs": torch.zeros(BS, 81, dtype=torch.int32, device="cuda"),
@@ -113,7 +112,7 @@ for step in range(TOTAL):
     if (step + 1) % 200 == 0:
         print(f"step {step+1}: loss={loss.item()/BS:.4f} ({time.time()-t0:.0f}s)", flush=True)
 
-# ---- 存 checkpoint：剔除 LoRA 参数 + key 重映射（xxx.linear.weight → xxx.weight），unwrapped 加载零 unexpected ----
+# ---- save checkpoint: strip LoRA params + remap keys (xxx.linear.weight -> xxx.weight), zero unexpected keys on unwrapped load ----
 state = {k.replace(".linear.", "."): v for k, v in model.state_dict().items()
          if not k.endswith("lora_A") and not k.endswith("lora_B")}
 ckpt_path = f"{OUT}/lora_{TOTAL}"
@@ -122,7 +121,7 @@ model.eval()
 del model
 torch.cuda.empty_cache()
 
-# ---- eval：重建 unwrapped 模型（removeprefix）----
+# ---- eval: rebuild the unwrapped model (removeprefix) ----
 emod = __import__("eval_ptrm").load_model(
     ckpt_path, "config/arch/trm.yaml", meta["vocab_size"], meta["seq_len"],
     meta["num_puzzle_identifiers"])

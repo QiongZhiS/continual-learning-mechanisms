@@ -1,12 +1,11 @@
-"""M0.3b 补验证：LoRA 抗遗忘快测——子集微调后的保持率
+"""M0.3b supplementary check: LoRA anti-forgetting quick test — retention after subset fine-tuning
 
-单域下"旧知识"不可构造（无第二域），用分布外逼近：只喂 train[:2000] 微调，
-测 **子集外** train[10000:10500] 的表现（微调前的旧知识面）。
-- LoRA（rank16 lr3e-4）子集 500 步 ← 新训
-- 对照 1：基线 23437（未微调）
-- 对照 2：human-label_500（全量参数同子集微调 500 步，已有 ckpt）
-判据：子集外，LoRA 保持率损失 < 全量微调 → adapter 的持续学习特性成立。
-"""
+With a single domain, "old knowledge" cannot be constructed (no second domain); approximate out-of-distribution:
+fine-tune only on train[:2000], then measure performance on the **out-of-subset** train[10000:10500] (the pre-fine-tuning knowledge surface).
+- LoRA (rank16 lr3e-4) subset 500 steps <- freshly trained
+- control 1: baseline 23437 (not fine-tuned)
+- control 2: human-label_500 (full-parameter same-subset fine-tune 500 steps, existing ckpt)
+Criterion: on out-of-subset data, LoRA retention loss < full fine-tuning -> the adapter's continual-learning property holds."""
 import json
 import os
 import time
@@ -29,13 +28,13 @@ STEPS = 500
 LR = 3e-4
 RANK = 16
 ALPHA = 16
-SUB = 2000            # 微调子集 = train[:SUB]
-HO_LO, HO_HI = 10000, 10500  # 子集外 holdout 区间
+SUB = 2000            # fine-tuning subset = train[:SUB]
+HO_LO, HO_HI = 10000, 10500  # out-of-subset holdout range
 
 os.makedirs(OUT, exist_ok=True)
 meta = json.load(open(f"{DATA}/test/dataset.json"))
 
-# test 集（200 谜题 seed 0，与全部 M0 同源）+ holdout 集（train 子集外）
+# test set (200 puzzles seed 0, same source as all of M0) + holdout set (out-of-subset train)
 inputs, labels, ids, idx = load_test_data(DATA, 200, 0)
 train_in = np.load(f"{DATA}/train/all__inputs.npy", mmap_mode="r")
 train_lb = np.load(f"{DATA}/train/all__labels.npy", mmap_mode="r")
@@ -86,7 +85,7 @@ def eval_unwrapped(ckpt_path, in_ten, lb_ten, pid_ten):
             (pred == lb_ten).float().mean().item())
 
 
-# ---- LoRA 子集微调（唯一新训部分）----
+# ---- LoRA subset fine-tuning (the only freshly trained part) ----
 model = make_model()
 for name, mod in list(model.named_modules()):
     if isinstance(mod, CastedLinear):
@@ -123,7 +122,7 @@ print(f"LoRA sub{SUB} {STEPS} steps done ({time.time()-t0:.0f}s)", flush=True)
 del model
 torch.cuda.empty_cache()
 
-# ---- 三模型 × 两 eval 集 ----
+# ---- three models x two eval sets ----
 rows = {}
 for tag, ck in [("baseline_23437", CKPT), ("lora_sub2000", lora_path),
                 ("full_sub2000(human-label)", HL_CKPT)]:

@@ -1,72 +1,71 @@
-"""domain_params.py — 全部域的机器可读结构化参数（M0.4 后档）
+"""domain_params.py — machine-readable structured parameters for all domains (M0.4 auxiliary)
 
-用途（辅助报告 + 渐变域插值接口）：
-1. domain_distance.py 从本文件读参数，算"结构距离矩阵"（辅助报告用）
-2. 渐变域插值对（域 B ↔ 前缀变体）需要同家族参数路径
-3. E/F/G 占位：域 E 选定后 + F/G 延伸设计后填入
+Purpose (auxiliary reports + gradient-domain interpolation interface):
+1. domain_distance.py reads parameters from this file to compute the structural distance matrix (auxiliary reporting)
+2. gradient-domain interpolation pairs (domain B <-> prefix variants) need same-family parameter paths
+3. E/F/G placeholders: to be filled after domain E is selected, then F/G extended from E's family
 
-冻结规则（预注册）：
-- 相似度梯度的**冻结物** = 行为距离（零样本迁移率矩阵）
-- 结构距离只作辅助报告，不参与冻结
-- A-D 参数 = 已交付生成器的实际值（域 B: m1_gen_domainB.py；域 C: m0_4_gen_domainC.py；
-  域 A 数独 = M0.1 复现配置；域 D = 域 D 实例化设计 v0.1）
-"""
+Freeze rules (pre-registration):
+- the frozen similarity gradient = behavioral distance (zero-shot transfer matrix)
+- structural distance is auxiliary reporting only, not part of the freeze
+- A-D parameters = actual values of delivered generators (domain B: m1_gen_domainB.py; domain C: m0_4_gen_domainC.py;
+  domain A sudoku = M0.1 reproduction config; domain D = domain-D instance spec)"""
 from __future__ import annotations
 
-# family 取值：
-#   puzzle   — 谜题域（格/约束填充）
-#   seq-map  — 序列映射域（程序/序列 → 值）
-#   game     — 博弈域（状态 → 动作）
+# family values:
+#   puzzle   — puzzle domain (grid/constraint fill)
+#   seq-map  — sequence-mapping domain (program/sequence -> value)
+#   game     — game domain (state -> action)
 DOMAIN_PARAMS = {
     "A": {
         "family": "puzzle",
-        "syntax": "grid-sudoku",   # 9x9 格，行/列/宫约束
-        "ops": [],                 # 无显式操作符
-        "depth": None,             # 非树结构
-        "value_range": [1, 9],     # 数字 1-9
-        "seq_len": 81,             # 9x9 展平
+        "syntax": "grid-sudoku",   # 9x9 grid, row/column/box constraints
+        "ops": [],                 # no explicit operators
+        "depth": None,             # not a tree structure
+        "value_range": [1, 9],     # digits 1-9
+        "seq_len": 81,             # 9x9 flattened
         "output_style": "fill-grid",
-        "note": "M0.1 复现 PTRM 数独基线",
+        "note": "M0.1 reproduction of the PTRM sudoku baseline",
     },
     "B": {
         "family": "seq-map",
-        "syntax": "postfix",       # RPN 后缀表达式
+        "syntax": "postfix",       # RPN postfix expression
         "ops": [10, 11],           # ADD=10, SUB=11 (vocab id)
-        "depth": [2, 4],           # 树深度范围
-        "value_range": [0, 9],     # 中间结果/答案范围
+        "depth": [2, 4],           # tree-depth range
+        "value_range": [0, 9],     # intermediate-result/answer range
         "seq_len": 81,
-        "output_style": "result",  # 位 0 = 结果
-        "note": "M1a RPN 栈机算术 (m1_gen_domainB.py)",
+        "output_style": "result",  # slot 0 = result
+        "note": "M1a RPN stack-machine arithmetic (m1_gen_domainB.py)",
     },
     "C": {
         "family": "seq-map",
-        "syntax": "fixed-pos",     # 固定位置特征 (c,a) -> (x,y)
+        "syntax": "fixed-pos",     # fixed-position features (c,a) -> (x,y)
         "ops": ["mulmod"],         # f: x=(c*(a+1))%10, y=(a*(c+1))%10
         "depth": None,
         "value_range": [0, 9],
         "seq_len": 81,
-        "output_style": "2-pos",   # 位 0,1 = x,y
-        "note": "M0.4a 组合域鸭嘴兽载体 (m0_4_gen_domainC.py)",
+        "output_style": "2-pos",   # slots 0,1 = x,y
+        "note": "M0.4a composition-domain platypus carrier (m0_4_gen_domainC.py)",
     },
     "D": {
         "family": "game",
-        "syntax": "iterated-game", # 离散状态博弈
-        "ops": ["IPD", "PG", "SG"],# 囚徒困境/公共品/信号博弈 (D1/D2/D3)
+        "syntax": "iterated-game", # discrete-state game
+        "ops": ["IPD", "PG", "SG"],  # prisoner's dilemma / public goods / signaling games (D1/D2/D3)
         "depth": None,
-        "value_range": None,       # 收益值域，非 token 域
-        "seq_len": None,           # 观测窗口 10 轮
-        "output_style": "action",  # 动作选择
-        "note": "域 D 实例化设计 v0.1（D1 最小实例 = E6a 第 4 域）",
+        "value_range": None,       # payoff range, not a token domain
+        "seq_len": None,           # 10-round observation window
+        "output_style": "action",  # action selection
+        "note": "domain-D instance spec (D1 minimal instance = E6a 4th domain)",
     },
-    # 占位：域 E 三候选选定后填入；F/G 从 E 族延伸后填入
+    # placeholders: fill after domain E is chosen; F/G extend from E's family
     "E": None,
     "F": None,
     "G": None,
 }
 
-# 辅助：人类可读的域间近邻预期（用于 sanity check 报告）
-# 不做冻结物，仅文档性质
-KNOWN_ORDER = ["A", "B", "C", "D"]  # v0.7 预注册的近→远排列（行为距离验证用）
+# helper: human-readable expected inter-domain neighborhoods (for sanity-check reports)
+# not frozen; documentation only
+KNOWN_ORDER = ["A", "B", "C", "D"]  # pre-registered near->far ordering (for behavioral-distance verification)
 
 
 def get_params(domain: str) -> dict | None:

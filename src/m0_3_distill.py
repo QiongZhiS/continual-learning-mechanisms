@@ -1,14 +1,13 @@
-"""M0.3c 7M 最小蒸馏试验：SkillsBench"自写 skill 零增益"在小规模是否复现
+"""M0.3c minimal 7M distillation test: does SkillsBench's "self-written skill null gain" reproduce at small scale?
 
-设计（同样本双组对照）：
-- 采样 train 前 2000 谜题；用 precise-muskox（K=1 D=16）推理出模型自输出
-- 组1（自蒸馏）：标签 = 模型自输出（自己教自己，无新信息）
-- 组2（人工）：标签 = ground truth（含模型错误样本的纠正 = 外部信息）
-- 组3：不微调（基线 0.33）
-每组微调 500 步（同预算同数据同种子）→ test 200 谜题对比。
+Design (same-sample two-group control):
+- sample the first 2000 train puzzles; use the pretrained checkpoint (K=1 D=16) to produce the model's own outputs
+- group 1 (self-distill): labels = model's own outputs (self-teaching, no new information)
+- group 2 (human): labels = ground truth (corrections of model errors = external information)
+- group 3: no fine-tuning (baseline 0.33)
+Each group fine-tuned 500 steps (same budget/data/seed) -> compare on 200 test puzzles.
 
-SkillsBench 模式复现（E3 动机成立）= 组1 ≈ 基线 且 组2 > 组1。
-"""
+SkillsBench pattern reproduced (E3 motivation holds) = group1 ~= baseline and group2 > group1."""
 import json
 import os
 import time
@@ -35,9 +34,9 @@ inputs, labels, ids, idx = load_test_data(DATA, 200, 0)
 train_in = np.load(f"{DATA}/train/all__inputs.npy", mmap_mode="r")
 train_lb = np.load(f"{DATA}/train/all__labels.npy", mmap_mode="r")
 X = np.asarray(train_in[:N_SAMPLE], dtype=np.int32)      # [N, 81]
-Y_gt = np.asarray(train_lb[:N_SAMPLE], dtype=np.int32)   # [N, 81] 人工标签
+Y_gt = np.asarray(train_lb[:N_SAMPLE], dtype=np.int32)   # [N, 81] human labels
 
-# ---- 生成模型自输出（K=1 D=16 标准推理）----
+# ---- generate model self-outputs (K=1 D=16 standard inference) ----
 gen_model = load_model(CKPT, "config/arch/trm.yaml", meta["vocab_size"], meta["seq_len"],
                        meta["num_puzzle_identifiers"])
 gen_model.config.halt_max_steps = 16
@@ -72,7 +71,7 @@ def make_model():
     with torch.device("cuda"):
         m = TinyRecursiveReasoningModel_ACTV1(arch_cfg)
     m = ACTLossHead(m, "stablemax_cross_entropy")
-    m.load_state_dict(torch.load(CKPT, map_location="cuda"), assign=True)  # checkpoint 自带 model. 前缀
+    m.load_state_dict(torch.load(CKPT, map_location="cuda"), assign=True)  # checkpoint carries the model. prefix
     m.train()
     return m
 
@@ -99,7 +98,7 @@ def train_eval(Y_target, tag):
         carry, loss, metrics, _, _ = model(carry=carry, batch=batch, return_keys=[])
         (loss / BS).backward()
         opt.step()
-    # eval 必须用 unwrapped 模型：ptrm_infer 解包 model(carry, batch) 读 outputs["logits"]
+    # eval must use the unwrapped model: ptrm_infer unpacks model(carry, batch) and reads outputs["logits"]
     ckpt_path = f"{OUT}/{tag}_{TOTAL}"
     torch.save(model.state_dict(), ckpt_path)
     model.eval()

@@ -152,7 +152,7 @@ def create_model(config: PretrainConfig, train_metadata: PuzzleDatasetMetadata, 
                 lr=0,  # Needs to be set by scheduler
                 weight_decay=config.weight_decay,
                 betas=(config.beta1, config.beta2),
-                fused=True  # M0.1 patch: CUDA 端优化器步骤，卸 CPU 负载
+                fused=True  # local patch: CUDA-side optimizer step, offload CPU load
             )
         ]
         optimizer_lrs = [
@@ -183,7 +183,7 @@ def create_model(config: PretrainConfig, train_metadata: PuzzleDatasetMetadata, 
                 lr=0,  # Needs to be set by scheduler
                 weight_decay=config.weight_decay,
                 betas=(config.beta1, config.beta2),
-                fused=True  # M0.1 patch: CUDA 端优化器步骤，卸 CPU 负载
+                fused=True  # local patch: CUDA-side optimizer step, offload CPU load
             )
         ]
         optimizer_lrs = [
