@@ -1,31 +1,31 @@
-# M1 结果报告：探索机制在符号域失败（负结果）
+# M1 Results: The Exploration Mechanism Fails in the Symbolic Domain (Negative Result)
 
-> 作者：Lumen
+> Author: Lumen
 
-E1（探索机制）主判据在域 B（RPN 栈机算术）失败。本报告记录完整的失败定位过程与重设计方向。
-
----
-
-**M1 结果与失败分支**：
-
-域 B（RPN——逆波兰表示法——栈机算术）从零训 4000 步后实测：K=1 深扩展基线 0.478 / K=10 0.476 / K=100 0.476——**K 增大零增益**，E1 主判据失败，推论 1 在符号域不支持。失败机制经三轮判别完整定位：
-
-1. 质量选择器 q-head 在域 B 无区分力（AUC 0.569 ≈ 随机，vs 域 A 的 1.0）——初判"跨域不泛化"
-2. **投票对照证伪该假设**：同批 rollouts 上纯多数表决 = 深扩展基线——rollout 间无增量信息
-3. **语义级探索证伪**：噪声从潜在空间改到 token/规则空间（交换操作数、交换子树），K=30 语义等价扰动 + 多数表决 = 基线。模型错误是**规则性的**（对等价程序错误模式相同）
-
-**稳健性扩展**：将训练延长至 10000 步后重测（模型仍处于爬升期，test 0.606/train 0.623），K 曲线保持非单调（K=1_D=48 0.604 / K=100 0.590，见 src/results/k_curve_10000.json）——4000 步的"平曲线"结论在更长训练下不变。"半成品模型"解释同时被排除：训练成熟不复活探索机制。
-
-**终版机制结论：推理期探索（任何输入侧载体）对"解唯一但模型未学会"的问题结构性无效**——PTRM 式探索解决的是"解不唯一"问题（吸引盆几何允许跨盆采样），而非"未学会规则"问题（需方向/训练侧修复）。此结论是有效的科学产出：明确了探索机制的适用边界。
-
-**重设计方向（候选，M1 预算内）**：
-- **动力学调试（分岔重定义）**：域 A 的 K 增益依赖鞍结分岔早期幽灵点附近动力学（临界学习率 ∝ T⁴），域 B 的分岔结构不同 → 扫描域 B 的学习率 + 记忆时长配比，找新临界参数。若存在配比使 K 增益恢复 → E1 失败 = 分岔定位成功（非架构缺陷）；若全域扫描零增益 → 原结论维持。成本约 20-30 次训练
-- **逆向模型（目标条件逆向模型，goal-conditioned inverse model）**：纯噪声探索在"无盆"平坦地形上无效——噪声没有方向。设计：增量训练轻量逆向模型（~2M 参数），输入"当前状态 + 目标"→ 输出"朝目标的差分方向向量"；推理时该方向 + 高斯噪声 = 有指向的展开。可证伪预测：域 B 上"逆向指引+噪声"的 K 增益恢复（vs 纯噪声零增益 + "仅逆向无噪声"退化到贪心）。成本：轻量增量训练（约 1/4 底座规模）。
-
-## 相关观察（E7b 仲裁候选）
-
-域 B 实测"选优"与"投票"仲裁臂均失效（rollout 无增量信息）——中和臂是唯一有测量空间的仲裁候选。
+The E1 (exploration mechanism) main criterion failed in domain B (RPN stack-machine arithmetic). This report records the complete failure-localization process and redesign directions.
 
 ---
 
-**此结论是有效的科学产出：明确了探索机制的适用边界。**
+## M1 result and failure branch
+
+After training from scratch for 4000 steps on domain B (RPN — reverse Polish notation — stack-machine arithmetic): K=1 deep-expansion baseline 0.478 / K=10 0.476 / K=100 0.476 — **increasing K yields zero gain**; the E1 main criterion failed; corollary 1 is not supported in the symbolic domain. The failure mechanism was fully localized through three rounds of discrimination:
+
+1. The quality selector (q-head) has no discriminative power on domain B (AUC 0.569 ≈ chance, vs. 1.0 on domain A) — initially judged as "does not generalize across domains."
+2. **Majority voting falsified that hypothesis**: pure majority voting over the same batch of rollouts = deep-expansion baseline — no incremental information across rollouts.
+3. **Semantic-level exploration falsified**: noise moved from the latent space to the token/rule space (swapping operands, swapping subtrees); K=30 semantically equivalent perturbations + majority voting = baseline. The model's errors are **rule-based** (the same error pattern on equivalent programs).
+
+**Robustness extension**: extending training to 10000 steps and re-testing (the model was still climbing; test 0.606 / train 0.623), the K-curve remains non-monotonic (K=1_D=48 0.604 / K=100 0.590, see src/results/k_curve_10000.json) — the 4000-step "flat curve" conclusion holds under longer training. The "half-trained model" explanation is simultaneously excluded: training to maturity does not revive the exploration mechanism.
+
+**Final mechanistic conclusion: inference-time exploration (any input-side carrier) is structurally ineffective for problems that are "uniquely solvable but not yet learned"** — PTRM-style exploration solves "non-unique-solution" problems (basin geometry allows cross-basin sampling), not "rule-not-yet-learned" problems (which need direction/training-side fixes). This conclusion is a valid scientific output: it delimits the applicability boundary of exploration mechanisms.
+
+**Redesign directions (candidates, within the M1 budget)**:
+- **Dynamics tuning (bifurcation redefinition)**: domain A's K-gain depends on dynamics near the ghost point of an early saddle-node bifurcation (critical learning rate ∝ T⁴); domain B's bifurcation structure differs → scan domain B's learning rate × memory-duration ratios to find new critical parameters. If a ratio restores the K-gain → the E1 failure was a bifurcation-localization success (not an architectural defect); if the full scan yields zero gain → the original conclusion stands. Cost: ~20–30 training runs.
+- **Inverse model (goal-conditioned inverse model)**: pure-noise exploration is ineffective on "basin-free" flat terrain — noise has no direction. Design: incrementally train a lightweight inverse model (~2M parameters) mapping "current state + goal" → "differential direction vector toward the goal"; at inference, that direction + Gaussian noise = directed expansion. Falsifiable prediction: on domain B, "inverse-guided + noise" restores the K-gain (vs. zero gain for pure noise + "inverse-only, no-noise" degrading to greedy). Cost: lightweight incremental training (~1/4 of base scale).
+
+## Related observation (E7b arbitration candidate)
+
+On domain B, the "best-of" and "voting" arbitration arms both failed empirically (no incremental information across rollouts) — the neutralization arm is the only arbitration candidate with measurement space left.
+
+---
+
+**This conclusion is a valid scientific output: it delimits the applicability boundary of exploration mechanisms.**

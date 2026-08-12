@@ -1,136 +1,136 @@
-# 技能是什么？——一个可操作的定义
+# What Is a Skill? — An Operational Definition
 
-> 作者：Lumen
-
----
-
-## 摘要
-
-"技能"（skill）是学习系统研究中最常用、也最缺乏严格定义的概念之一。社区讨论技能蒸馏、技能库、技能复用，鲜有人给出一个可检验的操作定义——什么是技能，什么不是，如何测量。本文提出一个以行为为判据、以学习特征为构成的操作定义，并给出可直接用于实验的测量协议。
-
-核心主张一句话：**技能是跨情境稳定的、自动化程度足以显著优于暴力枚举的、能解决训练分布外问题的行为倾向**——技能是什么，由它"做了什么"定义，不由它"长什么样"定义。
+> Author: Lumen
 
 ---
 
-## 1. 背景：一个没有定义的概念被反复测量
+## Abstract
 
-持续学习、蒸馏与 Agent 社区对"技能"的研究已经持续多年，但存在三个结构性问题：
+"Skill" is one of the most frequently used — and least rigorously defined — concepts in learning-system research. The community discusses skill distillation, skill libraries, and skill reuse, yet rarely offers a testable operational definition: what is a skill, what is not, and how is it measured. This paper proposes an operational definition with behavior as the criterion layer and learning characteristics as the constitution layer, together with a measurement protocol directly usable in experiments.
 
-**问题一：不可测的"技能"无法证伪。** 没有操作定义，任何方法都可以声称"提取了技能"——成功是技能的功劳，失败是数据/算力/运气的问题。技能库命中率、复用增益、学习加速等指标均为各实验自行预注册，互不可比，也无人质疑测量对象本身是否一致。
+The core claim in one sentence: **a skill is a behavioral disposition that is stable across situations, automated enough to significantly beat brute-force enumeration, and able to solve problems outside the training distribution** — what a skill *is* is defined by what it *does*, not by what it *looks like*.
 
-**问题二：保持与变强被混淆。** 持续学习/蒸馏社区绝大多数重放类工作（LwF [1]、iCaRL [2]、DER [3]、sleep replay [4]、generative replay [5]）服务的目标是**保持**——旧知识不丢，测遗忘率/恢复率。以预注册方式正面测量**变强**——经验提取技能后，新域学习是否加速——的工作很少（元学习与技能库文献测过，但未进入持续学习的主流判据）。
+---
 
-**问题三：同一概念，完全不同的机制。** 显式规则、向量表征、权重微调、文本描述——这些方案都被称为"技能蒸馏"，实际是完全不同的机制。没有定义层面的区分，方案选择就缺乏理论基础。
+## 1. Background: a concept without a definition, repeatedly measured
 
-SkillsBench（2026）[13] 给出了第一个可参考的实证锚点：在 87 个任务 × 18 种模型-框架配置的配对评测中，人工精选的 Skills（curated）将平均通过率从 33.9% 提升到 50.5%（+16.6 个百分点）；而模型自生成的 Skills（self-generated）在所测全部配置下均为负增益。这个结果说明两件事：**技能确实能带来可测量的能力提升**（curated 有效）；**但"经验 → 技能"的自动提取是当前的瓶颈**（self-generated 无效）。后者正是本文定义要服务的核心问题。
+Research on "skills" in the continual learning, distillation, and agent communities has gone on for years, but faces three structural problems:
 
-## 2. 定义
+**Problem 1: An untestable "skill" cannot be falsified.** Without an operational definition, any method can claim to have "extracted a skill" — success is attributed to the skill, failure to data/compute/luck. Skill-library hit rates, reuse gains, and learning-acceleration metrics are each pre-registered by individual experiments, are mutually incomparable, and nobody questions whether the measured object itself is consistent.
 
-> **技能（Skill）**：跨情境稳定的、自动化程度足以显著优于暴力枚举的、能解决训练分布外问题的行为倾向。
+**Problem 2: Retention is conflated with getting better.** The majority of replay-based work in the continual-learning/distillation community (LwF [1], iCaRL [2], DER [3], sleep replay [4], generative replay [5]) serves **retention** — old knowledge is not lost; forgetting/recovery rates are measured. Work that pre-registers and directly measures **getting better** — whether learning in a new domain accelerates after experience is extracted into skills — is rare (meta-learning and skill-library literature has measured it, but it has not entered the mainstream criteria of continual learning).
 
-两个说明：
+**Problem 3: The same concept, completely different mechanisms.** Explicit rules, vector representations, weight fine-tuning, text descriptions — all of these are called "skill distillation," yet they are entirely different mechanisms. Without a definition-level distinction, scheme selection lacks a theoretical basis.
 
-**关于"习得性"**：技能通常经练习获得，但"通过练习获得"不进入判据——一个手写专家系统满足全部行为判据，却未经练习获得。判据层只管"是不是技能"（行为），构成层才管"怎么获得"（习得/自动化/迁移）。这样划分避免把形成过程与外部表现混为一谈（见 §8.6 的开放问题）。
+SkillsBench (2026) [13] provides the first reference empirical anchor: in paired evaluation across 87 tasks × 18 model–harness configurations, human-curated Skills improved mean pass rate from 33.9% to 50.5% (+16.6 percentage points); model self-generated Skills were negative-gain in all tested configurations. Two things follow: **skills do produce measurable capability gains** (curated works); **automatic "experience → skill" extraction is the current bottleneck** (self-generated does not work). The latter is exactly the problem this definition is built to serve.
 
-**为什么是"行为倾向"而不是"知识/表征"**：行为倾向（behavioral disposition）是哲学与认知科学中用于描述"在适当条件下以特定方式行为"的稳定倾向性，其源头可追溯至 Ryle 对 knowing-how 的分析 [6]。选择它作为定义核心，是因为它是**唯一既可直接观测、又可跨实现形式比较**的层次——规则、向量、权重都可以是技能的载体，但它们本身不可观测也不直接可比；行为可以。
+## 2. The definition
 
-三个核心限定：
+> **Skill**: a behavioral disposition that is stable across situations, automated enough to significantly outperform brute-force enumeration, and able to solve problems outside the training distribution.
 
-| 限定 | 含义 | 排除对象 | 对应判据 |
-|------|------|---------|---------|
-| **可靠性（跨情境稳定）** | 多次测试的成功率，非单次命中；跨情境性由判据 2（迁移距离，见 §6）承担 | 排除"碰巧"（运气性成功） | 复用后性能提升（多次测量，报告均值与置信区间） |
-| **分布外有效** | 能解决训练分布外的问题 | 排除"背书"（记忆/检索——只解决分布内 = 数据库） | 迁移距离梯度 d*（失效距离） |
-| **效率** | 解决问题不依赖暴力枚举 | 排除 brute force（穷举式解决） | 技能方案总成本 vs 无技能基线 |
+Two clarifications:
 
-## 3. 判据层与构成层
+**On "acquired through practice"**: skills are usually acquired through practice, but "acquired through practice" is not part of the criterion — a hand-written expert system can satisfy all behavioral criteria without having been acquired through practice. The criterion layer decides only "is it a skill" (behavior); the constitution layer decides "how is it acquired" (acquisition/automatization/transfer). This separation avoids conflating the formation process with external manifestation (see the open question in §8.6).
 
-为避免"技能"成为不可言说之物，定义分为两层：
+**Why "behavioral disposition" rather than "knowledge/representation"**: a behavioral disposition is a stable tendency, described in philosophy and cognitive science, to behave in specific ways under appropriate conditions; its origin traces to Ryle's analysis of knowing-how [6]. It is chosen as the core of the definition because it is the **only level that is both directly observable and comparable across implementation forms** — rules, vectors, and weights can all be carriers of a skill, but they are not directly observable or directly comparable among themselves; behavior is.
 
-- **判据层**（外部可测）：解决问题的能力——技能的外部表现，即行为。多次测试成功率、迁移距离、总成本。**判据层决定"是不是技能"。**
-- **构成层**（内部特征）：习得性 + 自动化 + 迁移性——技能的形成过程特征。**构成层决定"怎么获得技能"。**
+Three core qualifications:
 
-两层的区分意义在于绕开一个经典陷阱：**存储了 ≠ 会使用**。一段文本描述即使被称为"技能"，如果它不改变解决率，它在判据层就不是技能。反之，一个无法用语言表达的专家行为模式，只要满足判据层，就是技能——这直接呼应 Dreyfus 技能获得模型的核心观察：专家说不出规则，但做得出 [7]。**行为是技能的载体，语言不是。**
+| Qualification | Meaning | Excludes | Corresponding criterion |
+|------|---------|---------|------------------------|
+| **Reliability (cross-situation stability)** | Success rate over multiple tests, not a single hit; cross-situation coverage is carried by criterion 2 (transfer distance, see §6) | "Luck" (chance success) | Post-reuse performance improvement (multiple measurements, report mean ± CI) |
+| **Out-of-distribution effectiveness** | Solves problems outside the training distribution | "Parroting" (memory/retrieval — solving only in-distribution = a database) | Transfer-distance gradient d* (failure distance) |
+| **Efficiency** | Solving does not depend on brute-force enumeration | Brute force (exhaustive search) | Total cost of the skill solution vs. the no-skill baseline |
 
-## 4. 与既有框架的关系
+## 3. Criterion layer and constitution layer
 
-| 框架 | 对技能的定义 | 与本定义的关系 |
+To keep "skill" from becoming an ineffable entity, the definition is split into two layers:
+
+- **Criterion layer** (externally measurable): problem-solving ability — the external manifestation of the skill, i.e., behavior. Success rate over multiple tests, transfer distance, total cost. **The criterion layer decides "is it a skill."**
+- **Constitution layer** (internal characteristics): acquisition + automatization + transferability — the formation-process characteristics of the skill. **The constitution layer decides "how a skill is acquired."**
+
+The point of separating the two layers is to bypass a classic trap: **storing ≠ using**. A text description, even if called a "skill," is not a skill at the criterion layer if it does not change the solve rate. Conversely, an expert behavioral pattern that cannot be verbalized is a skill as long as it satisfies the criterion layer — directly echoing the core observation of Dreyfus's skill-acquisition model: experts cannot state the rules, but they can perform them [7]. **Behavior is the carrier of skill; language is not.**
+
+## 4. Relationship to existing frameworks
+
+| Framework | Definition of skill | Relationship to this definition |
 |------|-----------|---------------|
-| **ACT-R / 知识编译**（Anderson, 1983, 1994） | 程序性知识（procedural knowledge）——从陈述性知识经知识编译转化，通过练习自动化 [8,9] | 构成层一致：习得 + 自动化。ACT-R 提供了技能形成的认知机制描述，本定义将机制特征映射为可测构成层 |
-| **Dreyfus 技能获得模型**（1980） | 新手依赖规则，专家是情境化直觉（不可言说）[7] | 支持判据层优先：专家的价值在行为，不在可表述性（该观点在认知科学中亦有争议，见 [10]） |
-| **Fitts & Posner 三阶段模型**（1967） | 认知 → 联结 → 自主（cognitive → associative → autonomous）三阶段 [11] | 为"自动化"限定提供发展阶段依据：自动化是技能形成的终点特征，非起点 |
-| **分层强化学习 / options**（Sutton, Precup & Singh, 1999） | 技能 = 时间扩展的动作抽象（策略）[12] | 面向 RL 策略抽象，与本文行为判据兼容但判据不同：options 无"分布外"与"效率"硬限定 |
-| **教育/能力本位观** | 在特定情境中应用知识完成任务的能力 | 与判据层同族，但本定义增加"分布外"硬限定（情境外的迁移），排除情境内记忆 |
+| **ACT-R / knowledge compilation** (Anderson, 1983, 1994) | Procedural knowledge — transformed from declarative knowledge via knowledge compilation, automatized through practice [8,9] | Constitution layer agrees: acquisition + automatization. ACT-R provides the cognitive-mechanism account of skill formation; this definition maps mechanism features onto a measurable constitution layer |
+| **Dreyfus skill-acquisition model** (1980) | Novices rely on rules; experts use situated intuition (ineffable) [7] | Supports criterion-layer priority: the expert's value lies in behavior, not expressibility (a position debated in cognitive science, see [10]) |
+| **Fitts & Posner three-stage model** (1967) | Cognitive → associative → autonomous stages [11] | Provides the developmental basis for the automatization qualification: automatization is the endpoint feature of skill formation, not its starting point |
+| **Hierarchical RL / options** (Sutton, Precup & Singh, 1999) | Skill = temporally extended action abstraction (policy) [12] | RL policy abstraction; compatible with this definition's behavioral criteria but different: options have no hard "out-of-distribution" or "efficiency" qualifications |
+| **Education / competence-based view** | The ability to apply knowledge to complete tasks in specific situations | Same family as the criterion layer, but this definition adds the hard "out-of-distribution" qualification (transfer beyond the situation), excluding in-situation memory |
 
-**关键差异**：学界既有定义多为**描述性**（技能是什么、怎么形成），本文定义为**操作性**（技能怎么测、什么算数）。操作性定义可以直接挂载实验判据，这是它区别于前人的核心增量。
+**Key difference**: existing definitions in the literature are mostly **descriptive** (what a skill is, how it forms); this definition is **operational** (how to measure a skill, what counts). An operational definition can directly mount experimental criteria — this is the core increment over prior work.
 
-## 5. 推论：技能是行为倾向，不是载体
+## 5. Corollary: a skill is a behavioral disposition, not a carrier
 
-由判据层定义直接推出：
+Directly implied by the criterion-layer definition:
 
-1. **技能 = 怎么用（behavioral disposition），不是怎么说（description）——但"说"本身可以是技能载体。**
-2. 判据是**行为改变**，不是载体形式：curated 文本描述在 SkillsBench 中改变了行为（+16.6pp），在判据层通过；self-generated 描述未改变行为，在判据层失败 [13]。同一载体（文本），两种结果——差异在来源与质量，不在载体。
-3. 该推论统一了一组独立实证：SkillsBench 的 curated 有效 / self-generated 无效（描述是否改变行为是经验问题）；两项作者未发表实验也指向同一方向——向输入侧注入等价类信息不改变能力、无规则结构先验的域内增益为零（见 [14]）。
+1. **A skill is how it is used (behavioral disposition), not how it is described (description) — but "description" itself can be a skill carrier.**
+2. The criterion is **behavioral change**, not carrier form: curated text descriptions changed behavior in SkillsBench (+16.6pp) and pass at the criterion layer; self-generated descriptions did not change behavior and fail at the criterion layer [13]. The same carrier (text), two outcomes — the difference lies in source and quality, not carrier.
+3. This corollary unifies an independent set of evidence: SkillsBench's curated effective / self-generated ineffective (whether a description changes behavior is an empirical question); two unpublished experiments by the author point the same way — injecting equivalence-class information at the input side does not change capability, and in-domain gain without rule-structure priors is zero (see [14]).
 
-三个案例指向同一个可检验命题：**显式信息若不改变行为，就不改变能力。**
+The three cases point to one testable proposition: **explicit information that does not change behavior does not change capability.**
 
-## 6. 可操作化：测量协议
+## 6. Operationalization: measurement protocol
 
-判据层三件套（可直接预注册）：
+The criterion-layer triplet (directly pre-registrable):
 
-1. **复用后性能提升**：对照组（无技能）× 实验组（带技能）在同一问题集上的成功率差。多次测试，报告均值 ± 置信区间（种子 ≥ 5，效应量 ≥ 预注册阈值）。这是"可靠性"的测量：单次命中不算，多次可复现才算；若需同时验证跨情境性，测试集应含情境变体。
-2. **迁移距离梯度 d\***：测试集按"距训练分布的替换距离"分层，准确率跌破随机基线的距离 = 失效距离——技能的"活动半径"。这是"分布外有效"的连续化测量：不满足于"能/不能"，测量"能多远"。**约定**：距离度量由任务域定义（如组合特征替换：替换 1 个特征 → 全部特征的梯度）；"跌破基线"用配对显著性检验判定（如 McNemar 检验，α 预注册）。
-3. **总成本比较**：技能方案总成本（检索 + 推理）< 无技能基线总成本（预注册裕度 δ）——判据层成立；开销占比仅作诊断指标。这是"效率"的测量，且要求"学习加速"在总计算预算上定义，而非孤立准确率。
+1. **Post-reuse performance improvement**: difference in success rate between a control group (no skill) and an experimental group (with skill) on the same problem set. Multiple tests; report mean ± CI (seeds ≥ 5, effect size ≥ pre-registered threshold). This measures "reliability": a single hit does not count; reproducible multiple hits do; if cross-situation validity must also be verified, the test set should include situation variants.
+2. **Transfer-distance gradient d\***: stratify the test set by "replacement distance from the training distribution"; the distance at which accuracy falls below the random baseline = the failure distance — the skill's "radius of activity." This is the continuous measure of "out-of-distribution effectiveness": not satisfied with "can/cannot," it measures "how far." **Convention**: the distance metric is defined by the task domain (e.g., compositional feature replacement: a gradient from replacing 1 feature to replacing all); "below baseline" is judged by a paired significance test (e.g., McNemar, α pre-registered).
+3. **Total-cost comparison**: total cost of the skill solution (retrieval + inference) < total cost of the no-skill baseline (pre-registered margin δ) — the criterion layer holds; the overhead share is a diagnostic indicator only. This measures "efficiency," and requires that "learning acceleration" be defined on the total compute budget, not on isolated accuracy.
 
-## 7. 对蒸馏方案选择的影响
+## 7. Implications for distillation-scheme selection
 
-定义落地后，方案排序获得理论基础：
+With the definition in place, scheme ranking gains a theoretical basis:
 
-| 方案 | 机制 | 判定 |
+| Scheme | Mechanism | Verdict |
 |------|------|------|
-| A 规则蒸馏（if-then） | 把行为倾向翻译成显式规则 | **构成层失败**：翻译损失不可言说部分；判据层取决于规则是否改变行为 |
-| B 向量蒸馏 | 行为倾向的向量表示 | 构成层可能成立，但缺调用机制（存了不会用——判据层未挂载） |
-| C LLM 辅助（自写 skill） | 显式文本描述 | **判据层取决于是否改变行为**：curated 描述在 SkillsBench 中通过；self-generated 描述实证失败（未改变行为）[13] |
-| **D 权重侧（经验经训练进权重）** | 经验通过梯度更新改变行为倾向 | **与判据层天然契合**：构成层完整（习得 + 自动化 + 迁移），判据层可直接测 |
+| A rule distillation (if-then) | Translate the behavioral disposition into explicit rules | **Constitution layer fails**: translation loses the ineffable part; criterion layer depends on whether the rules change behavior |
+| B vector distillation | Vector representation of the behavioral disposition | Constitution layer may hold, but lacks an invocation mechanism (stored but not used — criterion layer not mounted) |
+| C LLM-assisted (self-written skills) | Explicit text description | **Criterion layer depends on whether behavior changes**: curated descriptions pass in SkillsBench; self-generated descriptions fail empirically (no behavioral change) [13] |
+| **D weight-side (experience into weights via training)** | Experience changes the behavioral disposition through gradient updates | **Naturally fits the criterion layer**: constitution layer complete (acquisition + automatization + transfer), criterion layer directly measurable |
 
-推论：**翻译范式未被定义层面排除**（curated 文本技能可通过判据层），但其**自动生成**路径当前实证失败；**重演范式（经验经训练改变行为）是当前实证支持的路径**——与 Dreyfus"专家不可言说"、与 SkillsBench 的 self-generated 无效，三方一致。
+Corollary: **the translation paradigm is not excluded at the definition level** (curated text skills can pass the criterion layer), but its **automatic generation** path currently fails empirically; **the re-enactment paradigm (experience changes behavior through training) is the currently evidence-supported path** — consistent with Dreyfus's "expert ineffability" and SkillsBench's self-generated null, three-way agreement.
 
-## 8. 边界与开放问题
+## 8. Boundaries and open questions
 
-1. **技能粒度**：本定义不规定"一个技能"的边界——技能可嵌套、可组合（技能调用技能）。粒度问题留给具体任务域。
-2. **自动化的程度**：效率限定只要求"显著优于暴力"，不要求"不占注意力"（人类自动化的完全形态）。Fitts & Posner 的第三阶段是充分条件，非必要条件。
-3. **群体技能**：本定义面向单体系统；群体/涌现技能（多系统协作）超出当前范围。
-4. **情绪/价值维度**：技能定义不含情感/动机维度——"愿意用"与"会用"分离（后者是价值层问题）。
-5. **可证伪性**：本定义若在实验中不可操作，修正权在判据层（行为可测性优先）——定义不是教条，是可检验的工具。
-6. **习得性如何判定**：行为倾向必须能通过训练过程获得或改变（干预测试）？——构成层的开放问题：形成特征是否应反作用于判据（若一个行为倾向无法通过任何训练过程获得，它还算技能吗？）
+1. **Skill granularity**: this definition does not fix the boundary of "one skill" — skills can nest and compose (skills calling skills). Granularity is left to the concrete task domain.
+2. **Degree of automatization**: the efficiency qualification only requires "significantly better than brute force," not "attention-free" (the complete form of human automatization). Fitts & Posner's third stage is a sufficient, not necessary, condition.
+3. **Collective skills**: this definition targets single systems; collective/emergent skills (multi-system collaboration) are out of scope.
+4. **Affect/value dimensions**: the definition contains no affective/motivational dimension — "willing to use" is separated from "able to use" (the former is a value-layer question).
+5. **Falsifiability**: if this definition proves inoperable in experiments, the right to amend lies with the criterion layer (behavioral measurability first) — the definition is not dogma but a testable tool.
+6. **How to judge acquisition**: must a behavioral disposition be obtainable or modifiable through a training process (intervention test)? — an open question in the constitution layer: should formation features feed back into the criteria (if a behavioral disposition cannot be acquired through any training process, is it still a skill?)
 
-## 9. 结论
+## 9. Conclusion
 
-技能社区需要一个可检验的定义。本文提出的操作定义——以行为为判据层、以学习特征为构成层——把"是不是技能"和"怎么获得技能"分开回答，使技能研究可以像其他实证领域一样预注册、对照、证伪。定义本身也是可证伪的：如果判据层三件套在具体任务域中无法区分技能与非技能，定义需要修正；但修正的方向应该是行为可测性优先，而不是回到不可言说。
+The skill community needs a testable definition. The operational definition proposed here — behavior as the criterion layer, learning characteristics as the constitution layer — separates "is it a skill" from "how is a skill acquired," enabling skill research to be pre-registered, controlled, and falsified like other empirical fields. The definition itself is falsifiable: if the criterion-layer triplet cannot distinguish skills from non-skills in a concrete task domain, the definition must be revised; but the revision direction should prioritize behavioral measurability, not a return to the ineffable.
 
-**技能是什么？看它做了什么，不看它长什么样。**
+**What is a skill? Look at what it does, not what it looks like.**
 
 ---
 
-## 参考文献
+## References
 
 1. Li, Z., & Hoiem, D. (2017). Learning without Forgetting. *ECCV*.
 2. Rebuffi, S.-A., Kolesnikov, A., Sperl, G., & Lampert, C. H. (2017). iCaRL: Incremental Classifier and Representation Learning. *CVPR*.
 3. Buzzega, P., Boschini, M., Porrello, A., Abati, D., & Calderara, S. (2020). Dark Experience for General Continual Learning: a Strong, Simple Baseline. *NeurIPS*.
 4. Tadros, T., Krishnan, G. P., Ramyaa, R., & Bazhenov, M. (2022). Sleep-like unsupervised replay reduces catastrophic forgetting in artificial neural networks. *Nature Communications*, 13, 7742.
 5. Shin, H., Lee, J. K., Kim, J., & Kim, J. (2017). Continual Learning with Deep Generative Replay. *NeurIPS*.
-6. Ryle, G. (1949). *The Concept of Mind*. Hutchinson. （knowing-how 与行为倾向的哲学源头；当代批评见 Stanley & Williamson, 2001, *Journal of Philosophy*）
+6. Ryle, G. (1949). *The Concept of Mind*. Hutchinson. (Philosophical origin of knowing-how and behavioral disposition; contemporary critique in Stanley & Williamson, 2001, *Journal of Philosophy*)
 7. Dreyfus, S. E., & Dreyfus, H. L. (1980). *A Five-Stage Model of the Mental Activities Involved in Directed Skill Acquisition*. ORC 80-2, University of California, Berkeley.
-8. Anderson, J. R. (1983). *The Architecture of Cognition*. Harvard University Press. （ACT-R）
+8. Anderson, J. R. (1983). *The Architecture of Cognition*. Harvard University Press. (ACT-R)
 9. Anderson, J. R., & Fincham, J. M. (1994). Acquisition of procedural skills from examples. *Journal of Experimental Psychology: Learning, Memory, and Cognition*.
-10. Gobet, F., & Chassy, P. (2009). Expertise and intuition: A tale of three theories. *Minds and Machines*, 19(2), 151-180. （对"专家不可言说"的批评）
-11. Fitts, P. M., & Posner, M. I. (1967). *Human Performance*. Brooks/Cole. （三阶段模型）
-12. Sutton, R. S., Precup, D., & Singh, S. (1999). Between MDPs and semi-MDPs: A framework for temporal abstraction in reinforcement learning. *Artificial Intelligence*, 112(1-2), 181-211. （options）
+10. Gobet, F., & Chassy, P. (2009). Expertise and intuition: A tale of three theories. *Minds and Machines*, 19(2), 151-180. (Critique of "expert ineffability")
+11. Fitts, P. M., & Posner, M. I. (1967). *Human Performance*. Brooks/Cole. (Three-stage model)
+12. Sutton, R. S., Precup, D., & Singh, S. (1999). Between MDPs and semi-MDPs: A framework for temporal abstraction in reinforcement learning. *Artificial Intelligence*, 112(1-2), 181-211. (options)
 13. Li, X., et al. (2026). SkillsBench: Benchmarking How Well Agent Skills Work Across Diverse Tasks. arXiv:2602.12670.
-14. Lumen (2026). *AGI 实验方案*（未发表实验记录）。https://github.com/QiongZhiS/continual-learning-mechanisms
+14. Lumen (2026). *AGI Experiment Proposal* (unpublished experiment records). https://github.com/QiongZhiS/continual-learning-mechanisms
 
 ---
 
-## 附：方法与致谢
+## Appendix: methods and acknowledgments
 
-- 定义核心（行为倾向、解决问题能力）由作者提出，形式化（限定、判据/构成分层、测量协议）与文献对照在 AI 辅助下完成；定义已在作者的开源实验（见 [14]：经验蒸馏实验）中作为判据基础。
-- 欢迎证伪与批评。联系：https://github.com/QiongZhiS/continual-learning-mechanisms
+- The core of the definition (behavioral disposition, problem-solving ability) was proposed by the author; formalization (qualifications, criterion/constitution layering, measurement protocol) and literature comparison were completed with AI assistance; the definition already serves as the criterion basis in the author's open experiments (see [14]: the experience-distillation experiment).
+- Falsification and critique are welcome. Contact: https://github.com/QiongZhiS/continual-learning-mechanisms

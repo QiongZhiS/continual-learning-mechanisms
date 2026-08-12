@@ -1,389 +1,388 @@
-# AGI当前范式 实验方案：学习机制能否产生持续学习——可证伪验证
+# AGI Current-Paradigm Experiment Proposal: Can Learning Mechanisms Produce Continual Learning — A Falsifiable Test
 
-> 定位：**不是建造 AGI 的蓝图，是验证"学习机制能否产生持续学习"的可证伪实验。**
-> 任何结论都必须落在预注册的有限窗口内；证伪同样是有效科学产出。
-
----
-
-## 0. 摘要
-
-**问题**：当前深度学习范式的学习曲线斜率主要由**规模**决定（放大模型、数据、算力），而非**学习机制**（如何组织探索、记忆、经验复用）。本实验在 7M 参数微模型上，以完全可负担的计算预算，检验一个二分假设：**在同等计算预算下，带完整学习机制的系统能否在跨域任务序列上表现出"持续学习"（加速 + 抗遗忘 + 无重训），而普通微调范式结构性失败。**
-
-**方法**：训练潜在状态迭代递归模型（TRM，~7M 参数，单张消费级 GPU 可跑），在四个训练域（逻辑谜题 → 符号规则 → 特征组合 → 离散博弈）上逐一验证五个学习机制组件（并行探索 / 惊喜记忆 / 经验蒸馏 / 向量组合 / 反事实因果），再以预注册的 7 域序列做三臂对照综合检验。
-
-**判据**：持续学习签名 = 迁移加速（T(n) ≤ 0.5 且非增）+ 保持率（前域知识不崩塌）+ 连续性（全程单权重、无重训），且显著优于预算匹配的普通微调臂。
+> Positioning: **not a blueprint for building AGI, but a falsifiable experiment testing whether "learning mechanisms" can produce continual learning.**
+> All conclusions must land within a pre-registered finite window; falsification is equally valid scientific output.
 
 ---
 
-## 实验编号索引
+## 0. Abstract
 
-本文使用预注册实验编号（E0-E9）与里程碑编号（M0-M5），含义如下：
+**Problem**: the learning-curve slope of the current deep learning paradigm is determined mainly by **scale** (bigger models, more data, more compute), not by **learning mechanisms** (how exploration, memory, and experience reuse are organized). This experiment uses ~7M-parameter micro-models at a fully affordable compute budget to test a binary hypothesis: **under matched compute budgets, can a system with complete learning mechanisms exhibit "continual learning" (acceleration + retention + no retraining) on a cross-domain task sequence, where the plain fine-tuning paradigm structurally fails?**
 
-| 编号 | 实验/里程碑 | 一句话 |
+**Method**: train a latent-state iterative recurrent model (TRM, ~7M parameters, runs on a single consumer GPU); validate five learning-mechanism components (parallel exploration / surprise memory / experience distillation / vector composition / counterfactual causality) one by one on four training domains (logic puzzles → symbolic rules → feature composition → discrete games); then run a pre-registered 7-domain sequence in a three-arm controlled comprehensive test.
+
+**Criterion**: continual-learning signature = transfer acceleration (T(n) ≤ 0.5 and non-increasing) + retention (no collapse of previous-domain knowledge) + continuity (single weight set, no retraining), significantly better than a budget-matched plain fine-tuning arm.
+
+---
+
+## Experiment-number index
+
+This document uses pre-registered experiment numbers (E0–E9) and milestone numbers (M0–M5):
+
+| Number | Experiment / milestone | One-liner |
 |------|------------|--------|
-| **E0** | 底座 | TRM 基线与并行展开增益复现 |
-| **E1** | 探索机制（核心①） | 并行展开 + 质量选择 + 失败轨迹共享能否提升求解 |
-| **E2** | 记忆写入（确认实验） | 惊喜触发写入提升跨任务保持 |
-| **E3** | 经验蒸馏（核心②） | 情景经验 → 可复用技能的提取（A-E 五方案对照） |
-| **E4** | 组合泛化（向量加法） | 新实体 = 已知特征加权和 |
-| **E5** | 因果层（反事实干预） | 反事实干预 > 纯预测校准世界模型 |
-| **E6** | 综合验证（AGI 指纹） | N 域序列持续学习签名（加速+保持+连续） |
-| **E7** | 交互效应测量 | 模块组合超加性检测 |
-| **E8** | 候选机制 | 不占关键路径的探索性实验 |
-| **E9** | 自我认知轨道（独立） | 训练一个认识自己的持续更新模型 |
-| **M0** | 底座复现里程碑 | E0 + 可行性验证（含域序列生成器） |
-| **M1** | 探索机制里程碑 | E1 判据检验（K 扩展在符号域是否成立） |
-| **M2** | 记忆与组合里程碑 | E2 保持率 + E4 组合泛化判据 |
-| **M3** | 蒸馏里程碑 | E3 判据检验（T(n) 是否下降） |
-| **M4** | 综合里程碑 | E5 因果 + E6a/E6b 序列 + E7 交互效应判据 |
-| **M5** | 真实域放大（长期轨道） | 最优配置迁移到文本/工具域 |
+| **E0** | Base | Reproduce TRM baseline and parallel-expansion gain |
+| **E1** | Exploration mechanism (core mechanism 1) | Does parallel expansion + quality selection + failed-trajectory sharing improve solving? |
+| **E2** | Memory writing (confirmation) | Does surprise-triggered writing improve cross-task retention? |
+| **E3** | Experience distillation (core mechanism 2) | Extraction of reusable skills from episodic experience (five plans A–E compared) |
+| **E4** | Compositional generalization (vector addition) | New entity = weighted sum of known features |
+| **E5** | Causal layer (counterfactual intervention) | Counterfactual intervention > pure prediction for world-model calibration |
+| **E6** | Comprehensive validation (AGI fingerprint) | Continual-learning signature on an N-domain sequence (acceleration + retention + continuity) |
+| **E7** | Interaction-effect measurement | Super-additivity detection for module combinations |
+| **E8** | Candidate mechanisms | Exploratory experiments off the critical path |
+| **E9** | Self-cognition track (independent) | Train a continuously updated model that knows itself |
+| **M0** | Base-reproduction milestone | E0 + feasibility validation (incl. domain-sequence generator) |
+| **M1** | Exploration-mechanism milestone | E1 criterion test (does K-expansion hold in the symbolic domain?) |
+| **M2** | Memory & composition milestone | E2 retention + E4 compositional-generalization criteria |
+| **M3** | Distillation milestone | E3 criterion test (does T(n) decrease?) |
+| **M4** | Comprehensive milestone | E5 causality + E6a/E6b sequence + E7 interaction criteria |
+| **M5** | Real-domain scaling (long-term track) | Transfer the best configuration to text/tool domains |
 
-带后缀的编号（E0b/E0d/E2b/E6a/E7b 等）为同一实验的变体臂（扰动扫描/结构生长/衰减曲线/E6a 三臂序列对照/免疫中和）。里程碑与实验的映射见 §7。
-
----
-
-## 1. 定位声明
-
-- **实验目标** = 验证机制（学习曲线加速是否出现），不是建造产品
-- **起点决策** = 从训练微型递归模型（~7M 参数）开始——训练过程本身就是学习机制的观察窗口；推理成本 ≈ 0.001$/次；全因子实验设计在经济上可行
-- **成功定义** = 持续学习签名在预注册窗口（N 域序列）内出现，或明确证伪
-- **终极判据** = 持续学习签名 + 组合泛化（鸭嘴兽测试）
-
-### 物理边界声明
-
-本实验在数字硬件 + 梯度下降上验证学习机制的**调度/抽象层**（经验→技能的提取与复用能否产生迁移衰减），**不声称实现生物级"推理即塑形"**（毫秒级局部可塑性）或存算一体——那需要神经形态硬件，超出本实验范围。实验中的"夜间微调"等设计（见 §6 E3 方案 D）是更高频离线增量学习的**工程近似**（调度语义），不是物理实现。
-
-### 不可证明性声明
-
-"持续学习" = 同一系统在**无界**域序列上持续积累能力，是无穷序列上的性质——任何有限实验只能**证伪**（预注册窗口内出现退化），**不能证明**（窗口内通过 ≠ 任意长序列成立，与"AGI 指纹"问题同构）。因此持续学习定位为**目标（北极星）**而非可证明命题。本实验的科学产出限定为三件：
-
-1. 预注册窗口（N 个域）内持续学习签名的检验结果——**可证伪**
-2. 窗口内加速稳定时，T(n) 曲线外推作为**预测**单独报告（不冒充结论，标注外推区间）
-3. 退化模式分类（遗忘型/停滞型）——即便证伪，也产出"持续学习在何处断裂"的机制信息
-
-**"不能证明"是判据设计的约束**：一切判据必须落在可证伪窗口内，外推只作预测附注。
+Suffixed numbers (E0b/E0d/E2b/E6a/E7b, etc.) are variant arms of the same experiment (perturbation sweep / structure growth / decay curve / E6a three-arm sequence control / immune neutralization). Milestone-to-experiment mapping: see §7.
 
 ---
 
-## 2. 范式背景与外部证据
+## 1. Positioning statement
 
-### 2.1 范式转换假设
+- **Experiment goal** = validate a mechanism (does learning-curve acceleration appear), not build a product
+- **Starting decision** = begin with training a micro recurrent model (~7M parameters) — the training process itself is the observation window into learning mechanisms; inference cost ≈ $0.001/query; full-factorial experimental design is economically feasible
+- **Success definition** = the continual-learning signature appears within the pre-registered window (N-domain sequence), or is clearly falsified
+- **Ultimate criterion** = continual-learning signature + compositional generalization (platypus test)
 
-本实验验证的不仅是"学习机制能否产生持续学习"，而是**范式转换（静态优化 → 动态博弈）的微观条件**。主流范式的五条底层假设正在断裂：
+### Physical-boundary statement
 
-| 底层假设 | 断裂方向 | 跨域已有答案 | 本实验落点 |
+This experiment validates the **scheduling/abstraction layer** of learning mechanisms on digital hardware + gradient descent (can experience→skill extraction and reuse produce transfer decay); it does **not claim biological-level "reasoning-as-plasticity"** (millisecond-scale local plasticity) or compute-in-memory — those require neuromorphic hardware and are out of scope. Designs such as "nightly fine-tuning" (see §6 E3, plan D) are **engineering approximations** (scheduling semantics) of higher-frequency offline incremental learning, not physical implementations.
+
+### Non-provability statement
+
+"Continual learning" = the same system accumulating capability over an **unbounded** domain sequence, a property over infinite sequences — any finite experiment can only **falsify** (degeneration within the pre-registered window), never **prove** (passing within the window ≠ holding for arbitrary-length sequences; isomorphic to the "AGI fingerprint" problem). Continual learning is therefore positioned as a **goal (north star)** rather than a provable proposition. The scientific output of this experiment is limited to three items:
+
+1. The test result of the continual-learning signature within the pre-registered window (N domains) — **falsifiable**
+2. When in-window acceleration is stable, T(n)-curve extrapolation reported separately as a **prediction** (not masquerading as a conclusion; extrapolation interval labeled)
+3. Degradation-mode taxonomy (forgetting-type / stagnation-type) — even under falsification, this produces mechanistic information about "where continual learning breaks"
+
+**"Cannot prove" is a constraint on criterion design**: all criteria must land within the falsifiable window; extrapolation is only an appendix note.
+
+---
+
+## 2. Paradigm background and external evidence
+
+### 2.1 Paradigm-shift hypothesis
+
+This experiment tests not only "can learning mechanisms produce continual learning," but the **micro-conditions of a paradigm shift (static optimization → dynamic game)**. Five bottom-level assumptions of the mainstream paradigm are breaking:
+
+| Bottom-level assumption | Break direction | Existing answers across fields | This experiment's landing point |
 |---------|---------|------------|-----------|
-| 可微分 | 光滑 → 离散混合 | AlphaZero MCTS+NN / MoE 离散路由 | E1 并行展开（离散搜索）+ TRM 底座（可微） |
-| 静态（训练/推理分离） | 离线 → 在线 | 自适应控制：卡尔曼/RLS + 持续激励定理 | E3 方案 D 夜间微调（在线化第一步）、E0b 在线扰动 |
-| 单目标 | 优化 → 均衡 | 机制设计：支付矩阵而非标量 reward | E7b 免疫中和仲裁（候选） |
-| 单主体 | 个体 → 生态 | 免疫负选择 + 红皇后假说 | E0d 结构生长、E1b 流浪者保留（候选） |
-| 记忆无限 | 存储 → 失真分配 | 率失真理论：遗忘 = 最优失真分配 | E2b 衰减曲线 |
-| 认知（自我模型） | 被动 → 主动 | 主动推理/预测编码 | E9 自我认知轨道（候选） |
+| Differentiability | smooth → discrete hybrid | AlphaZero MCTS+NN / MoE discrete routing | E1 parallel expansion (discrete search) + TRM base (differentiable) |
+| Static (train/inference separation) | offline → online | Adaptive control: Kalman/RLS + persistence-of-excitation theorem | E3 plan D nightly fine-tuning (first online step), E0b online perturbation |
+| Single objective | optimization → equilibrium | Mechanism design: payoff matrices instead of scalar reward | E7b immune neutralization arbitration (candidate) |
+| Single agent | individual → ecology | Immune negative selection + Red Queen hypothesis | E0d structure growth, E1b wanderer retention (candidates) |
+| Infinite memory | storage → lossy allocation | Rate-distortion theory: forgetting = optimal lossy allocation | E2b decay curves |
+| Cognition (self-model) | passive → active | Active inference / predictive coding | E9 self-cognition track (candidate) |
 
-**首要突破口判断**：先拆除训练/推理分离。理由：可微-离散混合架构已存在；控制论提供在线更新的现成数学；QLoRA/夜间微调已工程可行——E3 方案 D 为第一步。
+**Primary-breakthrough judgment**: dismantle the train/inference separation first. Reasons: differentiable-discrete hybrid architectures already exist; control theory provides ready-made mathematics for online updates; QLoRA/nightly fine-tuning is already engineering-feasible — E3 plan D is the first step.
 
-**库恩式判据**：学习在线化后，"灾难性遗忘"从待攻克难题被重定义为"控制器稳定性问题"——问题域重定义 = 范式转换的特征信号。
+**Kuhnian criterion**: once learning is online, "catastrophic forgetting" is redefined from a hard problem to be solved into a "controller stability problem" — problem-domain redefinition is the signature signal of a paradigm shift.
 
-### 2.2 外部证据链
+### 2.2 External evidence chain
 
-**RLM（递归语言模型，MIT，2026-08）**：用 30B 模型做强化学习训练。同一底座、同一数据、同一算法，唯一变量 = Harness（模型外部的程序层）的 context 组织方式。裸模型训练奖励更高但长任务评测平线（泛化为零）；RLM 套 Harness——训练用 64k token，评测拉到 2M（32 倍），成绩跟着训练奖励同步涨。**同一模型，泛化差距 8-32 倍，区别只在"模型外面的那层程序"。**
+**RLM (Recursive Language Model, MIT, 2026-08)**: RL training on a 30B model. Same base, same data, same algorithm; the only variable = the context organization of the Harness (the program layer outside the model). The bare model trains with higher reward but flatlines on long-task evaluation (zero generalization); with the Harness — 64k-token training context, evaluation stretched to 2M (32×) — scores rise with training reward. **The same model, 8–32× generalization gap, the only difference being "the program layer outside the model."**
 
-与本实验的映射：
-- RLM 的"局部分布内" ↔ 域切换协议的边界感知重定向——实质都是"不让模型在不确定的分布外硬推"
-- RLM 的"等价类折叠"（解法相同的任务折叠成同一条轨迹）↔ E6a 的域序列迁移梯度——如果 T(n) 非增，等价于调度层发现了不同域间的等价结构
-- RLM 的"捷径→自我丢弃→泛化更好" ↔ E1 的设计意图：丢弃域特定捷径、保留域通用能力（待 E1 检验）——域特定的东西没学到，域通用的东西自己在涨，同一个机制在两个尺度独立观测
-- RLM 的局限（任务天生可切块、结论出自 30B）↔ 本实验的补位（博弈域测"子问题咬合紧"的场景、7M 底座提供"底座极致弱"的对照）
+Mapping to this experiment:
+- RLM's "local in-distribution" ↔ the boundary-aware redirection of the domain-switch protocol — both are "don't force inference outside the uncertain distribution"
+- RLM's "equivalence-class folding" (tasks with identical solutions folded into one trajectory) ↔ E6a's domain-sequence transfer gradient — if T(n) is non-increasing, the scheduling layer has found equivalent structure across domains
+- RLM's "shortcut → self-discarding → better generalization" ↔ E1's design intent: discard domain-specific shortcuts, retain domain-general capability (to be tested by E1) — domain-specific things were not learned, domain-general things grew by themselves; the same mechanism observed independently at two scales
+- RLM's limitations (tasks inherently chunkable, conclusions from 30B) ↔ this experiment's complement (game domain tests "tightly interlocking subproblems"; the 7M base provides an "extremely weak base" control)
 
-**脑科学交叉**：MIT 失语症研究（推理不需语言区）+ 逆向模型研究（噪声+逆向模型=结构化探索）+ 幽灵点（鞍结分岔临界点附近的滞留区，学习是分岔现象）+ 睡眠相变（去稳定化-重新稳定）——全部指向同一结论：**智能的底层是动力学 + 结构化探索 + 双模记忆 + 临界切换，语言和动作是后来的乘客。**（各方向出处见 §10 脑科学交叉条目）
+**Brain-science cross-reference**: MIT aphasia research (reasoning does not require language areas) + inverse-model research (noise + inverse model = structured exploration) + ghost points (stagnation near the critical point of a saddle-node bifurcation; learning is a bifurcation phenomenon) + sleep phase transitions (destabilization–restabilization) — all point to the same conclusion: **intelligence is bottom-up dynamics + structured exploration + dual-mode memory + critical switching; language and action are later passengers.** (Sources per direction: see the §10 brain-science cross-reference entry)
 
 ---
 
-## 3. 假设体系
+## 3. Hypothesis system
 
-### H0（零假设）：现有范式（无状态 + 缩放 + 上下文学习）足以产生 AGI
+### H0 (null): the current paradigm (stateless + scaling + in-context learning) suffices for AGI
 
-可证伪表述：既有范式（上下文学习 + 普通微调 + 检索）在**同等计算预算**下，达到与机制系统相同的持续学习签名（加速 + 保持 + 单权重连续）。
+Falsifiable statement: the existing paradigm (in-context learning + plain fine-tuning + retrieval), at **matched compute budget**, achieves the same continual-learning signature (acceleration + retention + single-weight continuity) as the mechanism system.
 
-预测：机制系统在域序列上的持续学习签名**不优于**预算匹配的普通微调对照。经典灾难性遗忘（McCloskey & Cohen 1989）先验：普通微调应在序列后段保持率崩塌——**若普通微调不崩塌且追平机制系统，才是真正的 H0 支持**（"任何学习都能持续学习"比"所有学习都遗忘"更反直觉，需更强证据）。
+Prediction: the mechanism system's continual-learning signature on the domain sequence is **not better than** the budget-matched plain fine-tuning control. Classical catastrophic-forgetting prior (McCloskey & Cohen 1989): plain fine-tuning should collapse in retention at the tail of the sequence — **if plain fine-tuning does not collapse and catches up with the mechanism system, that is the true H0 support** ("any learning can continually learn" is more counterintuitive than "all learning forgets" and requires stronger evidence).
 
-若 H0 成立 → 继续缩放/微调即可，本实验架构无价值。
+If H0 holds → continued scaling/fine-tuning suffices; this experiment's architecture has no value.
 
-### H1（备择假设）：学习曲线斜率取决于学习机制，而非规模
+### H1 (alternative): the learning-curve slope depends on learning mechanisms, not scale
 
-学习机制 = 五个组件的耦合：**并行探索 + 惊喜记忆 + 经验蒸馏 + 向量组合 + 反事实因果**。
+Learning mechanisms = the coupling of five components: **parallel exploration + surprise memory + experience distillation + vector composition + counterfactual causality**.
 
-H1 分两个抽象层级，实验分别测量：
-- **H1a（调度策略层）**：在固定权重底座上，信息流管理策略（探索/记忆/蒸馏/组合/因果）能否产生持续学习——**本实验的主验证对象，在数字硬件上可直接测量**
-- **H1b（机制本体层）**：权重持续重塑（在线可塑性）本身是否必要——由 E0b 扰动强度扫描 + E0d 结构生长轨道间接测量
+H1 is split into two abstraction levels, measured separately:
+- **H1a (scheduling-policy layer)**: on a fixed-weight base, can information-flow management policies (exploration/memory/distillation/composition/causality) produce continual learning — **the main validation target of this experiment, directly measurable on digital hardware**
+- **H1b (mechanism-substance layer)**: is continuous weight reshaping (online plasticity) itself necessary — measured indirectly via the E0b perturbation-strength sweep + E0d structure-growth track
 
-> 诚实声明：本实验能证伪/支持的是 H1a；H1b 只提供间接证据（若弱在线微扰就能胜过全部离线调度 → 机制层重要；若离线调度胜出 → 调度层在当前硬件范式下足够）。
+> Honesty statement: this experiment can falsify/support H1a; H1b provides only indirect evidence (if weak online perturbation beats all offline scheduling → the mechanism layer matters; if offline scheduling wins → the scheduling layer suffices under the current hardware paradigm).
 
-预测：带完整学习机制的系统，在跨域序列中表现出持续学习签名——(a) 加速：T(n)（域 n 达阈值所需数据 ÷ 域 1）随 n 非增且 ≤ 0.5（预注册阈值）；(b) 保持：任意前域保持率 R(n) ≥ 阈值；(c) 连续：全程单权重连续学习、无域级重训/重置；预算匹配下显著优于普通微调臂。
+Prediction: the system with complete learning mechanisms exhibits the continual-learning signature on the cross-domain sequence — (a) acceleration: T(n) (data needed by domain n to reach threshold ÷ domain 1) non-increasing in n and ≤ 0.5 (pre-registered threshold); (b) retention: retention R(n) ≥ threshold for any previous domain; (c) continuity: single-weight continuous learning throughout, no domain-level retraining/reset; significantly better than the plain fine-tuning arm at matched budget.
 
-### 关键推论（每个都是独立可证伪点）
+### Key corollaries (each an independently falsifiable point)
 
-| 推论 | 内容 | 对应实验 | 前沿锚点 |
+| Corollary | Content | Experiment | Frontier anchor |
 |------|------|---------|---------|
-| 推论 1 | 并行探索 + 质量选择在**等计算预算对照**下仍显著优于单路径确定性推理 | E1 | PTRM（上游论文，见 §10）：K=100 时 62.6%→91.2% |
-| 推论 2 | 惊喜触发写入（记忆）提升跨任务保持，但**不是**学习加速的主因 | E2 | Titans：BABILong 超 2M 上下文 |
-| 推论 3 | **经验→技能蒸馏是学习加速的瓶颈**（未知最大） | E3 | SkillsBench：curated skills +16.6pp（33.9%→50.5%）/ self-generated 无效 |
-| 推论 4 | 向量组合（新实体 = 已知特征加权和）实现组合泛化 | E4 | 脑科学：特征线性叠加（fMRI 验证） |
-| 推论 5 | 反事实干预 > 纯预测（相关性）校准世界模型 | E5 | Causal-JEPA（见 §10） |
-| 推论 6 | 综合系统在 N 域序列上持续学习：加速 + 不遗忘 + 无重训 | E6a | McCloskey & Cohen 1989：标准微调长序列灾难性遗忘 |
+| 1 | Parallel exploration + quality selection is significantly better than single-path deterministic inference even under **matched-compute control** | E1 | PTRM (upstream paper, see §10): 62.6%→91.2% at K=100 |
+| 2 | Surprise-triggered writing (memory) improves cross-task retention, but is **not** the main driver of learning acceleration | E2 | Titans: BABILong beyond 2M context |
+| 3 | **Experience→skill distillation is the bottleneck of learning acceleration** (unknown maximum) | E3 | SkillsBench: curated skills +16.6pp (33.9%→50.5%) / self-generated null |
+| 4 | Vector composition (new entity = weighted sum of known features) achieves compositional generalization | E4 | Brain science: linear feature superposition (fMRI-validated) |
+| 5 | Counterfactual intervention > pure prediction (correlation) for world-model calibration | E5 | Causal-JEPA (see §10) |
+| 6 | The integrated system continually learns over an N-domain sequence: acceleration + no forgetting + no retraining | E6a | McCloskey & Cohen 1989: catastrophic forgetting of standard fine-tuning on long sequences |
 
 ---
 
-## 4. 实验总览
+## 4. Experiment overview
 
 ```
-E0 小模型底座（TRM 训练 · 前置条件 · E0b 在线可塑性四臂 + E0d 结构生长轨道）
- ├─ E1 探索机制（核心机制 1：并行展开 + 质量选择 + 失败轨迹共享）
- ├─ E2 记忆写入（惊喜写入 开/关 + 衰减曲线）
- ├─ E3 经验蒸馏（核心机制 2：情景→技能 · A-E 五方案）
- ├─ E4 组合泛化（向量加法 · 鸭嘴兽测试）
- ├─ E5 因果层（反事实干预 开/关）
- ├─ E6 综合验证（E6a 持续学习序列三臂 = H1 判据 / E6b 人机协作 = 独立结论）
- └─ E7 交互效应测量（逐步累积 + 2×2 析因 · 归因路径）
+E0 micro-model base (TRM training · prerequisite · E0b online-plasticity four arms + E0d structure-growth track)
+ ├─ E1 exploration mechanism (core mechanism 1: parallel expansion + quality selection + failed-trajectory sharing)
+ ├─ E2 memory writing (surprise writing on/off + decay curves)
+ ├─ E3 experience distillation (core mechanism 2: episodic→skill · five plans A–E)
+ ├─ E4 compositional generalization (vector addition · platypus test)
+ ├─ E5 causal layer (counterfactual intervention on/off)
+ ├─ E6 comprehensive validation (E6a continual-learning sequence three arms = H1 criterion / E6b human-collaboration = independent conclusion)
+ └─ E7 interaction-effect measurement (stepwise accumulation + 2×2 factorial · attribution path)
 ```
 
 ---
 
-## 5. 基础设施
+## 5. Infrastructure
 
-### 5.1 底座（E0）
+### 5.1 Base (E0)
 
-- **模型**：TRM（潜在状态迭代递归模型，~7M 参数）+ PTRM 扩展（并行随机展开 + 质量选择器）
-- **硬件**：单张消费级 GPU（RTX 4060 8GB，8GB VRAM），全实验在此配置上可复现
-- **为什么是小模型**：① 训练即实验——学习机制的每个改动直接体现在训练曲线 ② 成本允许全因子实验设计 ③ 潜在空间动力学可观测（好/坏吸引盆可视化）
+- **Model**: TRM (latent-state iterative recurrent model, ~7M parameters) + PTRM extension (parallel stochastic expansion + quality selector)
+- **Hardware**: single consumer GPU (RTX 4060 8GB, 8GB VRAM); the full experiment is reproducible on this configuration
+- **Why small models**: ① training is the experiment — every change to a learning mechanism shows directly in the training curve ② cost allows full-factorial experimental design ③ latent-space dynamics are observable (good/bad basin visualization)
 
-### 5.2 训练域
+### 5.2 Training domains
 
-| 域族 | 内容 | 测试的能力 | 复杂度梯度 |
+| Domain family | Content | Capability tested | Complexity gradient |
 |------|------|-----------|-----------|
-| A 谜题域 | 数独/逻辑谜题 | 推理 + 探索机制 | 低 |
-| B 符号域 | 伪编程语言（不同语法/语义） | 规则学习 + 组合 | 中 |
-| C 组合域 | 特征→实体推断（颜色×动物→坐标） | **组合泛化（鸭嘴兽测试）** | 中 |
-| D 博弈域 | 离散状态博弈（囚徒困境/公共品/信号博弈） | 社会预测/策略推断 | 高 |
+| A puzzle | Sudoku/logic puzzles | Reasoning + exploration mechanism | low |
+| B symbolic | Pseudo-programming language (different syntax/semantics) | Rule learning + composition | medium |
+| C compositional | Feature→entity inference (color×animal→coordinates) | **Compositional generalization (platypus test)** | medium |
+| D game | Discrete-state games (prisoner's dilemma / public goods / signaling games) | Social prediction / strategy inference | high |
 
-域 D 设计为纯离散状态博弈：输入输出格式与前三域完全一致（状态向量 → 动作），无外部 LLM 接口——避免接口适配器引入额外工程复杂度，也避免设计者先验注入污染"纯系统自主"判据。域 D 的具体实例（对手策略、回合数、收益矩阵、观测结构）随预注册附录锁定。
+Domain D is designed as a purely discrete-state game: input/output format identical to the first three domains (state vector → action), no external LLM interface — avoiding extra engineering complexity from interface adapters and preventing designer-prior injection from polluting the "pure-system autonomy" criterion. Domain D's concrete instances (opponent strategies, round counts, payoff matrices, observation structure) are locked in a pre-registration appendix.
 
-**域切换协议（边界感知路由）**：域间切换时，若系统对"当前处于哪个域/规则集"置信度低（<阈值，阈值随预注册冻结），**主动请求人类重定向**而非硬解——人类回答作为高权重修正信号进记忆。理由：把"不知道自己在哪"的探测成本转嫁给人类的直觉（不对称互补）。
+**Domain-switch protocol (boundary-aware routing)**: when switching domains, if the system's confidence about "which domain/rule set it is in" is low (< threshold, threshold frozen at pre-registration), it **actively requests human redirection** instead of forcing a solution — the human answer enters memory as a high-weight correction signal. Rationale: shift the detection cost of "not knowing where it is" onto human intuition (asymmetric complementarity).
 
-**双轨道隔离**：域切换协议的重定向开关在 E1-E5 全程**双轨道独立运行**——轨道 1（重定向开 → 输入 E6b）；轨道 2（重定向关，边界模糊时硬解 → 输入 E6a）。防止训练-测试分布不匹配：若只在带重定向下积累经验却在无重定向下测试，E6a 失败将无法区分"机制不够强"与"从未学会无辅助硬解"。
+**Dual-track isolation**: the redirection switch of the domain-switch protocol runs on **two independent tracks** throughout E1–E5 — track 1 (redirection on → feeds E6b); track 2 (redirection off, force-solving at blurred boundaries → feeds E6a). This prevents train/test distribution mismatch: if experience is accumulated only with redirection but tested without it, an E6a failure could not distinguish "mechanism not strong enough" from "never learned unassisted force-solving."
 
-### 5.3 评估指标
+### 5.3 Evaluation metrics
 
-| 指标 | 定义 | 用途 |
+| Metric | Definition | Purpose |
 |------|------|------|
-| 域内学习曲线 | 训练步数 → 准确率 | 每域学习速度 |
-| 迁移系数 T(n) | 域 n 达阈值所需数据 ÷ 域 1 | 核心判据（持续学习·加速分量） |
-| 保持率矩阵 R(i,j) | 学完域 j 后测域 i 保持率（下三角 = 遗忘模式） | 核心判据（持续学习·保持分量） |
-| 吸引盆逃逸率 | 坏吸引盆中跳出成功率 | E1 判据 |
-| 蒸馏产物质量 | 技能库命中率 + 复用后性能提升 | E3 判据 |
-| 组合泛化准确率 | 未见组合的推断正确率（鸭嘴兽测试） | E4 判据 |
-| 自主发现规律 | 行为探针 + 规则匹配评分 + 随机基线对照 | E6a 判据 |
+| In-domain learning curve | training steps → accuracy | learning speed per domain |
+| Transfer coefficient T(n) | data needed by domain n to reach threshold ÷ domain 1 | core criterion (continual learning · acceleration component) |
+| Retention matrix R(i,j) | retention of domain i after learning domain j (lower triangle = forgetting pattern) | core criterion (continual learning · retention component) |
+| Basin-escape rate | success rate of escaping bad basins | E1 criterion |
+| Distillation product quality | skill-library hit rate + post-reuse performance gain | E3 criterion |
+| Compositional-generalization accuracy | inference accuracy on unseen combinations (platypus test) | E4 criterion |
+| Autonomous rule discovery | behavioral probe + rule-matching score + random-baseline control | E6a criterion |
 
-### 5.4 统计规范与预注册
+### 5.4 Statistical norms and pre-registration
 
-7M 模型 + 少域少样本下噪声主导，单次运行即可误判 H1 生死，"显著"必须有统计契约：
+With a 7M model and few domains/samples, noise dominates; a single run can misjudge H1's fate, so "significant" requires a statistical contract:
 
-- **种子数**：每个实验条件 ≥ 5 个随机种子，报告 mean ± CI，不做单次运行结论
-- **效应量**："显著优于" = 效应量 ≥ 预注册阈值（默认 Cohen's d ≥ 0.8 或中位数比值 ≤ 0.5）且 CI 不含零
-- **多重比较**：E1-E7 全实验族系误差控制（默认 Bonferroni 或 Holm 校正）
-- **超参冻结**：所有机制超参只在域 A-D 上调，冻结后以有限种子跑域 E——域 E 上禁止调参，防事后挑选
-- **域序列预注册**：E6a 的域序列长度 N（默认 7）、域间相似度梯度、每域交互预算于预注册文件中锁定——"序列顺序"与"域间距离"是隐藏变量，事后调整 = 判据污染
-- **"专家水平"操作定义**：每域达标阈值 = 准确率 ≥ 域天花板 × 预注册系数（默认 0.8）。天花板 = 无机制基线模型在充裕预算 + 多配置搜索下的后验最优表现，**标定过程禁止使用任何机制组件**（防"用机制标定机制"的循环依赖）。阈值敏感性分析：系数在 0.7–0.9 范围内重复判据计算，结论须对该范围稳健才报告
-- **"自主发现规律"操作定义**：① 行为探针（输入域内未见过的实例，检查输出是否一致体现规则）+ 规则匹配程序 + 随机基线对照；② 潜在空间几何通道（规则对应聚类的空间可分性）。两通道独立评分、任一成立即通过
+- **Seed count**: ≥ 5 random seeds per experimental condition; report mean ± CI; no single-run conclusions
+- **Effect size**: "significantly better" = effect size ≥ pre-registered threshold (default Cohen's d ≥ 0.8 or median ratio ≤ 0.5) and CI excluding zero
+- **Multiple comparisons**: family-wise error control across the E1–E7 experiment family (default Bonferroni or Holm correction)
+- **Hyperparameter freezing**: all mechanism hyperparameters are tuned only on domains A–D; after freezing, domain E is run with a limited seed set — tuning on domain E is forbidden, preventing post-hoc selection
+- **Domain-sequence pre-registration**: E6a's sequence length N (default 7), inter-domain similarity gradient, and per-domain interaction budget are locked in the pre-registration file — "sequence order" and "inter-domain distance" are hidden variables; post-hoc adjustment = criterion contamination
+- **Operational definition of "expert level"**: per-domain pass threshold = accuracy ≥ domain ceiling × pre-registered coefficient (default 0.8). Ceiling = the posterior best performance of a mechanism-free baseline model under ample budget + multi-configuration search; **the calibration process is forbidden from using any mechanism component** (preventing the "calibrate mechanisms with mechanisms" circular dependency). Threshold sensitivity analysis: recompute the criterion for coefficients in 0.7–0.9; report only if the conclusion is robust over that range
+- **Operational definition of "autonomous rule discovery"**: ① behavioral probe (feed instances unseen in-domain, check whether outputs consistently reflect the rule) + rule-matching program + random-baseline control; ② latent-space geometric channel (spatial separability of rule-corresponding clusters). The two channels are scored independently; either one passing suffices
 
-### 5.5 测试环境与规模
+### 5.5 Test environment and scale
 
-- **硬件**：同 §5.1
-- **模型规模**：TRM ~7M 参数（潜在状态迭代递归模型）；逆向模型候选 ~2M 参数
-- **数据规模**：域序列 N=7（见 §5.4）
-
-
----
-
-## 6. 实验详细设计
-
-### E0 底座
-
-- 复现 TRM/PTRM：在逻辑谜题域完成训练与基线复现，K=100 并行展开验证提升可复现
-- **架构选择**：TRM 是潜在状态迭代递归模型（无自注意力）——本实验的底座选择与"注意力不是底层机制"的路线判断一致（注意力的关系绑定可用更廉价的迭代机制实现），Transformer 仅作对照参考
-- 产出：可训练的底座 + 潜在空间可视化工具（好/坏吸引盆地图）
-
-**E0b 在线权重扰动扫描（H1b 的测量载体之一）**：每次推理后对最后一层权重做就地微扰，**不固定单一量级**——做扰动强度扫描（1e-5 → 1e-1，对数间隔），绘制"扰动强度 vs 迁移增益"曲线。单点实验无法区分"强度不足"与"原理无效"，扫描消除该歧义。四个对照臂构成完整**在线可塑性光谱**：
-
-1. 无更新（基线）
-2. 随机噪声扰动（纯正则化/随机化对照）
-3. 方向扰动臂（扰动方向由惊讶信号/梯度近似驱动）
-4. **TTT 臂**：自监督目标（预测下一步潜在状态/输出）驱动的推理时有限步梯度更新，扫描更新步数（1/2/4）× 学习率（1e-5 → 1e-2）
-
-判读：仅当扰动臂相对随机臂有额外增益，才归因到"可塑性原理"；TTT 臂显著优于方向扰动臂 → 可塑性需要目标驱动；TTT 臂全区间无增益 → 在线权重更新在当前底座无价值。**成本标注**：方向信号/TTT 的额外计算计入对照；若额外计算 > 随机扰动臂的 10%，结论声明降级（原理增益 vs 预算增益不可分）。TRM 的串行迭代结构与"推理时更新"同构，是本底座上 H1b 的最强可测载体。
-
-**E0d 结构生长轨道（独立轨道 · 探索性，不进入主判据链）**：与主实验完全平行的环境——底座训练中允许**结构层变化**（按新奇度分裂单元 / 按低利用率修剪连接），测与主实验相同的持续学习判据，与主实验按预注册判据选出的配置对照。若底座可在训练中生长，E1-E7 的"固定底座 + 调度策略"主判据即被污染——故完全隔离。判据：E0d 签名显著优于主实验选定配置 → 结构层可塑性 > 调度层；反之 → 调度层在当前尺度足够。
-
-### E1 探索机制（核心机制 1）
-
-**变量**：并行展开数 K（1/10/100）+ 随机噪声注入 开/关 + 质量选择器（q-head）开/关 + 跨展开失败轨迹共享（禁忌索引）开/关。
-
-**等计算对照（推论 1 成立的必要条件）**：best-of-K 的增益与推理预算不可分——K=100 vs K=1 同时变了算法与算力。加两个对照：① 等预算采样基线（同一模型、同总推理预算的 best-of-K，无共享、无禁忌索引）② 等预算单路径基线（同预算延长搜索步数）。仅当"K 扩展 + 失败共享"显著优于①且②，推论 1 才成立——否则结论降级为"多花推理算力有效"。
-
-**失败轨迹共享**：仅并行展开 + 选择器 = 暴力并行搜索 + 样本选择——100 条轨迹独立演化，第 50 条发现的捷径不会回传给第 1-49 条。**完整版 = 并行展开 + 跨展开失败轨迹共享**：每条展开的失败轨迹簇（撞过的墙）写入共享禁忌索引，后续展开优先避开——失败信息异步回传后，才构成"带着死因重来"的认知迭代。禁忌索引与 E3 负向蒸馏复用同一组件（单一开关因子，防重复写入/权重叠加）。
-
-**M1 结果（负结果，机制已定位）**：E1 主判据在符号域失败——推理期探索对"解唯一但模型未学会"的问题结构性无效。完整结果与重设计方向见 [docs/results-m1.md](results-m1.md)。
-
-### E2 记忆写入（确认实验）
-
-- **变量**：惊喜触发写入 开/关（记住意外样本；基线写全量）
-- **测量**：跨任务保持率（训练域 A 后测域 B 时 A 的知识保持）
-- **E2b 衰减曲线**：域 A 训练完成后，间隔 1/3/7/30 天测保持率（惊喜写入 开/关），拟合"衰减时间常数 vs 写入机制"曲线；扩展为跨域保持率矩阵 R(i,j)——持续学习 vs 灾难性遗忘的直接证据，兼作 E6a 保持率判据的机制级归因（哪个机制保护哪段历史）
-- **判据**：惊喜写入在记忆容量效率上显著优于全量写入（不退化保持率）；衰减时间常数为标定类产出，无显著性门槛
-- **定位**：确认存储层已解决，不是学习加速的主战场——若通过，则存储层假设确认，E2 完成使命
-
-### E3 经验蒸馏（核心机制 2 · 最大未知数）
-
-**变量**：蒸馏机制 开/关——情景经验（样本级）→ 技能（可复用规则级）的提取器。五组方案为**独立对照试验**，每次只开一个，不叠加：
-
-- **方案 A：规则蒸馏器**（从成功轨迹提取 if-then 规则）——本质是决策树剪枝，把分布式表征压缩成符号逻辑，边界情况丢失。预期在谜题域有效、交互域退化为噪声。方案 A 定位为探索性对照（不进入主判据）
-- **方案 B：向量蒸馏器**（成功经验的表征聚合成技能向量）——需修正选择性偏差：q-head 在自选"成功"子集上聚类会收敛到"最易聚类的成功"而非"最可迁移的规则"。修正：聚类输入改为**全轨迹表征**（成功+失败），标签只用于加权
-- **方案 C：LLM 辅助蒸馏**（对照——SkillsBench 已证 LLM 自写 skill 零增益，预期失败，用于确认基线）
-- **方案 D：夜间增量微调**——白天只推理不改权重，记录高置信错误；夜间用错误记录生成训练对，对底座做离线 LoRA/Adapter 增量微调（只动最后几层），次日加载新 Adapter。人类审查环节：对比"修改前 vs 修改后"测试集差异决定保留/回滚。优势：完全绕开"推理即训练"的硬件瓶颈，保留可回滚/可审计/可见 diff。**含"相变重置"步骤**：夜间训练前对最后几层注入高斯噪声 + 短时自由探索（模拟睡眠的去稳定化→重新稳定），再收敛到新吸引盆——测加/不加噪声扰动的 T(n) 差异，若噪声后 T(n) 降低 → 连续增量微调陷在旧盆局部最优，相变重置释放了探索空间
-- **方案 E：负向蒸馏**——专门记录"导致失败的轨迹簇"（撞过的墙），写入统一禁忌索引；系统在新域探索时**优先避开**。理由：反例信息在泛化中的权重 ≥ 正例——"知道什么不能做"是独立信息通道
-
-**测量**：技能库命中率、复用后性能提升、跨域复用率、**检索开销/推理步数占比**——技能命中但匹配计算消耗 >50% 推理步数 = 无净加速；"学习加速"必须在总计算预算上定义，不在孤立准确率上。
-
-**判据**：任一方案使 T(n) 显著下降 → 推论 3 支持；全部失败 → **实验核心结论：学习机制瓶颈在蒸馏，需要新机制**。
-
-**含义**：这是整个实验的主要不确定性——前沿（SkillsBench）显示当前所有蒸馏方法都失败，如果本实验也无法解决，说明 AGI 的"学习"需要范式级突破，而非组件改进。
-
-### E4 组合泛化（向量加法）
-
-- **变量**：组合表征机制——高维特征保留（记忆侧）vs 低维压缩（行动侧）的双表征通道 vs 单一通道
-- **任务**：鸭嘴兽测试——训练期只给"颜色→X轴、动物→Y轴"的独立映射，测试期给全新组合（绿色大象），要求零次推断坐标
-- **平凡组合防线**：线性空间里"特征向量相加"是 embedding 的平凡性质——① 任务族预注册：采用**使平凡线性组合失败**的结构（非线性特征交互、组合后需新决策），或明确测线性可解版本作对照以证明任务非平凡 ② 普通基线对照：判据 = 双表征通道**显著优于通用组合能力基线**，而非只优于单轨自身
-- **组合距离梯度**：测试集按"距训练组合的替换距离"分层（替换 1 个特征 → 全部），绘制"零次推断准确率 vs 组合距离"衰减曲线，报告**失效距离 d\***（准确率跌破随机基线的替换距离）——可证伪、可跨模型比较
-- **判据**：双表征通道零次推断显著优于单一通道**且优于平凡组合基线**，并报告失效距离；失败 → 组合泛化需要更强机制（如符号-神经混合）
-
-### E5 因果层（反事实干预）
-
-- **变量**：反事实训练 开/关——训练时加入干预样本（干预变量 A，观测 B 的分布变化）vs 纯观测
-- **任务**：微世界规则域中"干预 vs 相关"的区分测试（辛普森悖论式场景：治疗方案选择）
-- **判据**：反事实组在干预估计上显著优于纯预测组；失败 → 相关性学习够用（对 AGI 而言），因果层后置
-- **含义**：预测误差最小化学到的是相关性（辛普森悖论会骗过它）；因果层决定世界模型是否"懂"而非"记住"
-
-### E6 综合验证（AGI 指纹）
-
-> 域切换协议（人类重定向）不进入 E6a——注入最高质量外部监督后，通过只能证明"人机协作有效"而非"机制有效"。因此 E6 由两个独立实验组成：
-
-**E6a 持续学习序列测试（H1a 的独立判据）**
-
-- **配置**：E0–E5 按预注册判据选出的配置，**禁止任何人类干预**（域切换协议关闭，边界模糊时硬解）；**单权重连续学习约束**——全程不重训、不重置，记忆/技能库可写入不可清零（"持续"是架构约束而非口头声明）
-- **流程**：域序列 [A→B→C→D→E→F→G]（N=7 预注册；E–G 为按相似度梯度从域族实例化的新域实例），由生成器按相似度梯度（近→远）排列；域 E = 基线预测量零样本迁移率最低者（选择发生在任何机制训练之前，不构成事后挑选）；每域达到阈值立即切换至下一域（不追加预算）。全程测 T(n)、终点准确率、保持率矩阵 R。"交互"统一折算为训练步数（1 交互 = 1 梯度步，batch=128）
-- **三臂对照**：① 无学习基线（纯随机搜索 + 无探索确定性推理）② **普通微调臂**（同底座、与机制臂完全相同的 A-D 训练史与数据量、机制模块全关、每域交互后标准梯度微调——现有范式在持续学习语境下的忠实表述）③ 机制系统臂
-- **预期（基于 McCloskey & Cohen 1989）**：② 应在序列后段保持率崩塌。② 不崩塌且追平 ③ = 真正的 H0 支持；② 崩塌而 ③ 不崩塌 = 持续学习签名的最强证据（普通学习在该范式下结构性失败，而非"略逊一筹"）
-- **数据效率次级判据**：②与③共享 A-D 训练史，②的权重同样隐式编码 A-D 结构知识——主判据测的是"机制组织的经验 vs 隐式编码的经验"的同预算竞争。若②追平③ → H0 支持，但机制的价值主张保留在数据效率维度：机制臂达到与②同等域 E 性能所需交互数 ≤ ②的 50% → 报告"H1 在数据效率维度成立"
-- **潜在空间证据通道**（操作定义见 §5.4 ②）：测量域 E 规则对应聚类的空间可分性（簇间距离、聚类纯度随训练步数）
-- **判据（持续学习签名）**：机制臂在窗口内满足 (a) 加速：T(n) ≤ 0.5 且非增（分母 = 基线①在同一域上达到专家水平所需步数，预算上限内标定）(b) 保持：任意前域 R(n) ≥ 阈值 (c) 连续：全程无重训——**且 ③ 显著优于 ②**，才支持 H1a。③ 签名失败 → **持续学习签名证伪**：退化模式分类报告（遗忘型 = R 跌破阈值 / 停滞型 = T(n) 回升），区分"记忆容量不足"与"机制不足"
-
-**E6b 人机协作迁移（独立结论）**
-
-- 配置：同 E6a + 域切换协议启用（边界低置信时主动请求人类重定向）
-- 判据：E6a 失败但 E6b 通过 → 结论为"人机耦合方案有效"，**不构成 H1 支持**；两者都通过 → 报告分离两种贡献
-
-### E7 交互效应测量
-
-**问题**：E1-E5 单变量测主效应，E6 全开组合失败时归因混沌——无法判断哪个机制冲突。
-
-- **逐步累积**：E1 → E1+E2 → E1+E2+E3 → ... 对比 T(n)——每加一个模块测增量贡献；若某步为负增益 → 定位冲突对，再对该对做 2×2 析因（ANOVA 交互项显著性 = 超加性的正式检验）
-- **超加性检测**：逐步累积测的是边际贡献，测不出协同——若各组件小幅正增益、全开大幅增益（"耦合"正是 H1 的定义），逐步累积会漏掉。E6a 失败时改做两件事：① **全开 vs 最佳子集**——逐步累积序列中表现最优的子集 vs 全开（全开 > 最佳子集 → 协同证据；全开 ≈ 最佳子集 → 部分模块冗余）② 对可疑模块对做 2×2 析因
-- **突现检测**：补充报告规范（无新实验）——E6a 全开配置的轨迹特征、策略多样性、面对新域的反应方式，与各单开配置的行为库做相似度匹配。若无前例 → 整合效应（支持耦合假设）；若有前例 → 全开增益只是单效应的组合。此为辅助定性判据，不影响主签名
-
-### E8 候选机制（探索性轨道）
-
-**E1b 流浪者保留（选择器多样性约束）**——强制保留 10% 量级离群个体（当下表现差但距离所有同类极远），为环境剧变预留"活化石"。控制论锚点：持续激励定理（参数收敛需要持续激励信号）。与随机噪声注入的区别：噪声是均匀无向扰动源、无记忆；流浪者保留是**选择压力下的定向多样性**。保留率 ρ ∈ {0, 0.05, 0.1, 0.2}。可证伪预测：近域切换 ρ>0 无增益或微损；**远域切换 ρ=0.1 显著增益，增益随域间迁移距离单调增加**。若全区间无增益 → 随机噪声已覆盖多样性需求，机制冗余。
-
-**E7b 免疫中和（输出仲裁层）**——生物免疫的一致性不是"抗体想法一致"，而是"输出向量能相互中和"；冲突不是错误，是系统维持稳态的机制。多探测器**高置信度冲突**（候选输出向量夹角大 + 置信度接近）时，主系统不选边，生成"第三中和物"（冲突表征插值 + 新展开验证）。三臂对比仲裁策略：① 选优 ② 投票 ③ 中和。可证伪预测：冲突事件发生时，③ 成功率显著高于 ①② → 冲突是信息源；③ ≈ ① → 仲裁无需特殊机制。三臂对比仲裁策略：① 选优 ② 投票 ③ 中和。可证伪预测：冲突事件发生时，③ 成功率显著高于 ①② → 冲突是信息源；③ ≈ ① → 仲裁无需特殊机制。
-
-### E9 自我认知轨道（独立轨道 · 元认知层）
-
-> 与 E0d 并列的第二独立探索轨道。验证"自我认知驱动的持续更新"是否产生独立于外部任务驱动的持续学习签名。
-
-**设计**：S（主体，TRM 底座，解决外部任务，持续更新）+ M_self（自我模型，S 上的轻量预测头）。训练信号 = **自我预测误差**——自监督，S 自己就是 ground truth，无外部标注成本。认知带宽约束（架构硬约束）：M_self 必须比 S 轻、更新频率 ≥ S 的变化频率。
-
-**M_self 实现**：对数几率空间的贝叶斯式在线信念追踪（b_t = b_{t-1} + evidence_t，evidence = 每回合自对比证据值），成功概率 p_t = σ(b_t)，预测目标 = 成功概率的边际变化。
-
-**平凡解防线（本轨道设计的要害）**：
-- 禁止预测：① S 的输出分布（复读机解）② S 的 logits 置信度（复制粘贴解）
-- **主预测目标：预测学习曲线**——输入"新域/新任务"，预测"S 达到专家阈值所需样本数"。该预测无法从任务本身得出，必须从 S 的历史学习轨迹归纳"S 的学习速度规律"；ground truth = 实验将测的 T(n)，零额外成本
-- **最强防平凡判据：泛化到未来的自己**——S 更新后，M_self 对"新 S"的预测误差不显著上升。复读机学的是 S 的静态快照，S 一变即崩；真自我模型学的是 S 的变化规律，能跟上
-
-**判据**：① 自我预测误差随训练下降 ② 域切换后误差先升后降（M_self 跟上"新我"——下降速度 = 认知带宽的量化，作为次级指标报告）③ 自我预测准确的域 → 该域任务性能提升（自我认知服务行为，非自恋）④ 对照：无 M_self 的 S 是否带来行为增益 ⑤ 泛化到未来的自己
-
-**M_other 对话者建模（子轨道）**：人脑默认网络同时负责自我参照和心智理论（模拟论——认识他人 = 用自我模型模拟他人）。此子轨道依赖未来对话类任务域扩展（当前任务域 A–D 无对话场景）。操作化：M_other 对同一对话者的预测，"有群组上下文时"和"一对一对话时"的输出分布应有**系统差异**，差异大小反映此人在群组中的角色偏离度。防平凡判据：泛化到变化的人（人能变），而非锁死分类标签。
-
-**三阶段（防递归自指）**：1. 旁观（M_self 只观察不干预）→ 2. 参与（预测参与决策：知道不会 → 分配更多计算/请求重定向）→ 3. 内化（自我表征进入 S 决策回路）。阶段 1 通过才进阶段 2。
-
-**风险与防线**：平凡解 → 预测学习曲线 + 判据⑤；递归自指 → 三阶段门控；自恋（只关心自己）→ 外部任务次级目标 + 判据③；认知带宽不足 → 架构约束。
+- **Hardware**: same as §5.1
+- **Model scale**: TRM ~7M parameters (latent-state iterative recurrent model); inverse-model candidate ~2M
+- **Data scale**: domain sequence N=7 (see §5.4)
 
 ---
 
-## 7. 里程碑
+## 6. Detailed experiment designs
 
-| 里程碑 | 内容 | 判据 |
+### E0 Base
+
+- Reproduce TRM/PTRM: complete training and baseline reproduction in the logic-puzzle domain; verify the K=100 parallel-expansion gain is reproducible
+- **Architecture choice**: TRM is a latent-state iterative recurrent model (no self-attention) — this base choice is consistent with the route judgment that "attention is not the bottom-level mechanism" (attention's relational binding can be implemented with cheaper iterative mechanisms); Transformers serve only as comparison references
+- Deliverables: a trainable base + latent-space visualization tools (good/bad basin maps)
+
+**E0b online weight-perturbation sweep (one carrier for measuring H1b)**: apply in-place micro-perturbations to the last-layer weights after each inference, **without fixing a single magnitude** — run a perturbation-strength sweep (1e-5 → 1e-1, log-spaced) and plot "perturbation strength vs. transfer gain." A single-point experiment cannot distinguish "insufficient strength" from "principle ineffective"; the sweep removes that ambiguity. Four control arms form a complete **online-plasticity spectrum**:
+
+1. No update (baseline)
+2. Random-noise perturbation (pure regularization/randomization control)
+3. Directional-perturbation arm (perturbation direction driven by surprise signal / gradient approximation)
+4. **TTT arm**: inference-time finite-step gradient updates driven by a self-supervised objective (predict next latent state/output), sweeping update steps (1/2/4) × learning rate (1e-5 → 1e-2)
+
+Reading: only when the perturbation arm has extra gain over the random arm is it attributed to the "plasticity principle"; TTT arm significantly better than the directional arm → plasticity needs objective-driven updates; TTT arm with no gain over the full range → online weight updates have no value on the current base. **Cost labeling**: the extra compute of direction signals/TTT is counted into the control; if extra compute > 10% of the random-perturbation arm, the conclusion is downgraded (principle gain vs. budget gain indistinguishable). TRM's serial iterative structure is isomorphic to "update during inference" — the strongest measurable carrier of H1b on this base.
+
+**E0d structure-growth track (independent track · exploratory, outside the main criterion chain)**: a fully parallel environment to the main experiment — the base is allowed **structure-level changes during training** (split units by novelty / prune connections by low utilization), measured against the same continual-learning criteria as the main experiment, and compared with the configuration selected by pre-registered criteria in the main experiment. If the base can grow during training, the "fixed base + scheduling policy" main criterion of E1–E7 is contaminated — hence full isolation. Criterion: E0d signature significantly better than the main experiment's selected configuration → structure-level plasticity > scheduling layer; otherwise → the scheduling layer suffices at the current scale.
+
+### E1 Exploration mechanism (core mechanism 1)
+
+**Variables**: parallel-expansion count K (1/10/100) + random-noise injection on/off + quality selector (q-head) on/off + cross-expansion failed-trajectory sharing (taboo index) on/off.
+
+**Matched-compute control (necessary condition for corollary 1)**: best-of-K gain is inseparable from inference budget — K=100 vs. K=1 changes both algorithm and compute. Add two controls: ① matched-budget sampling baseline (same model, same total inference budget, best-of-K without sharing or taboo index) ② matched-budget single-path baseline (same budget, longer search steps). Corollary 1 holds only if "K-expansion + failure sharing" significantly beats ① and ② — otherwise the conclusion is downgraded to "spending more inference compute works."
+
+**Failed-trajectory sharing**: parallel expansion + selection alone = brute-force parallel search + sample selection — 100 trajectories evolve independently; a shortcut found by trajectory 50 is not passed back to trajectories 1–49. **The complete version = parallel expansion + cross-expansion failed-trajectory sharing**: each expansion's failed-trajectory cluster (walls hit) is written into a shared taboo index; subsequent expansions preferentially avoid them — after failure information is asynchronously fed back, it constitutes a cognitive iteration of "coming back with the cause of death." The taboo index reuses the same component as E3 negative distillation (a single switch factor, preventing duplicate writes/weight stacking).
+
+**M1 result (negative result, mechanism localized)**: the E1 main criterion failed in the symbolic domain — inference-time exploration is structurally ineffective for problems that are "uniquely solvable but not yet learned." Full results and redesign directions: [docs/results-m1.md](results-m1.md).
+
+### E2 Memory writing (confirmation experiment)
+
+- **Variable**: surprise-triggered writing on/off (remember surprising samples; baseline writes everything)
+- **Measurement**: cross-task retention (knowledge retention of domain A when testing domain B after training on A)
+- **E2b decay curves**: after domain-A training completes, measure retention at intervals of 1/3/7/30 days (surprise writing on/off); fit "decay time constant vs. writing mechanism" curves; extend to the cross-domain retention matrix R(i,j) — direct evidence of continual learning vs. catastrophic forgetting, and mechanism-level attribution for E6a's retention criterion (which mechanism protects which history)
+- **Criterion**: surprise writing is significantly better than full writing in memory-capacity efficiency (no retention degradation); the decay time constant is calibration-type output without a significance gate
+- **Positioning**: confirm that the storage layer is solved and is not the main battleground of learning acceleration — if it passes, the storage-layer hypothesis is confirmed and E2 has fulfilled its mission
+
+### E3 Experience distillation (core mechanism 2 · the biggest unknown)
+
+**Variable**: distillation mechanism on/off — an extractor from episodic experience (sample level) to skills (reusable rule level). The five plans are **independent controlled trials**: only one is on at a time, never stacked:
+
+- **Plan A: rule distiller** (extract if-then rules from successful trajectories) — essentially decision-tree pruning; compresses distributed representations into symbolic logic; boundary cases are lost. Expected effective on puzzle domains, degrading to noise on interactive domains. Plan A is positioned as an exploratory control (not in the main criterion)
+- **Plan B: vector distiller** (aggregate successful-experience representations into skill vectors) — needs selection-bias correction: clustering on q-head self-selected "successful" subsets converges to "the easiest-to-cluster success," not "the most transferable rule." Correction: cluster input changed to **full-trajectory representations** (success + failure); labels used only for weighting
+- **Plan C: LLM-assisted distillation** (control — SkillsBench has shown LLM self-written skills give zero gain; expected failure, used to confirm the baseline)
+- **Plan D: nightly incremental fine-tuning** — daytime: inference only, weights untouched, high-confidence errors recorded; nighttime: generate training pairs from error records, offline LoRA/Adapter incremental fine-tuning of the base (only the last few layers), load the new Adapter the next day. Human review step: compare "before vs. after" test-set differences to decide keep/rollback. Advantage: completely bypasses the "inference-as-training" hardware bottleneck, retaining rollback/auditability/visible diff. **Includes a "phase-transition reset" step**: before nightly training, inject Gaussian noise into the last few layers + brief free exploration (simulating sleep's destabilization→restabilization), then converge to a new basin — measure T(n) difference with/without noise perturbation; if T(n) decreases with noise → continuous incremental fine-tuning was stuck in an old-basin local optimum, and the phase-transition reset released the exploration space
+- **Plan E: negative distillation** — specifically records "trajectory clusters that led to failure" (walls hit) into a unified taboo index; the system **preferentially avoids** them when exploring new domains. Rationale: counterexamples carry ≥ weight of positive examples in generalization — "knowing what cannot be done" is an independent information channel
+
+**Measurement**: skill-library hit rate, post-reuse performance gain, cross-domain reuse rate, **retrieval overhead / inference-step share** — a skill hit whose matching computation consumes >50% of inference steps = no net acceleration; "learning acceleration" must be defined on the total compute budget, not on isolated accuracy.
+
+**Criterion**: any plan making T(n) drop significantly → corollary 3 supported; all fail → **experimental core conclusion: the learning-mechanism bottleneck is distillation; a new mechanism is needed**.
+
+**Meaning**: this is the main uncertainty of the entire experiment — the frontier (SkillsBench) shows all current distillation methods fail; if this experiment also cannot solve it, AGI's "learning" needs a paradigm-level breakthrough, not component improvements.
+
+### E4 Compositional generalization (vector addition)
+
+- **Variable**: compositional representation mechanism — dual representation channels (high-dimensional feature preservation on the memory side vs. low-dimensional compression on the action side) vs. a single channel
+- **Task**: the platypus test — training gives only "color→X-axis, animal→Y-axis" independent mappings; testing gives novel combinations (green elephant) requiring zero-shot coordinate inference
+- **Trivial-composition defense**: in linear spaces, "adding feature vectors" is a trivial property of embeddings — ① task-family pre-registration: use structures **where trivial linear combination fails** (nonlinear feature interactions, new decisions needed after composition), or explicitly test a linearly solvable version as a control to prove the task is non-trivial ② plain-baseline control: criterion = dual channels **significantly better than a generic composition-capability baseline**, not merely better than the single channel itself
+- **Compositional-distance gradient**: stratify the test set by "replacement distance from training combinations" (replace 1 feature → all); plot "zero-shot inference accuracy vs. compositional distance" decay curves; report the **failure distance d\*** (replacement distance at which accuracy falls below the random baseline) — falsifiable, comparable across models
+- **Criterion**: dual-channel zero-shot inference significantly better than single-channel **and better than the trivial-composition baseline**, with failure distance reported; failure → compositional generalization needs stronger mechanisms (e.g., symbolic-neural hybrids)
+
+### E5 Causal layer (counterfactual intervention)
+
+- **Variable**: counterfactual training on/off — training includes intervention samples (intervene on variable A, observe the distribution change of B) vs. pure observation
+- **Task**: "intervention vs. correlation" discrimination tests in a micro-world rule domain (Simpson's-paradox-style scenarios: treatment choice)
+- **Criterion**: the counterfactual group is significantly better than the pure-prediction group on intervention estimation; failure → correlation learning suffices (for AGI), causal layer deferred
+- **Meaning**: prediction-error minimization learns correlations (Simpson's paradox fools it); the causal layer decides whether the world model "understands" rather than "memorizes"
+
+### E6 Comprehensive validation (AGI fingerprint)
+
+> The domain-switch protocol (human redirection) does not enter E6a — after injecting the highest-quality external supervision, passing could only prove "human-collaboration works," not "the mechanism works." E6 therefore consists of two independent experiments:
+
+**E6a continual-learning sequence test (independent criterion for H1a)**
+
+- **Configuration**: configurations selected from E0–E5 by pre-registered criteria, **no human intervention allowed** (domain-switch protocol off; force-solving at blurred boundaries); **single-weight continuous-learning constraint** — no retraining, no reset throughout; memory/skill libraries writable but never cleared ("continuity" is an architectural constraint, not a verbal claim)
+- **Procedure**: domain sequence [A→B→C→D→E→F→G] (N=7 pre-registered; E–G are new domain instances instantiated from the domain families by similarity gradient), ordered by the generator along a similarity gradient (near→far); domain E = the baseline-predicted lowest zero-shot-transfer one (selection happens before any mechanism training; not post-hoc selection); each domain switches immediately to the next upon reaching threshold (no extra budget). Measure T(n), end accuracy, and retention matrix R throughout. "Interactions" are uniformly converted to training steps (1 interaction = 1 gradient step, batch=128)
+- **Three-arm control**: ① no-learning baseline (pure random search + deterministic inference without exploration) ② **plain fine-tuning arm** (same base, exactly the same A–D training history and data volume as the mechanism arm, all mechanism modules off, standard gradient fine-tuning after each domain's interactions — the faithful expression of the current paradigm in a continual-learning context) ③ mechanism-system arm
+- **Expectation (based on McCloskey & Cohen 1989)**: ② should collapse in retention at the tail of the sequence. ② not collapsing and catching ③ = true H0 support; ② collapsing while ③ does not = the strongest evidence for the continual-learning signature (plain learning structurally fails in this paradigm, rather than "slightly worse")
+- **Data-efficiency secondary criterion**: ② and ③ share the A–D training history; ②'s weights implicitly encode A–D structural knowledge — the main criterion measures a matched-budget competition between "mechanism-organized experience" and "implicitly encoded experience." If ② catches ③ → H0 support, but the mechanism's value proposition remains on the data-efficiency dimension: if the mechanism arm reaches ②'s domain-E performance with ≤ 50% of ②'s interactions → report "H1 holds on the data-efficiency dimension"
+- **Latent-space evidence channel** (operational definition in §5.4 ②): measure the spatial separability of rule-corresponding clusters for domain E (inter-cluster distance, cluster purity vs. training steps)
+- **Criterion (continual-learning signature)**: the mechanism arm satisfies within the window (a) acceleration: T(n) ≤ 0.5 and non-increasing (denominator = steps needed by baseline ① to reach expert level on the same domain, calibrated within the budget cap) (b) retention: R(n) ≥ threshold for any previous domain (c) continuity: no retraining throughout — **and ③ significantly better than ②**, to support H1a. ③ signature failure → **continual-learning signature falsified**: degradation-mode taxonomy report (forgetting-type = R below threshold / stagnation-type = T(n) rising), distinguishing "insufficient memory capacity" from "insufficient mechanism"
+
+**E6b human-collaboration transfer (independent conclusion)**
+
+- Configuration: same as E6a + domain-switch protocol enabled (actively requests human redirection at low-confidence boundaries)
+- Criterion: E6a fails but E6b passes → conclusion is "human-machine coupling works," **not H1 support**; both pass → report the two contributions separately
+
+### E7 Interaction-effect measurement
+
+**Problem**: E1–E5 measure main effects single-variable; if the all-on combination fails in E6, attribution is chaotic — it cannot be determined which mechanism conflicts.
+
+- **Stepwise accumulation**: E1 → E1+E2 → E1+E2+E3 → ... comparing T(n) — measure the incremental contribution of each added module; if a step is negative-gain → localize the conflicting pair, then run a 2×2 factorial on that pair (ANOVA interaction-term significance = the formal test of super-additivity)
+- **Super-additivity detection**: stepwise accumulation measures marginal contributions, not synergy — if each component gives a small positive gain and all-on gives a large gain ("coupling" is precisely H1's definition), stepwise accumulation would miss it. When E6a fails, do two things instead: ① **all-on vs. best subset** — the best-performing subset in the stepwise sequence vs. all-on (all-on > best subset → synergy evidence; all-on ≈ best subset → some modules redundant) ② 2×2 factorial on suspect module pairs
+- **Emergence detection**: supplementary reporting norm (no new experiments) — match the trajectory characteristics, strategy diversity, and responses to novel domains of the E6a all-on configuration against a behavior library of each single-on configuration. No precedent → integrated effect (supports the coupling hypothesis); precedent exists → all-on gain is just a combination of single effects. This is an auxiliary qualitative criterion; it does not affect the main signature
+
+### E8 Candidate mechanisms (exploratory track)
+
+**E1b wanderer retention (selector diversity constraint)** — forcibly retain ~10%-scale outlier individuals (currently poor performers but extremely far from all their own kind), reserving "living fossils" for drastic environment changes. Control-theory anchor: the persistence-of-excitation theorem (parameter convergence requires persistent excitation signals). Difference from random-noise injection: noise is a uniform, directionless perturbation source without memory; wanderer retention is **directed diversity under selection pressure**. Retention rate ρ ∈ {0, 0.05, 0.1, 0.2}. Falsifiable prediction: near-domain switching ρ>0 gives no gain or slight loss; **far-domain switching ρ=0.1 gives significant gain, monotonically increasing with inter-domain transfer distance**. No gain over the full range → random noise already covers the diversity requirement; the mechanism is redundant.
+
+**E7b immune neutralization (output arbitration layer)** — biological immunity's consistency is not "antibodies think alike," but "output vectors can neutralize each other"; conflict is not an error but the system's homeostasis mechanism. When multiple detectors have a **high-confidence conflict** (candidate output vectors with large angles + close confidences), the main system takes neither side but generates a "third neutralizer" (conflict-representation interpolation + new-expansion verification). Three-arm arbitration strategies: ① best-of ② voting ③ neutralization. Falsifiable prediction: when conflict events occur, ③'s success rate is significantly higher than ①② → conflict is an information source; ③ ≈ ① → arbitration needs no special mechanism.
+
+### E9 Self-cognition track (independent track · metacognitive layer)
+
+> The second independent exploration track alongside E0d. Tests whether "self-cognition-driven continuous updating" produces a continual-learning signature independent of external task drive.
+
+**Design**: S (the subject; TRM base; solves external tasks; continuously updated) + M_self (self-model; a lightweight prediction head on S). Training signal = **self-prediction error** — self-supervised; S itself is the ground truth; zero external labeling cost. Cognitive-bandwidth constraint (architectural hard constraint): M_self must be lighter than S, and its update frequency ≥ S's change frequency.
+
+**M_self implementation**: Bayesian-style online belief tracking in log-odds space (b_t = b_{t-1} + evidence_t; evidence = per-round self-comparison evidence value); success probability p_t = σ(b_t); prediction target = marginal change in success probability.
+
+**Trivial-solution defenses (the crux of this track's design)**:
+- Forbidden predictions: ① S's output distribution (parrot solution) ② S's logits confidence (copy-paste solution)
+- **Main prediction target: predict the learning curve** — given a "new domain/new task," predict "samples needed for S to reach the expert threshold." This prediction cannot be derived from the task itself; it must induce "S's learning-speed law" from S's historical learning trajectories; ground truth = the T(n) the experiment will measure anyway, zero extra cost
+- **Strongest anti-trivial criterion: generalize to the future self** — after S updates, M_self's prediction error on the "new S" does not rise significantly. A parrot learns a static snapshot of S and collapses the moment S changes; a true self-model learns S's change law and keeps up
+
+**Criteria**: ① self-prediction error decreases with training ② after domain switches, error first rises then falls (M_self keeps up with the "new self" — the fall speed quantifies cognitive bandwidth, reported as a secondary indicator) ③ domains where self-prediction is accurate → task performance improves on those domains (self-cognition serves behavior, not narcissism) ④ control: does S without M_self gain behavior ⑤ generalize to the future self
+
+**M_other interlocutor modeling (sub-track)**: the brain's default network handles self-reference and theory of mind simultaneously (simulation theory — knowing others = simulating others with the self-model). This sub-track depends on future dialogue-type task-domain extension (current task domains A–D have no dialogue scenarios). Operationalization: M_other's predictions about the same interlocutor should show **systematic differences** between "with group context" and "one-on-one dialogue," with the difference size reflecting the person's role-deviation in the group. Anti-trivial criterion: generalize to changing people (people change), not lock onto classification labels.
+
+**Three stages (against recursive self-reference)**: 1. observation (M_self only observes, does not intervene) → 2. participation (predictions enter decisions: knowing "it won't work" → allocate more compute / request redirection) → 3. internalization (self-representation enters S's decision loop). Stage 2 only begins after stage 1 passes.
+
+**Risks and defenses**: trivial solutions → predict the learning curve + criterion ⑤; recursive self-reference → three-stage gating; narcissism (only caring about itself) → external-task secondary goal + criterion ③; insufficient cognitive bandwidth → architectural constraint.
+
+---
+
+## 7. Milestones
+
+| Milestone | Content | Criterion |
 |--------|------|------|
-| M0 | 底座复现（域 A） | 并行展开增益复现 + 吸引盆可视化 |
-| M1 | E1 探索机制（域 A→B） | K 扩展在符号域成立 |
-| M2 | E2 记忆 + E4 组合（域 B→C） | 保持率 + 鸭嘴兽测试通过 |
-| M3 | E3 蒸馏（核心） | T(n) 下降？**最大未知** |
-| M4 | E5 因果 + E6a/E6b + E7 | E6a 指纹判据（H1）+ 归因路径 |
-| M5 | 真实域放大（长期轨道） | 最优配置迁移到文本/工具域 |
+| M0 | Base reproduction (domain A) | Parallel-expansion gain reproduced + basin visualization |
+| M1 | E1 exploration mechanism (domains A→B) | K-expansion holds in the symbolic domain |
+| M2 | E2 memory + E4 composition (domains B→C) | Retention + platypus test pass |
+| M3 | E3 distillation (core) | T(n) decreases? **the biggest unknown** |
+| M4 | E5 causality + E6a/E6b + E7 | E6a fingerprint criterion (H1) + attribution path |
+| M5 | Real-domain scaling (long-term track) | Best configuration transfers to text/tool domains |
 
-> M3 是分水岭：若蒸馏失败，M4/M5 无意义，退出条件见 §8。
+> M3 is the watershed: if distillation fails, M4/M5 are meaningless; exit conditions in §8.
 
 ---
 
-## 8. 失败判据与退出条件
+## 8. Failure criteria and exit conditions
 
-| 场景 | 判定 | 行动 |
+| Scenario | Verdict | Action |
 |------|------|------|
-| M0 复现失败 | PTRM 提升不可复现 | 检查实现；若前沿结果不稳 → 探索机制假设降权 |
-| M1 K 扩展在符号域失效 | 探索机制只对谜题域有效 | 动力学调试 / 逆向模型方向 |
-| E6a 普通微调臂追平机制臂 | 正常学习即达同等迁移效率 | H0 支持方向：机制无增量价值，报告后换路线 |
-| M3 蒸馏全方案失败 | **学习机制瓶颈确认** | 实验核心结论：当前组件不足以产生学习加速 → 报告 + 探索新机制（如抽象预测类） |
-| M4 因果层无增益 | 相关性学习够用 | 因果层后置，不阻塞主路径 |
-| E6a 持续学习签名证伪 | T(n) 回升（停滞型）或 R 跌破阈值（遗忘型） | 报告退化模式 + 机制归因，同 M3：报告产出，换路线 |
+| M0 reproduction fails | PTRM gain not reproducible | Check implementation; if the frontier result is unstable → down-weight the exploration-mechanism hypothesis |
+| M1 K-expansion fails in the symbolic domain | Exploration mechanism only works for puzzle domains | Dynamics tuning / inverse-model direction |
+| E6a plain fine-tuning catches the mechanism arm | Plain learning already reaches the same transfer efficiency | H0-support direction: mechanism has no incremental value; report and switch routes |
+| M3 all distillation plans fail | **Learning-mechanism bottleneck confirmed** | Experimental core conclusion: current components cannot produce learning acceleration → report + explore new mechanisms (e.g., abstraction-prediction class) |
+| M4 causal layer has no gain | Correlation learning suffices | Causal layer deferred; does not block the main path |
+| E6a continual-learning signature falsified | T(n) rising (stagnation-type) or R below threshold (forgetting-type) | Report degradation mode + mechanism attribution; same as M3: report as output, switch routes |
 
-本方案价值 = 用可控成本（本地 GPU + 小模型）快速回答"学习机制路线是否可行"。
-
----
-
-## 9. 术语表
-
-- **吸引盆**：TRM 潜在空间中收敛到正确/错误答案的区域。确定性模型掉进坏盆无法跳出 = "死亡"的数学定义
-- **鸭嘴兽测试**：组合泛化的操作性定义——已知特征组合推断新实体属性（18 世纪生物学家推断鸭嘴兽会产卵/游泳）
-- **AGI 指纹**：分布外少样本迁移 + 自主发现规律（替代不可测的"通用智能"）
-- **预算匹配**：对照组与实验组消耗相同计算预算（推理步数/参数规模），排除"多花算力"对"机制"的混淆
-- **专家水平**：每域预注册的达标阈值（准确率 ≥ 域天花板 × 80%，天花板先标定后注册，见 §5.4）
-- **超加性（协同）**：全开效果显著优于各组件单开之和——"耦合"假设的操作化检测
-- **持续学习**：同一系统（同套权重、无域级重训）在域序列上持续积累能力；签名 = 加速（T(n) 非增）+ 保持（R ≥ 阈值）+ 连续（无重训）
-- **保持率矩阵 R(i,j)**：学完域 j 后域 i 的保持率；下三角 = 遗忘模式
-- **流浪者保留**：选择器强制保留离群个体的策略（ρ 比例），为分布偏移预留适应火种——持续激励定理的离散实现
-- **免疫中和**：多候选高置信度冲突时的第三候选合成仲裁策略——冲突作为信息源而非噪声
-- **自我预测误差**：M_self 对 S 行为/学习属性的预测与实际表现的差——自监督信号，无需外部标注
-- **平凡解**：M_self 退化为"S 的复印件"（预测输出分布/复制置信度）——防线：预测学习曲线 + 泛化到未来的自己判据
-- **TTT 臂**：自监督目标驱动的推理时在线权重更新对照臂——在线可塑性光谱最强端
-- **信念递归更新**：对数几率空间的贝叶斯式在线信念追踪（b_t = b_{t-1} + evidence_t），M_self 的实现机制
+The value of this proposal = cheaply answering "is the learning-mechanism route viable" with controlled cost (local GPU + small models).
 
 ---
 
-## 10. 参考锚点
+## 9. Glossary
 
-- **PTRM**：概率微型递归模型（并行随机展开 + 质量选择，7M 参数）——探索机制的先验验证来源（上游论文报告 K=100 时 62.6%→91.2%）
-- **Titans**：Google 记忆架构（surprise-based learning）——BABILong 超 2M 上下文
-- **SkillsBench**（arXiv 2602.12670）：curated skills +16.6pp（33.9%→50.5%）/ self-generated 无效——"经验→技能"蒸馏为瓶颈的锚点
-- **脑科学认知制图**：牛津团队四步认知流水线（海马体高维/感知低维/向量加法/空间锚定）——组合泛化机制蓝图
-- **Causal-JEPA**：arXiv 2602.11389——物体中心世界模型 + 潜在干预
-- **RLM**：递归语言模型（MIT，2026-08）——30B 模型上 context 组织方式造成 8-32 倍泛化差距
-- **灾难性遗忘**：McCloskey & Cohen 1989——标准微调在长序列上遗忘的结构性先验
-- **脑科学交叉**：MIT 失语症研究（推理不需语言区）/ GCML（噪声+逆向模型=规划）/ 幽灵点（学习是分岔现象）/ 睡眠相变（去稳定化-重新稳定）——动机性锚点，正式引用待核对补全
+- **Basin**: regions of TRM latent space converging to correct/incorrect answers. A deterministic model falling into a bad basin and unable to escape = the mathematical definition of "death"
+- **Platypus test**: the operational definition of compositional generalization — inferring properties of a new entity from known feature combinations (18th-century biologists inferring that platypuses lay eggs/swim)
+- **AGI fingerprint**: out-of-distribution few-shot transfer + autonomous rule discovery (replacing the unmeasurable "general intelligence")
+- **Budget matching**: control and experimental groups consume the same compute budget (inference steps / parameter scale), removing "spending more compute" as a confound of "mechanism"
+- **Expert level**: the pre-registered per-domain pass threshold (accuracy ≥ domain ceiling × 80%; ceiling calibrated first, then registered; see §5.4)
+- **Super-additivity (synergy)**: all-on effect significantly better than the sum of each component alone — the operational test of the "coupling" hypothesis
+- **Continual learning**: the same system (same weights, no domain-level retraining) accumulating capability over a domain sequence; signature = acceleration (T(n) non-increasing) + retention (R ≥ threshold) + continuity (no retraining)
+- **Retention matrix R(i,j)**: retention of domain i after learning domain j; lower triangle = forgetting pattern
+- **Wanderer retention**: a selector policy that forcibly retains outlier individuals (proportion ρ), reserving adaptation embers for distribution shifts — a discrete implementation of the persistence-of-excitation theorem
+- **Immune neutralization**: third-candidate synthesis arbitration when multiple high-confidence candidates conflict — conflict as an information source, not noise
+- **Self-prediction error**: the difference between M_self's predictions of S's behavior/learning attributes and actual performance — a self-supervised signal requiring no external labels
+- **Trivial solution**: M_self degenerating into a "copy of S" (predicting output distributions / copying confidences) — defenses: predict the learning curve + the future-self criterion
+- **TTT arm**: inference-time online weight-update control arm driven by a self-supervised objective — the strongest end of the online-plasticity spectrum
+- **Belief recursive update**: Bayesian-style online belief tracking in log-odds space (b_t = b_{t-1} + evidence_t); M_self's implementation mechanism
+
+---
+
+## 10. Reference anchors
+
+- **PTRM**: probabilistic micro recurrent model (parallel stochastic expansion + quality selection, 7M parameters) — prior-validation source for the exploration mechanism (the upstream paper reports 62.6%→91.2% at K=100)
+- **Titans**: Google memory architecture (surprise-based learning) — BABILong beyond 2M context
+- **SkillsBench** (arXiv 2602.12670): curated skills +16.6pp (33.9%→50.5%) / self-generated null — anchor for "experience→skill" distillation as the bottleneck
+- **Brain-science cognitive mapping**: Oxford team's four-step cognitive pipeline (hippocampal high-dim / perceptual low-dim / vector addition / spatial anchoring) — blueprint for compositional-generalization mechanisms
+- **Causal-JEPA**: arXiv 2602.11389 — object-centric world models + latent interventions
+- **RLM**: recursive language model (MIT, 2026-08) — context organization causing 8–32× generalization gaps on a 30B model
+- **Catastrophic forgetting**: McCloskey & Cohen 1989 — structural prior for standard fine-tuning forgetting on long sequences
+- **Brain-science cross-reference**: MIT aphasia research (reasoning without language areas) / GCML (noise + inverse model = planning) / ghost points (learning as a bifurcation phenomenon) / sleep phase transitions (destabilization–restabilization) — motivational anchors; formal citations to be completed after verification

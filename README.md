@@ -99,7 +99,7 @@ src/
 
 Note: scripts write generic names (`result.json`); files were renamed by experiment when archived.
 
-Experiments are pre-registered as E0–E9, milestones as M0–M5 — see the "实验编号索引" section in `docs/experiment-proposal.md`. M0.x are sub-milestones within M0 (M0.1 reproduction, M0.2 basin tooling, M0.3 feasibility anchors, M0.4 domain C/D generators). docs are currently in Chinese; English translation in progress.
+Experiments are pre-registered as E0–E9, milestones as M0–M5 — see the "Experiment-number index" section in `docs/experiment-proposal.md`. M0.x are sub-milestones within M0 (M0.1 reproduction, M0.2 basin tooling, M0.3 feasibility anchors, M0.4 domain C/D generators).
 
 ## License
 
