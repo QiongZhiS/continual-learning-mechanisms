@@ -1,0 +1,9 @@
+step 500: exact=0.3280 train_exact=0.3315 cell=0.9917 loss=0.2268 (1585s)
+step 1000: exact=0.3675 train_exact=0.3820 cell=0.9922 loss=0.2884 (2621s)
+step 1500: exact=0.4415 train_exact=0.4415 cell=0.9931 loss=0.2742 (3530s)
+step 2000: exact=0.4225 train_exact=0.4425 cell=0.9929 loss=0.3250 (4622s)
+step 2500: exact=0.4685 train_exact=0.4895 cell=0.9934 loss=0.2807 (5354s)
+step 3000: exact=0.4335 train_exact=0.4505 cell=0.9930 loss=0.2337 (6428s)
+step 3500: exact=0.4985 train_exact=0.5020 cell=0.9938 loss=0.3142 (7190s)
+step 4000: exact=0.5175 train_exact=0.5465 cell=0.9940 loss=0.2924 (8360s)
+done

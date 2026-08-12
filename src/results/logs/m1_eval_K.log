@@ -1,0 +1,5 @@
+K=1 D=16 sigma=0.0: exact=0.4900 cell=0.9937 (22s)
+K=1 D=48 sigma=0.0: exact=0.4640 cell=0.9934 (68s)
+K=10 D=48 sigma=0.2: exact=0.4320 cell=0.9930 (691s)
+K=100 D=48 sigma=0.2: exact=0.4300 cell=0.9930 (6901s)
+saved -> results/logs/m1_eval_K.json

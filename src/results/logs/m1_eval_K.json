@@ -1,0 +1,24 @@
+{
+  "K=1_D=16_s=0.0": {
+    "exact": 0.49,
+    "cell": 0.9937,
+    "seconds": 22.5
+  },
+  "K=1_D=48_s=0.0": {
+    "exact": 0.464,
+    "cell": 0.9934,
+    "seconds": 68.4
+  },
+  "K=10_D=48_s=0.2": {
+    "exact": 0.432,
+    "cell": 0.993,
+    "seconds": 690.9
+  },
+  "K=100_D=48_s=0.2": {
+    "exact": 0.43,
+    "cell": 0.993,
+    "seconds": 6901.5
+  },
+  "ckpt": "outputs/m1_domainB_rerun/step_4000",
+  "n": 500
+}
