@@ -1,5 +1,7 @@
 # Continual Learning Mechanisms
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21902053.svg)](https://doi.org/10.5281/zenodo.21902053)
+
 > **How do skills form? How does memory update? How does agency emerge? I trust experiments to answer.**
 
 A falsifiable investigation into whether **learning mechanisms** — not scale — can produce continual learning: accelerating across tasks, retaining old knowledge, without retraining.

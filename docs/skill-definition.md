@@ -107,7 +107,7 @@ Corollary: **the translation paradigm is not excluded at the definition level** 
 
 The skill community needs a testable definition. The operational definition proposed here — behavior as the criterion layer, learning characteristics as the constitution layer — separates "is it a skill" from "how is a skill acquired," enabling skill research to be pre-registered, controlled, and falsified like other empirical fields. The definition itself is falsifiable: if the criterion-layer triplet cannot distinguish skills from non-skills in a concrete task domain, the definition must be revised; but the revision direction should prioritize behavioral measurability, not a return to the ineffable.
 
-**What is a skill? Look at what it does, not what it looks like.**
+**What is a skill? Look at what it does, not what it looks like. (A permanent, versioned record of this paper is available at [15].)**
 
 ---
 
@@ -127,6 +127,7 @@ The skill community needs a testable definition. The operational definition prop
 12. Sutton, R. S., Precup, D., & Singh, S. (1999). Between MDPs and semi-MDPs: A framework for temporal abstraction in reinforcement learning. *Artificial Intelligence*, 112(1-2), 181-211. (options)
 13. Li, X., et al. (2026). SkillsBench: Benchmarking How Well Agent Skills Work Across Diverse Tasks. arXiv:2602.12670.
 14. Lumen (2026). *AGI Experiment Proposal* (unpublished experiment records). https://github.com/QiongZhiS/continual-learning-mechanisms
+15. Lumen (2026). *What Is a Skill? An Operational Definition* (preprint). Zenodo. https://doi.org/10.5281/zenodo.21902053
 
 ---
 
