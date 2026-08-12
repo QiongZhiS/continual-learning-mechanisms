@@ -1,6 +1,6 @@
 # 技能是什么？——一个可操作的定义
 
-> 作者：溯光（Lumen） · 学术署名：S.F.J. · 2026-08-12
+> 作者：Lumen · 学术署名：S.F.J. · 2026-08-12
 
 ---
 
@@ -69,7 +69,7 @@ SkillsBench（2026）给出了第一个可参考的实证锚点：在 87 个任�
 
 1. **技能 = 怎么用（behavioral disposition），不是怎么说（description）——但"说"本身可以是技能载体。**
 2. 判据是**行为改变**，不是载体形式：curated 文本描述在 SkillsBench 中改变了行为（+16.6pp），在判据层通过；self-generated 描述未改变行为，在判据层失败 [13]。同一载体（文本），两种结果——差异在来源与质量，不在载体。
-3. 该推论统一了一组独立实证：SkillsBench 的 curated 有效 / self-generated 无效（描述是否改变行为是经验问题）；语义级探索中向输入侧注入等价类信息不改变能力（作者未发表实验，见 [14] §E1）；M1 实验中无规则结构先验的域内增益为零（作者未发表实验，见 [14] §M1）。
+3. 该推论统一了一组独立实证：SkillsBench 的 curated 有效 / self-generated 无效（描述是否改变行为是经验问题）；语义级探索中向输入侧注入等价类信息不改变能力（作者未发表实验，见 [14] §6-E1）；M1 实验中无规则结构先验的域内增益为零（作者未发表实验，见 [14] §6-E1）。
 
 三个案例指向同一个可检验命题：**显式信息若不改变行为，就不改变能力。**
 
@@ -126,7 +126,7 @@ SkillsBench（2026）给出了第一个可参考的实证锚点：在 87 个任�
 11. Fitts, P. M., & Posner, M. I. (1967). *Human Performance*. Brooks/Cole. （三阶段模型）
 12. Sutton, R. S., Precup, D., & Singh, S. (1999). Between MDPs and semi-MDPs: A framework for temporal abstraction in reinforcement learning. *Artificial Intelligence*, 112(1-2), 181-211. （options）
 13. Li, X., et al. (2026). SkillsBench: Benchmarking How Well Agent Skills Work Across Diverse Tasks. arXiv:2602.12670. （数据版本 v4，2026-06 更新：curated +16.6pp，33.9%→50.5%；self-generated 负增益）
-14. 作者 (2026). *AGI 实验方案*。https://github.com/QiongZhiS/agi-experiment —— 含 M1 失败结论（§E1）、语义级探索证伪（§E1）、经验蒸馏设计（§E3）
+14. 作者 (2026). *AGI 实验方案*。https://github.com/QiongZhiS/agi-experiment —— 含 M1 失败结论（§6-E1）、语义级探索证伪（§6-E1）、经验蒸馏设计（§E3）
 
 ---
 

@@ -1,6 +1,6 @@
 """M0.4 域 D 实例化：D1 囚徒困境 IPD（E6a 序列第 4 域 · 空白4 社会智能）
 
-规格（域D-实例化设计.md v0.1，已拍板；本脚本冻结实例参数）：
+规格（域 D 实例化设计已冻结；本脚本固化实例参数）：
 - 2 人 × 100 轮；收益矩阵 R=3 / S=0 / T=5 / P=1（payoff[my, opp]）
 - 对手池 8 个：{always-cooperate, always-defect, tit-for-tat,
   慷慨 tit-for-tat(容忍 0.1), random, 惩罚者, 伪装者-潜伏型, 伪装者-概率型}

@@ -33,18 +33,18 @@ If not — if experience cannot be turned into reusable skill — that is also a
 
 **Hypothesis**: parallel stochastic expansion + quality selection improves solving on symbolic domains.
 
-**Result**: **No gain in domain B** (RPN stack-machine arithmetic). K-curve flat: K=1 0.454 / K=10 0.476 / K=100 0.476 (baseline). Three rounds of discrimination localized the mechanism:
+**Result**: **No gain in domain B** (RPN stack-machine arithmetic). K-curve flat (D=48 deep-expansion match): K=1 0.478 / K=10 0.476 / K=100 0.476 (K=1 baseline). Three rounds of discrimination localized the mechanism:
 
 1. q-head selector doesn't generalize across domains (AUC 1.0 → 0.57)
 2. Selector repair (majority voting) falsified — same rollouts, no incremental information
 3. Semantic-level exploration falsified — equivalence-class perturbations at the input side, zero gain
 
-**Conclusion**: inference-time exploration is structurally ineffective for problems that are "uniquely solvable but not yet learned" — it helps when the solution space has basin structure (domain A: K=100 62.6%→91.2%), not when the model simply hasn't learned the rule. Redesign targets: inverse model (direction-constrained exploration) + phase-transition reset.
+**Conclusion**: inference-time exploration is structurally ineffective for problems that are "uniquely solvable but not yet learned" — it helps when the solution space has basin structure (domain A, Sudoku: K=100 62.6%→91.2%), not when the model simply hasn't learned the rule. Redesign targets: inverse model (direction-constrained exploration) + phase-transition reset.
 
 ### M0.3 — feasibility anchors
 
 - Ceiling ~0.48 reachable (expert-level, 4.5h/domain)
-- LoRA fine-tuning viable (+4.5~7.5pp)
+- LoRA fine-tuning viable (+4.4pp on held-out config, see results/m0_3_lora*.json)
 - Self-distillation **negative** (−16.5pp) — external-information motivation for E3 confirmed
 
 ### The skill definition (docs/)
@@ -63,7 +63,7 @@ python src/m1_train_domainB.py --steps 3000
 python src/m1_eval_K.py <checkpoint>
 ```
 
-Requires: Python 3.11, CUDA 12.x, ~8GB VRAM (or CPU, slower).
+Requires: Python 3.11, CUDA 12.x, ~8GB VRAM (scripts hardcode CUDA device).
 
 ## Layout
 
@@ -74,13 +74,32 @@ docs/
 src/
   m0_*.py m1_*.py   Milestone experiment scripts
   models/           TRM upstream (Samsung MIT) + experiment models
+  config/           Architecture configs (TRM upstream)
   dataset/          Data generators (reproducibility)
-  results/          Raw result JSONs
+  results/          Raw result JSONs (see mapping below)
   requirements.txt  Python dependencies
 ```
+
+## Result files ↔ experiments
+
+| File | Experiment | Contents |
+|---|---|---|
+| `results/k_curve.json` | E1, domain B (RPN) | K-curve @ 4000 steps: K=1 0.454 (D=16) / 0.478 (D=48), K=10 0.476, K=100 0.476 |
+| `results/k_curve_10000.json` | E1, domain B | K-curve @ 10000 steps (robustness extension) |
+| `results/k_curve_domainA.json` | M0.1, domain A (Sudoku) | Domain-A K-curve (with config deviation note) |
+| `results/q_sep.json` | E1, discrimination round 1 | q-head separability (AUC 0.569 ≈ chance) |
+| `results/selector_fix.json` | E1, round 2 | Majority-vote selector repair (no gain) |
+| `results/sem_explore.json` | E1, round 3 | Semantic-level exploration (no gain) |
+| `results/m1_domainB_aug*.json` | E1, augmentation channel | Training-side equivalence-class augmentation |
+| `results/curve.json` | M0.3 | Domain-A ceiling curve |
+| `results/m0_3_*.json` | M0.3 | LoRA / self-distillation / seed variance results |
+
+Note: scripts write generic names (`result.json`); files were renamed by experiment when archived.
+
+Experiments are pre-registered as E0–E9, milestones as M0–M4 — see `docs/experiment-proposal.md` §0 for the index. docs are currently in Chinese; English translation in progress.
 
 ## License
 
 - **Code** (this repo's scripts): MIT — see `LICENSE`
-- **Upstream TRM code** (`src/models/recursive_reasoning/`): MIT, © Samsung Electronics — see `src/TRM-LICENSE.txt`
+- **Upstream TRM code**: `src/models/`, `src/config/`, `src/dataset/`, `src/pretrain.py`, `src/eval_ptrm.py`, `src/puzzle_dataset.py`, `src/utils/`, `src/requirements.txt` derive from [TinyRecursiveModels](https://github.com/SamsungSAILMontreal/TinyRecursiveModels) (MIT, © Samsung Electronics) with local modifications — see `src/TRM-LICENSE.txt`
 - **Documents** (`docs/`): CC-BY 4.0

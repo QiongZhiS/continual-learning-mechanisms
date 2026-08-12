@@ -1,4 +1,4 @@
-"""domain_params.py — 全部域的机器可读结构化参数（M0.4 后档 · 决策 1 落地）
+"""domain_params.py — 全部域的机器可读结构化参数（M0.4 后档）
 
 用途（辅助报告 + 渐变域插值接口）：
 1. domain_distance.py 从本文件读参数，算"结构距离矩阵"（辅助报告用）
@@ -6,10 +6,10 @@
 3. E/F/G 占位：域 E 选定后 + F/G 延伸设计后填入
 
 冻结规则（预注册）：
-- 相似度梯度的**冻结物** = 行为距离（零样本迁移率矩阵，m0_4_zero_shot_matrix.py）
+- 相似度梯度的**冻结物** = 行为距离（零样本迁移率矩阵）
 - 结构距离只作辅助报告，不参与冻结
 - A-D 参数 = 已交付生成器的实际值（域 B: m1_gen_domainB.py；域 C: m0_4_gen_domainC.py；
-  域 A 数独 = M0.1 复现配置；域 D = 域D-实例化设计.md v0.1）
+  域 A 数独 = M0.1 复现配置；域 D = 域 D 实例化设计 v0.1）
 """
 from __future__ import annotations
 
@@ -56,7 +56,7 @@ DOMAIN_PARAMS = {
         "value_range": None,       # 收益值域，非 token 域
         "seq_len": None,           # 观测窗口 10 轮
         "output_style": "action",  # 动作选择
-        "note": "域D-实例化设计.md v0.1（D1 最小实例 = E6a 第 4 域）",
+        "note": "域 D 实例化设计 v0.1（D1 最小实例 = E6a 第 4 域）",
     },
     # 占位：域 E 三候选选定后填入；F/G 从 E 族延伸后填入
     "E": None,

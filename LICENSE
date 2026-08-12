@@ -22,10 +22,10 @@ SOFTWARE.
 
 ---
 
-## Documents (docs/)
+## Documents (docs/) and result data (src/results/)
 
-The documents in `docs/` are licensed under Creative Commons Attribution 4.0
-International (CC-BY 4.0). You are free to share and adapt with attribution:
-"© 2026 Lumen".
+The documents in `docs/` and the result data in `src/results/` are licensed under
+Creative Commons Attribution 4.0 International (CC-BY 4.0). You are free to share
+and adapt with attribution: "© 2026 Lumen".
 
 Full license text: https://creativecommons.org/licenses/by/4.0/
