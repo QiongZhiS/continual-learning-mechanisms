@@ -12,8 +12,8 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
 
 | Path | Contents |
 |---|---|
-| `docs/experiment-proposal.md` | Experiment proposal (public version) · 实验方案公开版 |
-| `docs/skill-definition.md` | Operational definition of *skill* · 技能操作定义 |
+| `docs/experiment-proposal.md` | Experiment proposal — hypotheses, criteria, pre-registration |
+| `docs/skill-definition.md` | Operational definition of *skill* — proposal, falsifiable |
 | `src/` | Experiment code (M0/M1 milestone scripts) + upstream TRM models |
 | `src/results/` | Raw result JSONs — reproducible evidence, including negative results |
 

@@ -126,7 +126,7 @@ SkillsBench（2026）给出了第一个可参考的实证锚点：在 87 个任�
 11. Fitts, P. M., & Posner, M. I. (1967). *Human Performance*. Brooks/Cole. （三阶段模型）
 12. Sutton, R. S., Precup, D., & Singh, S. (1999). Between MDPs and semi-MDPs: A framework for temporal abstraction in reinforcement learning. *Artificial Intelligence*, 112(1-2), 181-211. （options）
 13. Li, X., et al. (2026). SkillsBench: Benchmarking How Well Agent Skills Work Across Diverse Tasks. arXiv:2602.12670. （数据版本 v4，2026-06 更新：curated +16.6pp，33.9%→50.5%；self-generated 负增益）
-14. 作者 (2026). *AGI 实验方案公开版*。https://github.com/QiongZhiS/agi-experiment —— 含 M1 失败结论（§E1）、语义级探索证伪（§E1）、E3 技能蒸馏设计（§E3）
+14. 作者 (2026). *AGI 实验方案*。https://github.com/QiongZhiS/agi-experiment —— 含 M1 失败结论（§E1）、语义级探索证伪（§E1）、经验蒸馏设计（§E3）
 
 ---
 
@@ -134,5 +134,5 @@ SkillsBench（2026）给出了第一个可参考的实证锚点：在 87 个任�
 
 - 定义核心（行为倾向、解决问题能力）由作者提出（原始表述："技能是用解决问题的能力"），形式化为本定义
 - 形式化（限定、判据/构成分层、测量协议）与文献对照由作者在 AI 辅助下完成
-- 定义已在作者的开源实验中作为 E3 技能蒸馏实验的判据基础（见 [14]）
+- 定义已在作者的开源实验（见 [14]，实验 E3：经验蒸馏）中作为判据基础
 - 欢迎证伪与批评。联系：https://github.com/QiongZhiS/agi-experiment
