@@ -12,7 +12,8 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
 
 | Path | Contents |
 |---|---|
-| `docs/` | Experiment proposal (public version) · Operational definition of *skill* |
+| `docs/experiment-proposal.md` | Experiment proposal (public version) · 实验方案公开版 |
+| `docs/skill-definition.md` | Operational definition of *skill* · 技能操作定义 |
 | `src/` | Experiment code (M0/M1 milestone scripts) + upstream TRM models |
 | `src/results/` | Raw result JSONs — reproducible evidence, including negative results |
 
@@ -68,8 +69,8 @@ Requires: Python 3.11, CUDA 12.x, ~8GB VRAM (or CPU, slower).
 
 ```
 docs/
-  实验方案.md        Experiment proposal (public) — hypotheses, criteria, pre-registration
-  技能操作定义.md    Operational definition of skill — proposal, falsifiable
+  experiment-proposal.md  Experiment proposal (public) — hypotheses, criteria, pre-registration
+  skill-definition.md     Operational definition of skill — proposal, falsifiable
 src/
   m0_*.py m1_*.py   Milestone experiment scripts
   models/           TRM upstream (Samsung MIT) + experiment models
@@ -83,7 +84,3 @@ src/
 - **Code** (this repo's scripts): MIT — see `LICENSE`
 - **Upstream TRM code** (`src/models/recursive_reasoning/`): MIT, © Samsung Electronics — see `src/TRM-LICENSE.txt`
 - **Documents** (`docs/`): CC-BY 4.0
-
-## Contact
-
-Lumen — https://github.com/QiongZhiS
