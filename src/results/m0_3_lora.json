@@ -1,0 +1,9 @@
+{
+  "ckpt": "checkpoints/Sudoku-extreme-1k-aug-100-ACT-torch/TinyRecursiveReasoningModel_ACTV1 precise-muskox/step_23437",
+  "rank": 16,
+  "lr": 0.0003,
+  "steps": 1000,
+  "exact": 0.375,
+  "cell": 0.7847530841827393,
+  "baseline_exact": 0.33
+}

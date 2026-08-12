@@ -1,0 +1,56 @@
+{
+  "K": 30,
+  "D": 48,
+  "n": 500,
+  "ref_K1_D48_exact": 0.478,
+  "sigma=0.0": {
+    "ese_vote_exact": 0.478,
+    "paired_base_exact": 0.476,
+    "mean_unique_variants": 1.79,
+    "pct_single_variant_puzzles": 0.516,
+    "consistent_subset_acc": 0.5969,
+    "inconsistent_subset_acc": 0.3471,
+    "pools": {
+      "pool1-1": {
+        "n": 132,
+        "base_acc": 0.5455,
+        "vote_acc": 0.5455
+      },
+      "pool2-2": {
+        "n": 163,
+        "base_acc": 0.454,
+        "vote_acc": 0.454
+      },
+      "pool3-99": {
+        "n": 205,
+        "base_acc": 0.4488,
+        "vote_acc": 0.4537
+      }
+    }
+  },
+  "sigma=0.2": {
+    "ese_vote_exact": 0.486,
+    "paired_base_exact": 0.472,
+    "mean_unique_variants": 2.59,
+    "pct_single_variant_puzzles": 0.236,
+    "consistent_subset_acc": 0.7712,
+    "inconsistent_subset_acc": 0.3796,
+    "pools": {
+      "pool1-1": {
+        "n": 132,
+        "base_acc": 0.5227,
+        "vote_acc": 0.5682
+      },
+      "pool2-2": {
+        "n": 163,
+        "base_acc": 0.4601,
+        "vote_acc": 0.4479
+      },
+      "pool3-99": {
+        "n": 205,
+        "base_acc": 0.4488,
+        "vote_acc": 0.4634
+      }
+    }
+  }
+}

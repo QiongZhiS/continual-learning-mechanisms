@@ -1,0 +1,32 @@
+{
+  "ckpt": "checkpoints/Sudoku-extreme-1k-aug-100-ACT-torch/TinyRecursiveReasoningModel_ACTV1 precise-muskox/step_23437",
+  "n_puzzles": 200,
+  "seed": 0,
+  "curves": {
+    "K=1": {
+      "D": 16,
+      "sigma": 0.0,
+      "exact_match": 0.33,
+      "cell_acc": 0.7678,
+      "seconds": 8.7,
+      "gpu_mem_MB": 598
+    },
+    "K=10": {
+      "D": 48,
+      "sigma": 0.2,
+      "exact_match": 0.365,
+      "cell_acc": 0.7758,
+      "seconds": 261.1,
+      "gpu_mem_MB": 1487
+    },
+    "K=100": {
+      "D": 48,
+      "sigma": 0.2,
+      "exact_match": 0.38,
+      "cell_acc": 0.7792,
+      "seconds": 2621.3,
+      "gpu_mem_MB": 1456
+    }
+  },
+  "deviation_note": "AdamW 替换 adam-atan2; 数据缩 10x; 步数缩 ~15x"
+}

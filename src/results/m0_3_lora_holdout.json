@@ -1,0 +1,28 @@
+{
+  "sub": 2000,
+  "holdout_range": [
+    10000,
+    10500
+  ],
+  "steps": 500,
+  "rows": {
+    "baseline_23437": {
+      "test_exact": 0.32999998331069946,
+      "test_cell": 0.7678394913673401,
+      "holdout_exact": 0.3060000240802765,
+      "holdout_cell": 0.7715061902999878
+    },
+    "lora_sub2000": {
+      "test_exact": 0.3799999952316284,
+      "test_cell": 0.7811728119850159,
+      "holdout_exact": 0.37400001287460327,
+      "holdout_cell": 0.7879259586334229
+    },
+    "full_sub2000(human-label)": {
+      "test_exact": 0.35499998927116394,
+      "test_cell": 0.7690740823745728,
+      "holdout_exact": 0.41600000858306885,
+      "holdout_cell": 0.7957284450531006
+    }
+  }
+}

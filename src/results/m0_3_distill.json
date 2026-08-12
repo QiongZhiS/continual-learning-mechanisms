@@ -1,0 +1,18 @@
+{
+  "self_ok_rate": 0.3045,
+  "results": [
+    {
+      "tag": "self-distill",
+      "exact": 0.16499999165534973,
+      "cell": 0.7105555534362793
+    },
+    {
+      "tag": "human-label",
+      "exact": 0.35499998927116394,
+      "cell": 0.7690740823745728
+    }
+  ],
+  "baseline": 0.33,
+  "steps": 500,
+  "n_sample": 2000
+}

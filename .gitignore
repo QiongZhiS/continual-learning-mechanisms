@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Experiments / artifacts (never commit large binaries)
+*.pt
+*.ckpt
+checkpoints/
+outputs/
+data/
+kaggle/
+
+# Environment / secrets
+.env
+wandb/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Editors
+.idea/
+.vscode/

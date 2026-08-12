@@ -1,0 +1,11 @@
+{
+  "K": 30,
+  "D": 48,
+  "sigma": 0.2,
+  "n": 500,
+  "q_select_exact": 0.49,
+  "majority_vote_exact": 0.478,
+  "vote_q_tiebreak_exact": 0.48,
+  "ref_K1_D48_exact": 0.478,
+  "ref_q_select_K10_exact": 0.476
+}

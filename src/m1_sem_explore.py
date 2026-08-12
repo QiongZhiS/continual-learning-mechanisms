@@ -1,0 +1,235 @@
+"""M1 语义级探索（E1 失败分支行动 B）：等价语义扰动（ESE）多数表决
+
+失败机制（已证伪前因）：域 B 的 z_L 噪声 = 同质抖动（rollout 间无增量信息，
+投票 0.478 = 深扩展基线）。未判别的问题：**模型的错误是"输入位置性的"
+（对 token 位置/操作数顺序敏感）还是"规则性的"（学错了规则）**。
+
+ESE 判别设计：对程序 P 做 K 个**语义等价扰动**（加法交换律交换 ADD 子树，
+答案数学上不变），每个变体 rollout D=48，多数表决。
+- ESE 表决 > K=1 D=48 基线（0.478）→ 错误是输入位置性的，语义扰动打破
+  系统性 → 语义级探索有效（输入侧扰动是域无关的探索载体）
+- ≈ 基线 → 错误是规则性的（模型对等价程序同样错），输入侧扰动救不了
+  → 语义级探索失效，失败是根本性的（需训练侧修复）
+
+对照：σ=0 纯语义 / σ=0.2 语义 + latent 混合（z_L 噪声在变体上是否叠加增益）。
+变体等价性由独立栈求值器在冒烟阶段验证（变体答案必须 == 原答案）。
+"""
+import json
+import os
+import sys
+import time
+
+import numpy as np
+import torch
+
+from eval_ptrm import load_test_data, load_model
+
+CKPT = "outputs/2026-08-10/m1_domainB/step_4000"
+DATA = "../data/domain-b-rpn"
+OUT = "outputs/2026-08-10/m1_domainB/sem_explore.json"
+K, D, N = 30, 48, 500
+CHUNK = 10
+ADD, SUB, PAD = 10, 11, 12
+
+
+class Node:
+    """op < 10 = 叶子值；op ∈ {ADD, SUB} = 内部节点"""
+    __slots__ = ("op", "left", "right")
+
+    def __init__(self, op, left=None, right=None):
+        self.op, self.left, self.right = op, left, right
+
+
+def parse(seq):
+    """RPN token → AST（栈机逆推；程序保证单根）"""
+    stack = []
+    for t in seq:
+        if t == PAD:
+            break
+        if t in (ADD, SUB):
+            r, l = stack.pop(), stack.pop()
+            stack.append(Node(t, l, r))
+        else:
+            stack.append(Node(int(t)))
+    return stack[0]
+
+
+def serialize(node):
+    """AST → RPN token 列表（与 m1_gen_domainB.fill 一致：左 + 右 + op）"""
+    if node.op < 10:
+        return [node.op]
+    return serialize(node.left) + serialize(node.right) + [node.op]
+
+
+def stack_eval(seq):
+    """独立栈求值器（冒烟验证变体等价性用；与 fill 的递归实现不同源）"""
+    st = []
+    for t in seq:
+        if t in (ADD, SUB):
+            b, a = st.pop(), st.pop()
+            st.append(a + b if t == ADD else a - b)
+        else:
+            st.append(int(t))
+    return st[0]
+
+
+def collect_add(node, acc):
+    if node.op == ADD:
+        collect_add(node.left, acc)
+        collect_add(node.right, acc)
+        acc.append(node)
+    elif node.op == SUB:
+        collect_add(node.left, acc)
+        collect_add(node.right, acc)
+    return acc
+
+
+def copy_tree(node):
+    if node.op < 10:
+        return Node(node.op)
+    return Node(node.op, copy_tree(node.left), copy_tree(node.right))
+
+
+def random_walk(node, add_nodes, steps, rng):
+    """随机游走 steps 步，每步随机选一个 ADD 节点交换左右子树"""
+    out = copy_tree(node)
+    for _ in range(steps):
+        target = add_nodes[rng.integers(len(add_nodes))]
+        target.left, target.right = target.right, target.left
+    return out
+
+
+def variants(node, K, rng):
+    """K 个变体，**第 0 个 = 原程序**（= K=1 D=48 配对基线），其余 = 互异
+    随机游走变体（1-3 步，扰动空间 = ADD 节点组合）。无 ADD 节点（如
+    `a b -`）→ 变体池只有原程序，如实填充（语义探索对该谜题结构性不可用，
+    由调用方以 pool_size 分层报告）。返回 (variants, pool_size)。"""
+    adds = collect_add(node, [])
+    out, seen = [node], {tuple(serialize(node))}
+    max_steps = min(3, len(adds))
+    guard = 0
+    while len(out) < K and guard < 20 * K:
+        guard += 1
+        if max_steps == 0:
+            break  # 无 ADD：只用原程序
+        t = random_walk(node, adds, rng.integers(1, max_steps + 1), rng)
+        s = tuple(serialize(t))
+        if s not in seen:
+            seen.add(s)
+            out.append(t)
+    while len(out) < K:
+        out.append(node)  # 扰动空间穷尽，填充原程序
+    return out, len(seen)
+
+
+def encode_variants(vs):
+    arr = np.full((len(vs), 81), PAD, dtype=np.int64)
+    for i, v in enumerate(vs):
+        s = serialize(v)
+        arr[i, :len(s)] = s
+    return arr
+
+
+def run_sigma(model, inputs, ids, labels0, sigma, rng):
+    """K 个语义变体 rollout + 多数表决。
+    返回 (acc_vote, pred0, pool_sizes)；pred0[:,0] = 原程序 rollout（配对基线）"""
+    N0 = inputs.shape[0]
+    pred0 = np.zeros((N0, K), dtype=np.int64)
+    pool = np.zeros(N0, dtype=np.int64)
+    t0 = time.time()
+    with torch.inference_mode():
+        for start in range(0, N0, CHUNK):
+            bs = min(CHUNK, N0 - start)
+            vlist = [variants(parse(inputs[i].cpu().numpy()), K, rng)
+                     for i in range(start, start + bs)]
+            vs = [v for v, _ in vlist]
+            pool[start:start + bs] = [p for _, p in vlist]
+            b = np.concatenate([encode_variants(v) for v in vs], axis=0)
+            batch = {
+                "inputs": torch.tensor(b, dtype=torch.int64, device="cuda"),
+                "puzzle_identifiers": ids[start:start + bs].repeat_interleave(K),
+            }
+            with torch.device("cuda"):
+                carry = model.initial_carry(batch)
+            for _ in range(D):
+                if sigma > 0:
+                    carry.inner_carry.z_L = carry.inner_carry.z_L + \
+                        sigma * torch.randn_like(carry.inner_carry.z_L)
+                carry, outputs = model(carry, batch)
+            pred0[start:start + bs] = \
+                outputs["logits"].argmax(-1)[:, 0].view(bs, K).cpu().numpy()
+    print(f"  sigma={sigma} rollouts done ({time.time()-t0:.0f}s)", flush=True)
+
+    vote = np.array([np.bincount(pred0[i], minlength=13).argmax()
+                     for i in range(N0)])
+    n_unique = np.array([len(np.unique(pred0[i])) for i in range(N0)])
+    return (vote == labels0).mean(), pred0, pool, n_unique
+
+
+def main():
+    N_use = int(sys.argv[1]) if len(sys.argv) > 1 else N
+    meta = json.load(open(f"{DATA}/dataset.json"))
+    inputs, labels, ids, idx = load_test_data(DATA, N_use, 0)
+    labels0 = labels[:, 0].cpu().numpy()
+    model = load_model(CKPT, "config/arch/trm.yaml", meta["vocab_size"],
+                       meta["seq_len"], meta["num_puzzle_identifiers"])
+    model.config.halt_max_steps = D
+
+    rng = np.random.default_rng(0)
+
+    # 冒烟自检（N=20）：parse/serialize 往返 + 变体等价性（独立求值器）
+    bad_roundtrip = bad_equiv = 0
+    for i in range(20):
+        toks = inputs[i].cpu().numpy()
+        toks = toks[toks != PAD]
+        if serialize(parse(toks)) != list(toks):
+            bad_roundtrip += 1
+        ans = stack_eval(toks)
+        if ans != labels0[i]:
+            raise AssertionError(f"puzzle {i}: data mismatch {ans} vs {labels0[i]}")
+        vs, _ = variants(parse(toks), 5, rng)
+        for v in vs:
+            if stack_eval(serialize(v)) != ans:
+                bad_equiv += 1
+    print(f"smoke: roundtrip_bad={bad_roundtrip} equiv_bad={bad_equiv} "
+          f"(n=20, 变体必须与原程序答案一致)", flush=True)
+    assert bad_roundtrip == 0 and bad_equiv == 0, "ESE 前置条件失败"
+
+    results = {"K": K, "D": D, "n": N_use,
+               "ref_K1_D48_exact": 0.478}  # M1c K 曲线（同 eval 集）
+    for sigma in (0.0, 0.2):
+        acc, pred0, pool, n_unique = run_sigma(model, inputs, ids, labels0,
+                                               sigma, rng)
+        cons = n_unique == 1
+        r = {
+            "ese_vote_exact": round(float(acc), 4),
+            "paired_base_exact": round(float((pred0[:, 0] == labels0).mean()), 4),
+            "mean_unique_variants": round(float(n_unique.mean()), 2),
+            "pct_single_variant_puzzles": round(float(cons.mean()), 3),
+            "consistent_subset_acc": round(float((pred0[cons, 0] == labels0[cons]).mean()), 4),
+            "inconsistent_subset_acc": round(float((pred0[~cons, 0] == labels0[~cons]).mean()), 4),
+            "pools": {},
+        }
+        # 变体池大小分层（配对：同谜题上 原程序 rollout vs 表决）
+        for lo, hi in [(1, 1), (2, 2), (3, 99)]:
+            m = (pool >= lo) & (pool <= hi)
+            if m.sum() == 0:
+                continue
+            v = np.array([np.bincount(pred0[i], minlength=13).argmax()
+                          for i in np.where(m)[0]])
+            r["pools"][f"pool{lo}-{hi}"] = {
+                "n": int(m.sum()),
+                "base_acc": round(float((pred0[m, 0] == labels0[m]).mean()), 4),
+                "vote_acc": round(float((v == labels0[m]).mean()), 4),
+            }
+        results[f"sigma={sigma}"] = r
+        print(json.dumps({f"sigma={sigma}": r}, indent=2), flush=True)
+        if sigma == 0.0:  # 明细落盘，供后续分析
+            np.savez("outputs/2026-08-10/m1_domainB/sem_explore_detail.npz",
+                     pred0=pred0, pool=pool, labels0=labels0)
+    json.dump(results, open(OUT, "w"), indent=2)
+    print("saved -> " + OUT, flush=True)
+
+
+if __name__ == "__main__":
+    main()
