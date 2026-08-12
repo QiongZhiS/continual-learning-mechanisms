@@ -86,4 +86,4 @@ src/
 
 ## Contact
 
-Lumen — https://github.com/lumen (placeholder until public)
+Lumen — https://github.com/QiongZhiS
