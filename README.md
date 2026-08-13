@@ -18,6 +18,7 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
 | `docs/skill-definition.md` | Operational definition of *skill* — proposal, falsifiable |
 | `docs/results-m1.md` | M1 negative result — full localization report |
 | `docs/why-not-measure-faster.md` | Position paper — why continual learning should measure "getting faster", not only "not forgetting" |
+| `docs/social-intelligence-experiment.md` | Social intelligence — falsifiable operational definition + experiment preregistration (frozen) |
 | `src/` | Experiment code (M0/M1 milestone scripts) + upstream TRM models |
 | `src/results/` | Raw result JSONs — reproducible evidence, including negative results |
 
