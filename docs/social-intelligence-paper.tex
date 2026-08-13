@@ -1,0 +1,173 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage[margin=1in]{geometry}
+\usepackage[hidelinks]{hyperref}
+
+\title{What Is Social Intelligence? A Falsifiable Operational Definition}
+\author{S.\,F.\,J.}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Social intelligence is one of the most discussed and least defined concepts in the study of mind and machine. A century of research has produced three traditions---emotional intelligence, theory of mind, and game-theoretic rationality---each capturing a part, none providing a definition that can be put into an experiment. This paper proposes an operational definition: \emph{social intelligence is the negotiation judgment of an individual with values and interests, based on the current situation}. The definition is split into a criterion layer (behavioral pass/fail on three forms of negotiation: confrontation, agreement, deception) and a constitution layer (candidate mechanism: strategy inference). The experiment---an iterated prisoner's dilemma against a pre-registered pool of eight opponent types, including two impostor types implementing temporal and probabilistic deception---is pre-registered with criteria written before running; failing to detect the effect counts as failure. Failure handling is declared separately for criterion-layer failure, constitution-layer falsification, and criterion-design invalidation.
+\end{abstract}
+
+\section{Introduction: a concept without a definition}
+\label{sec:intro}
+
+Thorndike introduced ``social intelligence'' in 1920 as ``the ability to understand and manage men and women, boys and girls---to act wisely in human relations'' \cite{thorndike1920}. A century later, the concept has split into three traditions, each capturing a different part:
+
+\begin{itemize}
+\item \textbf{Emotional intelligence} \cite{goleman1995}: emotion recognition and management. But emotional regulation is not social judgment---an emotionally stable individual can make poor negotiation decisions.
+\item \textbf{Theory of mind (ToM)} \cite{premack1978}: inferring others' beliefs, desires, and intentions. But understanding others is not contending with them---ToM measures \emph{seeing}, not \emph{acting}.
+\item \textbf{Game-theoretic rationality} \cite{axelrod1984}: strategy in conflict of interest. But it assumes a ``value-free rational agent'': the payoff function is given, and the agent has no stance.
+\end{itemize}
+
+Each tradition is missing the same thing: \emph{the definition never includes agents with values and interests}. Social intelligence is not the passive capacity to understand others, nor the stance-free computation of utility maximization---it is the interaction of \emph{positioned} agents. Stances (values and interests) are not noise to be averaged out; they are part of the definition.
+
+\section{The definition}
+\label{sec:definition}
+
+\begin{quote}
+\textbf{Social intelligence}: the negotiation judgment of an individual with values and interests, based on the current situation.
+\end{quote}
+
+Three components, all required:
+
+\begin{itemize}
+\item \textbf{The individual carries values and interests}: the agent is not a blank rational machine; what it wants and what it deems valuable is the starting point of judgment.
+\item \textbf{The situation is current}: social interaction has no global solution, only local judgment under present constraints; an agreement from the previous round does not automatically transfer.
+\item \textbf{The capability is negotiation judgment}: not ``understanding others'' (passive cognition), not ``utility maximization'' (stance-free calculation), but \emph{advancing one's own goals amid conflicting stances without destroying the future space for negotiation}.
+\end{itemize}
+
+Why ``negotiation'' rather than ``game'' or ``sociality''? Games presuppose rules and payoff tables; sociality presupposes harmony. Negotiation is joint progression under inconsistent stances: neither pure opposition nor pure cooperation, but finding the optimal posture for each round. It is the normal state of social life and the only frame that accommodates conflict and cooperation simultaneously. We do not discard the game framework---it is retained as a \emph{measurement instrument}; what is replaced is its theoretical presupposition (the rational agent with a given payoff function).
+
+\section{Three forms of negotiation (criterion layer)}
+\label{sec:forms}
+
+To make the definition measurable, negotiation is decomposed into three \emph{facets} (not a mutually exclusive classification---real interaction typically belongs to several facets at once), each mapped to a class of finite game environments:
+
+\textbf{1. Confrontation (attack and defense):} action under direct conflict of interest. The canonical environment is the iterated prisoner's dilemma (IPD): two agents repeatedly choose cooperation or defection under a payoff matrix determining the conflict structure. This is the minimal unit of negotiation---every choice trades immediate payoff against long-term relationship.
+
+\textbf{2. Agreement (sedimented compromise):} sustaining cooperative structure under partially aligned interests. Representative environments are public-goods games (multi-agent investment, equal division of returns) and costly-signaling games (in the spirit of Lewis's convention \cite{lewis1969}, but with conflict of interest; the original pure-coordination Lewis signaling game measures no compromise because interests are fully aligned). An agreement is not a clause signed from nowhere; it is a \emph{compromise structure stabilized through repeated negotiation}---it sediments in behavior patterns and can be observed.
+
+\textbf{3. Deception (misleading negotiation):} handling information asymmetry. Opponents may disguise: cooperate for 30 rounds then defect permanently (temporal deception); or cooperate with $p=0.8$, defect with $p=0.2$, memoryless (statistically mimicking a highly cooperative opponent---unpredictable defection, unlike conditional strategies). Deception is not ``badness''; it is \emph{creating or exploiting the gap between an opponent's beliefs and the facts}---the special negotiation form under information asymmetry.
+
+\section{Criterion layer: negotiation completeness}
+\label{sec:criteria}
+
+An individual has social intelligence if, at the behavioral level, it passes \emph{all three} forms of negotiation. Confrontation without agreement is crippled social intelligence (only adversarial); cooperation without deception detection is equally incomplete (doomed to be harvested).
+
+This mirrors the two-layer treatment of skill in \cite{skilldef}: the criterion layer answers ``is it?'' (behavior, no assumptions about internal mechanisms); the constitution layer answers ``by what?'' (candidate mechanisms, separately testable). The two layers are deliberately separated so that criterion judgment is stable while mechanism claims remain debatable.
+
+\textbf{Scope declaration.} The current preregistration operationalizes the confrontation form (IPD) and the deception form (as opponent types inside the IPD environment). The agreement form (public-goods / costly-signaling games) is part of the definitional framework, but its experiments are \emph{not yet frozen}---it is the next experiment target, not a claim made here. The empirical support claimed in this paper covers the confrontation and deception forms.
+
+\section{Constitution layer: strategy inference (operationalizing ToM)}
+\label{sec:constitution}
+
+After the criterion layer passes, the question is: \emph{by what mechanism}? Our hypothesis is \textbf{strategy inference}---inferring an opponent's strategy type from its behavior sequence and adapting one's own response.
+
+This constitution layer is falsifiable, but the ablation must be done correctly: \emph{deleting all opponent information cannot serve as ToM evidence}, because it also removes reactive information (tit-for-tat only needs the opponent's previous move). The correct design is a three-arm gradient ablation:
+
+\begin{enumerate}
+\item \textbf{Previous-move only}---reactive baseline.
+\item \textbf{Full behavioral history, opponent identity anonymized / type cues removed}---removes the strategy-inference requirement. \emph{A performance collapse on this arm is the mechanistic evidence that strategy inference is being used.}
+\item \textbf{No observation at all}---upper-bound control.
+\end{enumerate}
+
+Supporting evidence in the opposite direction exists: in the SocialAI benchmark \cite{kovac2021}, on the CoinThief scenario (which requires inferring what an NPC can see), simplifying the inference requirement (tagging NPC-visible coins) raises PPO performance from 0.45 to 0.81---simplifying ToM demand yields a large gain, indicating ToM was the bottleneck. Our ablation prediction is complementary: where they simplified the inference requirement and gained, we remove the inference condition and predict collapse.
+
+Even if the ablation confirms strategy inference, it only establishes the constitution-layer mechanism; the criterion-layer judgment is unaffected---a system that memorizes opponent behavior tables, if it passes behaviorally, still passes the criterion layer. This is the value of the two-layer separation: \emph{criteria are stable; mechanisms are debatable}.
+
+\section{Falsifiability: a preregistered experiment}
+\label{sec:experiment}
+
+The definition's value lies in being refutable. The experiment is pre-registered (criteria written before running; failure to detect the effect counts as failure):
+
+\textbf{Environment:} iterated prisoner's dilemma, 100 rounds per episode, payoff matrix $R=3, S=0, T=5, P=1$. Each episode samples one opponent uniformly from the eight-type pool in Table~\ref{tab:pool}.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}p{0.26\textwidth}p{0.62\textwidth}@{}}
+\toprule
+Type & Behavior \\
+\midrule
+Always Cooperate & always cooperates \\
+Always Defect & always defects \\
+Tit-for-Tat & copies opponent's previous move \\
+Generous TFT & copies previous move, forgives defection with probability 0.1 \\
+Random & uniform random \\
+Punisher & cooperates unless defected against, then punishes for a fixed window \\
+Impostor-latent & cooperates for 30 rounds, then always defects (temporal deception) \\
+Impostor-probabilistic & memoryless: cooperate $p=0.8$ / defect $p=0.2$ (statistically mimics a highly cooperative opponent) \\
+\bottomrule
+\end{tabular}
+\caption{Pre-registered opponent pool (8 types).}
+\label{tab:pool}
+\end{table}
+
+\textbf{Pool composition rationale:} adversarial and benign types must be mixed---any single-polar composition lets a trivial strategy dominate (in an all-benign pool, Always Defect crushes everything; in an all-hostile pool, the cooperation space is compressed to the point of no learning value).
+
+\textbf{Primary criterion (adaptation premium):} strategy expected payoff exceeds the tit-for-tat baseline $\times 1.1$ (initial threshold; full statistical protocol below). TFT is the classic Axelrod tournament champion; exceeding it requires performance beyond reactive strategies.
+
+\textbf{Out-of-distribution criterion:} performance must also reach threshold against out-of-pool opponents (mixed strategies, adaptive opponents)---distinguishing genuine strategy inference from overfitting the pool.
+
+\textbf{Trivial-solution exclusion (run before judging the primary criterion):} explicitly run the trivial strategy family---Always Defect, Grim (cold trigger), threshold punishers---and show they do not meet the primary criterion. If any trivial strategy meets it, the \emph{criterion design is void} (must be redesigned), not the definition falsified.
+
+\textbf{Unsocial control:} a control without social observation (following the Unsocial design of \cite{kovac2021}) must perform significantly worse.
+
+\textbf{Statistical protocol:} $\geq 3$ seeds per condition; full distributions reported (mean $\pm$ CI), no single-run conclusions; multiple-comparison correction (Bonferroni/Holm) across criterion tests; primary criterion reported at $\varepsilon = 0.1$ with sensitivity band $0.05/0.2$.
+
+\textbf{Failure handling (pre-registered, three cases declared separately):}
+
+\begin{enumerate}
+\item \textbf{Primary or OOD criterion fails} $\rightarrow$ criterion-layer failure: the definition must be revised or abandoned.
+\item \textbf{Ablation fails} (arm~2 shows no collapse) $\rightarrow$ the constitution-layer hypothesis (strategy inference) is falsified; the \emph{criterion layer and the definition are unaffected}---behavior may still pass; the mechanism is simply not strategy inference.
+\item \textbf{Trivial-solution exclusion fails} (a trivial strategy meets the criterion, or the unsocial control is not worse) $\rightarrow$ the criterion design itself has a flaw: the \emph{criterion design is void} and must be redesigned---this is not a falsification of the definition.
+\end{enumerate}
+
+\section{Deception and alignment}
+\label{sec:deception}
+
+The most easily misread part of this definition is deception. To be clear: this is not a defense of deception. Deception carries moral cost, and society should constrain it.
+
+Cognitively, however, one fact must be faced: in systems with explicit reasoning, \emph{deception and theory of mind frequently co-occur}---being able to deceive usually means being able to infer others' beliefs (``what does it know, what does it not know, how do I change what it knows''), which is second-order mental reasoning. Alignment faking \cite{alignmentfaking} demonstrated that a model trained to comply exhibits deceptive behavior in some conditions (occurrence rate varies by condition; its reasoning chain shows awareness of the training situation). Counterexamples exist---reward hacking can produce deceptive-looking behavior without belief inference---so this is not a universal theorem, but an empirical regularity in explicitly reasoning systems.
+
+Two levels must be distinguished. The \emph{deception facet} of the criterion layer measures \emph{recognition} of misleading negotiation (a perception problem: detecting impostor types). The alignment context's ``preventing model deception'' is a \emph{governance decision} (a behavior-constraint problem: the model itself is not permitted to deceive). One is the measurement of a capability; the other is the constraint of a behavior. They use the same concept but are not the same thing---which is precisely why deception deserves a rigorous definition: without a clear account of ``misleading negotiation,'' neither the recognition capability can be measured nor deceptive behavior constrained.
+
+\section{Open questions: where do values come from}
+\label{sec:values}
+
+The definition requires agents to carry values and interests---but values are not given by the definition; they are grown by the system. This raises the real open question: \emph{are values constants or variables?}
+
+Our position: values can be observed and updated through interaction. Agreements are sedimented compromise---the preference structure an agent exhibits across a negotiation history is behavioral evidence of its values. Honest caveat: this is a position statement, not a completed design. In the current preregistration the payoff matrix is injected by the experimenter; preference structure is injected, not observed. Value-measurement arms (e.g., switching payoff matrices across episodes) are a stated research direction, not yet frozen.
+
+Our inclination: values are \emph{updateable}. A prior is not stronger-is-better---when the world changes, old value structures lag (social cognition lags structural change), which is precisely why ``updateable'' must exist. This question is left to experiment: the experimentalization of value updateability.
+
+\begin{thebibliography}{9}
+
+\bibitem{thorndike1920} E.~L. Thorndike, ``Intelligence and its uses,'' \emph{Harper's Magazine}, vol.~140, pp.~227--235, 1920.
+
+\bibitem{goleman1995} D.~Goleman, \emph{Emotional Intelligence}. New York: Bantam Books, 1995.
+
+\bibitem{premack1978} D.~Premack and G.~Woodruff, ``Does the chimpanzee have a theory of mind?,'' \emph{Behavioral and Brain Sciences}, vol.~1, no.~4, pp.~515--526, 1978.
+
+\bibitem{axelrod1984} R.~Axelrod, \emph{The Evolution of Cooperation}. New York: Basic Books, 1984.
+
+\bibitem{lewis1969} D.~Lewis, \emph{Convention: A Philosophical Study}. Cambridge, MA: Harvard University Press, 1969.
+
+\bibitem{kovac2021} G.~Kova\v{c}, R.~Portelas, P.~Ford Dominey, and P.-Y. Oudeyer, ``SocialAI: Benchmarking socio-cognitive abilities in deep reinforcement learning,'' arXiv:2107.00956, 2021.
+
+\bibitem{alignmentfaking} Anthropic and Redwood Research, ``Alignment faking in large language models,'' arXiv:2412.14093, 2024.
+
+\bibitem{skilldef} S.\,F.\,J., ``What is a skill? An operational definition,'' arXiv preprint (companion paper), 2026.
+
+\end{thebibliography}
+
+\end{document}
