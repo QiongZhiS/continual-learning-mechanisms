@@ -1,0 +1,148 @@
+{
+  "features": {
+    "A-sudoku": [
+      1.8840396981758194,
+      6.339850002884626,
+      1.0,
+      0.0,
+      3.1697214263656797,
+      10.0
+    ],
+    "B-rpn": [
+      3.0178147679155924,
+      3.744640864216832,
+      0.1019111111111111,
+      3.2371980219662038,
+      3.1713349082463993,
+      13.0
+    ],
+    "C-combo": [
+      3.5047860125552335,
+      1.0,
+      0.024691358024691357,
+      0.0,
+      2.886842188131012,
+      13.0
+    ],
+    "D-ipd": [
+      1.528536346326361,
+      4.5226558529437595,
+      0.2699320987654321,
+      2.746632232777788,
+      0.94841934195439,
+      11.0
+    ],
+    "E1-prefix": [
+      2.9558220595762466,
+      3.744640864216832,
+      0.1019111111111111,
+      3.2371980219662038,
+      2.779814944334366,
+      13.0
+    ],
+    "E2-signal": [
+      3.5500064912139004,
+      3.4594316186372978,
+      0.13580246913580246,
+      0.0,
+      3.321341590366532,
+      13.0
+    ],
+    "E3-latin": [
+      3.1699199130631985,
+      6.338446862906557,
+      0.39387530864197534,
+      0.768794762263545,
+      3.1697428840751627,
+      10.0
+    ]
+  },
+  "feature_names": [
+    "token_entropy",
+    "pos_entropy",
+    "fill_rate",
+    "log1p_len_var",
+    "label_entropy",
+    "vocab_used"
+  ],
+  "z_norm": true,
+  "metric": "euclidean on z-scored features",
+  "distance_matrix": {
+    "A-sudoku": {
+      "A-sudoku": 0.0,
+      "B-rpn": 4.782,
+      "C-combo": 5.434,
+      "D-ipd": 4.399,
+      "E1-prefix": 4.782,
+      "E2-signal": 4.548,
+      "E3-latin": 2.677
+    },
+    "B-rpn": {
+      "A-sudoku": 4.782,
+      "B-rpn": 0.0,
+      "C-combo": 2.858,
+      "D-ipd": 3.919,
+      "E1-prefix": 0.518,
+      "E2-signal": 2.357,
+      "E3-latin": 3.316
+    },
+    "C-combo": {
+      "A-sudoku": 5.434,
+      "B-rpn": 2.858,
+      "C-combo": 0.0,
+      "D-ipd": 4.933,
+      "E1-prefix": 2.858,
+      "E2-signal": 1.588,
+      "E3-latin": 4.085
+    },
+    "D-ipd": {
+      "A-sudoku": 4.399,
+      "B-rpn": 3.919,
+      "C-combo": 4.933,
+      "D-ipd": 0.0,
+      "E1-prefix": 3.51,
+      "E2-signal": 4.855,
+      "E3-latin": 4.139
+    },
+    "E1-prefix": {
+      "A-sudoku": 4.782,
+      "B-rpn": 0.518,
+      "C-combo": 2.858,
+      "D-ipd": 3.51,
+      "E1-prefix": 0.0,
+      "E2-signal": 2.479,
+      "E3-latin": 3.361
+    },
+    "E2-signal": {
+      "A-sudoku": 4.548,
+      "B-rpn": 2.357,
+      "C-combo": 1.588,
+      "D-ipd": 4.855,
+      "E1-prefix": 2.479,
+      "E2-signal": 0.0,
+      "E3-latin": 3.002
+    },
+    "E3-latin": {
+      "A-sudoku": 2.677,
+      "B-rpn": 3.316,
+      "C-combo": 4.085,
+      "D-ipd": 4.139,
+      "E1-prefix": 3.361,
+      "E2-signal": 3.002,
+      "E3-latin": 0.0
+    }
+  },
+  "gradient_frozen": {
+    "anchor": "B-rpn",
+    "near_to_far": [
+      "B-rpn",
+      "E1-prefix",
+      "E2-signal",
+      "C-combo",
+      "E3-latin",
+      "D-ipd",
+      "A-sudoku"
+    ],
+    "note": "M0.4 delivery freeze (v0.7 domain-sequence preregistration); E6a ordering uses this"
+  }
+}

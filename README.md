@@ -8,7 +8,7 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
 
 - **Scale**: ~7M parameter recursive reasoning models (TRM), single consumer GPU (RTX 4060)
 - **Method**: pre-registered experiments, budget-matched controls, honest negative results
-- **Status**: M0 baseline complete (M0.4 domain C/D generators in progress — no results archived yet); M1 (exploration mechanism) main criterion failed in the symbolic domain — negative result fully localized, redesign in progress
+- **Status**: M0 complete — M0.4 domain-sequence generators delivered (domains B/C/D/E instantiated, inter-domain similarity matrix frozen, see `results/domain_distance.json`); M1 (exploration mechanism) main criterion failed in the symbolic domain — negative result fully localized and independently re-run verified; redesign in progress
 
 ## What this repo is
 
@@ -16,6 +16,8 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
 |---|---|
 | `docs/experiment-proposal.md` | Experiment proposal — hypotheses, criteria, pre-registration |
 | `docs/skill-definition.md` | Operational definition of *skill* — proposal, falsifiable |
+| `docs/results-m1.md` | M1 negative result — full localization report |
+| `docs/why-not-measure-faster.md` | Position paper — why continual learning should measure "getting faster", not only "not forgetting" |
 | `src/` | Experiment code (M0/M1 milestone scripts) + upstream TRM models |
 | `src/results/` | Raw result JSONs — reproducible evidence, including negative results |
 
@@ -51,6 +53,10 @@ If not — if experience cannot be turned into reusable skill — that is also a
 - LoRA fine-tuning viable (+4.5pp on test, +6.8pp on held-out subset, see results/m0_3_lora.json and results/m0_3_lora_holdout.json)
 - Self-distillation **negative** (−16.5pp) — external-information motivation for E3 confirmed
 
+### M0.4 — domain-sequence infrastructure (delivered 2026-08-13)
+
+Generators for the pre-registered 7-domain sequence are complete and frozen: domain B (RPN stack-machine arithmetic), domain C (feature composition), domain D (discrete game, IPD-based), and three domain-E candidates (prefix pseudo-language / signal inference / Latin square) with the pre-registered selection rule "test all three, pick the mechanically lowest zero-shot transfer". The inter-domain similarity gradient is frozen from **measured** 6-feature distances (token/position entropy, fill rate, length variance, label entropy, vocab usage; z-scored Euclidean), not manual selection — see `results/domain_distance.json`. The E6a domain ordering uses this matrix.
+
 ### The skill definition (docs/)
 
 A falsifiable operational definition of *skill* for the continual-learning community: **a behavioral disposition** — judged by behavior (reliability, out-of-distribution transfer, efficiency), not by implementation form (rules/vectors/weights). Key corollary: explicit information that does not change behavior is not a skill (SkillsBench: curated +16.6pp vs self-generated null).
@@ -81,6 +87,8 @@ Requires: Python 3.11, CUDA 12.x, ~8GB VRAM (scripts hardcode CUDA device).
 docs/
   experiment-proposal.md  Experiment proposal (public) — hypotheses, criteria, pre-registration
   skill-definition.md     Operational definition of skill — proposal, falsifiable
+  results-m1.md           M1 negative result — full localization report
+  why-not-measure-faster.md  Position paper: measure "getting faster", not only "not forgetting"
 src/
   m0_*.py m1_*.py   Milestone experiment scripts
   models/           TRM upstream (Samsung MIT) + experiment models
@@ -106,6 +114,7 @@ src/
 | `results/m1_domainB_aug*.json` | E1, augmentation channel | Training-side equivalence-class augmentation |
 | `results/curve.json` | M0.3 | Domain-A ceiling curve |
 | `results/m0_3_*.json` | M0.3 | LoRA / self-distillation / seed variance results |
+| `results/domain_distance.json` | M0.4 | Frozen inter-domain similarity matrix (7 domains × 6 z-scored features) + near→far gradient anchored at B-rpn |
 
 Note: scripts write generic names (`result.json`); files were renamed by experiment when archived.
 
