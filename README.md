@@ -40,11 +40,11 @@ If not — if experience cannot be turned into reusable skill — that is also a
 
 **Result**: **No gain in domain B** (RPN stack-machine arithmetic). K-curve flat (D=48 deep-expansion match; D = rollout depth, deep-expansion = longer single-path rollouts): K=1 0.478 / K=10 0.476 / K=100 0.476 (K=1 baseline). Three rounds of discrimination localized the mechanism:
 
-1. q-head selector (quality-scoring head) doesn't generalize across domains (AUC 1.0 → 0.57)
-2. Selector repair (majority voting) falsified — same rollouts, no incremental information
-3. Semantic-level exploration falsified — equivalence-class perturbations at the input side, zero gain
+1. q-head selector (quality-scoring head) AUC drops (1.0 → 0.57) — initially judged as no cross-domain generalization
+2. Selector repair (majority voting) falsified that judgment — identical rollouts carry no incremental information
+3. Semantic-level exploration falsified — equivalence-class perturbations at the input side, no measurable gain (single run, no CI)
 
-**Conclusion**: inference-time exploration is structurally ineffective for problems that are "uniquely solvable but not yet learned" — it helps when the solution space has basin structure (domain A, Sudoku: K=100 62.6%→91.2%, upstream PTRM paper; our local reproduction: 33.0%→36.5%, see results/k_curve_domainA.json), not when the model simply hasn't learned the rule. Redesign targets: inverse model (direction-constrained exploration) + phase-transition reset — see docs/results-m1.md.
+**Conclusion**: inference-time exploration is structurally ineffective for problems that are "uniquely solvable but not yet learned" — it helps when the solution space has basin structure (domain A, Sudoku: K=100 62.6%→91.2%, upstream PTRM paper; our local reproduction: 33.0%→38.0% at K=100 (36.5% at K=10), see results/k_curve_domainA.json), not when the model simply hasn't learned the rule. Redesign targets: inverse model (direction-constrained exploration) + phase-transition reset — see docs/results-m1.md.
 
 **Independent re-run verification (2026-08-13)**: the full M1 pipeline was re-run from scratch (same scripts, same data, fresh training) — training log `results/logs/m1_train_domainB_4000.log`, K-curve `results/logs/m1_eval_K.json`. Re-run K-curve: K=1 D=16 0.490 / K=1 D=48 0.464 / K=10 D=48 0.432 / K=100 D=48 0.430. Small level differences vs the original run are training stochasticity; the **negative result reproduces**: no K gain (K=100 slightly *lower*).
 
@@ -56,11 +56,25 @@ If not — if experience cannot be turned into reusable skill — that is also a
 
 ### M0.4 — domain-sequence infrastructure (delivered 2026-08-13)
 
-Generators for the pre-registered 7-domain sequence are complete and frozen: domain B (RPN stack-machine arithmetic), domain C (feature composition), domain D (discrete game, IPD-based), and three domain-E candidates (prefix pseudo-language / signal inference / Latin square) with the pre-registered selection rule "test all three, pick the mechanically lowest zero-shot transfer". The inter-domain similarity gradient is frozen from **measured** 6-feature distances (token/position entropy, fill rate, length variance, label entropy, vocab usage; z-scored Euclidean), not manual selection — see `results/domain_distance.json`. The E6a domain ordering uses this matrix.
+Generators for the pre-registered 7-domain sequence are complete and frozen: domain B (RPN stack-machine arithmetic), domain C (feature composition), domain D (discrete game, IPD-based), and three domain-E candidates (prefix pseudo-language / signal inference / Latin square) with the pre-registered selection rule: pick the baseline-predicted lowest zero-shot-transfer candidate before any mechanism training. The inter-domain similarity matrix reports **measured** 6-feature structural distances (feature names: token_entropy, pos_entropy, fill_rate, log1p_len_var, label_entropy, vocab_used; z-scored Euclidean). Per src/domain_params.py the pre-registered freeze specifies behavioral distance (zero-shot transfer matrix), which is pending measurement; the structural matrix is auxiliary reporting. See `results/domain_distance.json`. The E6a domain ordering uses this matrix as specified in the pre-registration.
 
 ### The skill definition (docs/)
 
 A falsifiable operational definition of *skill* for the continual-learning community: **a behavioral disposition** — judged by behavior (reliability, out-of-distribution transfer, efficiency), not by implementation form (rules/vectors/weights). Key corollary: explicit information that does not change behavior is not a skill (SkillsBench: curated +16.6pp vs self-generated null).
+
+## A reusable falsifiable evaluation framework
+
+This repository doubles as a reusable evaluation framework for one question: *do learning mechanisms — not scale — produce continual learning?* Anyone testing a new mechanism (parallel exploration, replay, distillation, ...) can run the same five steps and get an answer structurally comparable to ours (the domain-B pipeline is end-to-end reproducible; domain A requires a gitignored pretrained checkpoint — see Running):
+
+1. **Pre-register the criteria first.** Write down, before training anything, what counts as evidence: sequence acceleration (T(n) ↓ — fewer samples needed per new domain), retention (no catastrophic forgetting), continuity (single weight set, no retraining), and the *failure handling* — what a criterion failure means for each layer (criterion vs mechanism hypothesis vs design). See `docs/experiment-proposal.md`: the pre-registered criteria (fixed before training; result reports are appended and clearly separated).
+2. **Define the discovery signal.** Decide in advance what "getting better" means operationally: K-gain (do more parallel rollouts improve accuracy?), learning-efficiency curves, and the trivial-solution baselines that must be beaten. We use K-gain and selector AUC (measured); T(n) is the pre-registered cross-domain criterion (pending measurement).
+3. **Build reference baselines.** A result means nothing against nothing. Naive fine-tuning, pure-noise perturbation, and majority voting are the minimum set that rules out trivial explanations (see the M1 discrimination rounds below).
+4. **Localize failures to the mechanism layer.** A negative result is only as valuable as its localization. The three-round discrimination protocol (same-rollout test → selector repair → semantic-level exploration) walks a failure down to the specific mechanism that failed — not "the approach doesn't work" but "this component, for this reason".
+5. **Extend for robustness.** Re-run with longer training before concluding anything about "the model didn't learn yet" (M1: 4000 → 10000 steps — no consistent K-gain at K=100; K=10 showed +1.8pp in one run, unverified). The independent from-scratch re-run (training + eval logs) is archived in `src/results/logs/`.
+
+The framework is **sequential**: it measures the *learning curve across a sequence of domains* (pre-registered A→G; B/C/D instantiated, three E candidates measured, F/G pending E selection), not a single static benchmark score. Generators for B/C/D are delivered (see Running), so the sequence is extensible in principle; adaptive task generation is a roadmap item, not yet exercised.
+
+Every step maps to concrete files in this repo (proposal → scripts → result JSONs), which is what makes the framework — and its negative results — independently checkable. A fuller statement of the paradigm (components, evidence, boundaries) is in `docs/paradigm-contribution.md`.
 
 ## Running
 
