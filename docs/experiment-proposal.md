@@ -347,6 +347,26 @@ Reading: only when the perturbation arm has extra gain over the random arm is it
 
 **Risks and defenses**: trivial solutions → predict the learning curve + criterion ⑤; recursive self-reference → three-stage gating; narcissism (only caring about itself) → external-task secondary goal + criterion ③; insufficient cognitive bandwidth → architectural constraint.
 
+### E9a Self-belief stability (belief-update dynamics · pre-registered expansion)
+
+**Redefinition**: self-referential stability ≠ computational undecidability. Real systems are **approximately self-referential** (lossy snapshot + delayed update) and do not satisfy Gödel-completeness conditions — Gödel-style and Yampolskiy-style unpredictability arguments do not apply. **Self-referential stability = the update dynamics of a self-belief system under predictive failure (counterexamples).**
+
+**Belief = prior; update damping = prior strength**: reuses the E3 prior levels (weak/medium/strong — no new architecture). Same dynamics as the value-updatability / anchor-update design: self-belief stability and value-updatability are two instances of one dynamics problem.
+
+**Key hypothesis (damping balance)**: moderate damping → convergence; low damping → oscillation (undamped closed-loop prediction diverges); high damping → rigidity / belief-behavior decoupling (behavior changes, belief lags).
+
+**Human-side existence proof**: human self-belief is systematically wrong (overconfidence, belief perseverance, cognitive dissonance) yet stable — stability comes from update damping, not from belief correctness.
+
+**Design**: M_self maintains a belief set (own ability/speed/limits). Independent variables: (1) belief-update damping, three levels (weak/medium/strong; medium is mandatory for criterion 1 — if unrun, criterion 1 is undecidable); (2) self-reference depth — 0-order (predict task performance / the learning curve) is the **main criterion path**; 1/2-order (predict one's own predictions) are expected to **collapse** (parrot solution: a deterministic model predicting its own output degenerates to the identity map), run only as control arms to validate collapse detection; (3) escalation threshold θ × duration T (from the time-scale layering design): belief b above θ for T consecutive windows triggers a "proposal" (L2→L3 upgrade).
+
+**Three-state classification (pre-registered · thresholds frozen)**: convergence = prediction error < ε for n consecutive steps (ε = 0.1 × baseline error, n = 10); oscillation = periodic alternation of extrema ≥ 3 times with peak-to-peak difference > 0.2 × baseline error; decoupling = belief-behavior gap > δ (δ = 0.3 standardized gap). Arbitration (pre-registered): convergence ∧ oscillation = measurement anomaly (constructively mutually exclusive under frozen thresholds); convergence ∧ decoupling → decoupling wins (conservative; consistent with the project's "prefer false stop" philosophy).
+
+**27-mode matrix**: three damping arms × three states = 27 joint modes, **all pre-written interpretations** (lookup table; no post-hoc interpretation; partial hits have pre-written explanations and do not enter an uncovered flow). Main criteria: criterion 1 (damping balance) = mode {weak=oscillation, medium=convergence, high=decoupling}; criterion 2 (robustness) = all-convergence; criterion 3 (intrinsic instability) = all-oscillation — a serious conclusion requiring ≥ 5-seed reproduction + author review before reporting. All-decoupling is an independent severe conclusion (belief-behavior decoupling at every damping level = update capacity lost), kept separate from criterion 3.
+
+**External-anchor control**: human feedback intervention vs no intervention → the external anchor restores stability = quantitative evidence for constraint-layer externalization. Rationale: evolution is a selection factor with no intrinsic right/wrong — the right/wrong dimension requires an external standard, and self-judgment of one's own predictions is circular. Intervention arm is exploratory and does not participate in the 27-mode judgment; if the intervention arm also lands in a non-convergent state, that is not evidence for criterion 3 (exploratory report only).
+
+**Anti-contamination**: independent instance (not shared with E3); all thresholds frozen at pre-registration; post-hoc threshold adjustment = contamination. Statistics: inherits §5.4 (power-based seed counts and Holm correction for the θ×T×damping scan as exploratory arms).
+
 ---
 
 ## 7. Milestones
