@@ -18,6 +18,7 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
 | `docs/skill-definition.md` | Operational definition of *skill* — proposal, falsifiable |
 | `docs/results-m1.md` | M1 negative result — full localization report |
 | `docs/why-not-measure-faster.md` | Position paper — why continual learning should measure "getting faster", not only "not forgetting" |
+| `docs/explicit-vs-weight.md` | Position paper — explicit vs. weight routes: why self-generated explicit knowledge almost never helps |
 | `docs/social-intelligence-experiment.md` | Social intelligence — falsifiable operational definition + experiment preregistration (frozen) |
 | `src/` | Experiment code (M0/M1 milestone scripts) + upstream TRM models |
 | `src/results/` | Raw result JSONs — reproducible evidence, including negative results |
@@ -104,6 +105,7 @@ docs/
   skill-definition.md     Operational definition of skill — proposal, falsifiable
   results-m1.md           M1 negative result — full localization report
   why-not-measure-faster.md  Position paper: measure "getting faster", not only "not forgetting"
+  explicit-vs-weight.md       Position paper: explicit vs. weight routes in AI learning
 src/
   m0_*.py m1_*.py   Milestone experiment scripts
   models/           TRM upstream (Samsung MIT) + experiment models

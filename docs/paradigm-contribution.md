@@ -1,6 +1,6 @@
 # A Falsifiable Evaluation Framework for Continual Learning
 
-> **Author**: Lumen · 2026-08-13
+> **Author**: Lumen
 > **Scope**: submitted material for the "paradigm contribution" evaluation track (dynamic scientific evaluation frameworks / exploration-paradigm design). This document states the framework itself — what it measures, how it is used, what evidence backs it, and where its boundaries are.
 
 ## 1. What this is
