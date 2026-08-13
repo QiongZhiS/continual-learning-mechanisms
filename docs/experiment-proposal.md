@@ -256,6 +256,28 @@ Reading: only when the perturbation arm has extra gain over the random arm is it
 
 **Meaning**: this is the main uncertainty of the entire experiment — the frontier (SkillsBench) shows all current distillation methods fail; if this experiment also cannot solve it, AGI's "learning" needs a paradigm-level breakthrough, not component improvements.
 
+### E3a Prior control arm (attribution design · updateable-prior criterion)
+
+**Motivation**: plans A–E all operate on the **algorithm side** (same base, different compression/integration mechanisms) — none adds prior knowledge. If the root cause of distillation failure is *insufficient priors*, all algorithm-side plans fail *and the failure is unattributable* (cannot distinguish "the algorithm is inadequate" from "the prior is insufficient"). Fix: a prior control arm — the same distillation algorithm under different prior strengths, as a prior-strength × algorithm factorial.
+
+**Prior axis (four levels, frozen at pre-registration)**:
+- **weak-0**: current base (domain A trained, no extra prior; reuses the M1 checkpoint)
+- **① pretraining**: 5k additional pretraining steps on the domain-family distribution
+- **② architectural bias**: domain-specific inductive bias (e.g., explicit operator embedding / stack-structure bias for the RPN stack-machine domain — directly targeting the M1 failure root cause)
+- **①+②**: both combined
+
+**Distillation axis**: {off, D} (D = nightly incremental fine-tuning, §E3 plan D).
+
+**Registered cells (6)**: c1 baseline (off × weak-0) · c2 (off × ①) · c3 (off × ②) · c4 strong (off × ①+②) · c5 distillation alone (D × weak-0) · c6 interaction (D × ①+②). Cells ①×D and ②×D alone are not run initially (attribution of ① vs ② is separated on the off side; if the joint D-side increment is significant, the two cells are added from a reserved budget).
+
+**Reading rules (pre-registered)**: c2>c1 → ① independently effective; c3>c1 → ② independently effective; c4>c1 → combined effective; c5>c1 → algorithm axis independently effective; c6>c4+c5−c1 → **interaction (prior is a precondition for distillation — strongest signal)**; c6≈c4 → distillation redundant (prior axis dominates).
+
+**Transfer-distance stratification**: results are reported separately for near transfer (A→B) and far transfer (B→C / C→D). **Far-domain ②<① is the direct evidence for the updateable-prior corollary** — the operationalization of "over-generalization" (a strong prior that forces the regularities of context A onto context B is negative transfer; in a drifting world, a strong prior is a structural liability: old priors process new worlds, and the lag is structural, not a matter of effort).
+
+**Pre-registration constraints (anti-contamination)**: prior pretraining data = domain A instances + non-test instances from the domain-family generators (whitelist); **domain E appears in zero prior pretraining runs**; prior-pretraining configuration freezes when the M0.4 generators are delivered.
+
+**Relation to the inverse model**: the inverse model is an inference-side direction constraint (a lightweight prior). After the weight-side prior result is confirmed, it is stacked as the "inference-side projection of the prior" to test complementarity.
+
 ### E4 Compositional generalization (vector addition)
 
 - **Variable**: compositional representation mechanism — dual representation channels (high-dimensional feature preservation on the memory side vs. low-dimensional compression on the action side) vs. a single channel
