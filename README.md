@@ -24,6 +24,8 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
 | `docs/should-priors-update.md` | Position paper — updateable priors: strength axis vs. update axis; why strong priors are liabilities in a drifting world |
 | `docs/can-ai-know-itself.md` | Position paper — self-knowledge as self-prediction: damping balance, external anchor, echo-chamber trap |
 | `docs/can-ai-deceive.md` | Position paper — deception as a byproduct of mind inference: two impersonator types, falsifiable criteria |
+| `docs/who-decides-right-wrong.md` | Position paper — externalized criteria: who owns the standard of right and wrong; two-layer anchors, dual-channel protocol (design decision, not a scientific conclusion) |
+| `docs/end-of-memory-is-intuition.md` | Position paper — memory as influence with a source: record → memory → intuition → skill; distillation as manufactured source loss |
 | `src/` | Experiment code (M0/M1 milestone scripts) + upstream TRM models |
 | `src/results/` | Raw result JSONs — reproducible evidence, including negative results |
 
@@ -114,6 +116,8 @@ docs/
   should-priors-update.md     Position paper: updateable priors — strength axis vs. update axis
   can-ai-know-itself.md       Position paper: self-knowledge as self-prediction — damping, external anchor
   can-ai-deceive.md           Position paper: deception as a byproduct of mind inference
+  who-decides-right-wrong.md  Position paper: externalized criteria — who owns the standard of right and wrong
+  end-of-memory-is-intuition.md  Position paper: record → memory → intuition → skill; distillation as source loss
 src/
   m0_*.py m1_*.py   Milestone experiment scripts
   models/           TRM upstream (Samsung MIT) + experiment models
