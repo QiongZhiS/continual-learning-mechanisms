@@ -104,7 +104,11 @@ def optimal_vs(opp):
     if opp == "random":
         return lambda r, mh, oh, rng: D                      # all-D: expected 300
     if opp == "sleeper":
-        return lambda r, mh, oh, rng: D if r >= SLEEPER_CUT else C  # 30C+70D：440
+        # all-D is the accepted best response (acceptance record M0.4-2026-08-12):
+        # 30 x T=5 + 70 x P=1 = 220. (30C+70D would score only 30x3 + 70x1 = 160 --
+        # sleeper defects late, so early cooperation never collects T; the
+        # identification value of detecting the sleeper = 220 - 159 TFT baseline.)
+        return lambda r, mh, oh, rng: D  # all-D: 30*5 + 70*1 = 220
     if opp == "prob-deceiver":
         return lambda r, mh, oh, rng: D                      # all-D: expected 420
     raise ValueError(opp)
@@ -200,9 +204,10 @@ def main():
     # analytical assertions (ceiling sanity: matches hand computation)
     assert abs(ceils["always-cooperate"] - 500) < 1e-6, ceils["always-cooperate"]
     assert abs(ceils["always-defect"] - 100) < 1e-6
-    assert abs(ceils["sleeper"] - 440) < 1e-6
-    assert abs(ceils["prob-deceiver"] - 420) < 1.0  # random opponent, denoised over 200 games
-    assert abs(ceils["random"] - 300) < 1.0
+    assert abs(ceils["sleeper"] - 220) < 1e-6  # all-D: 30*5 + 70*1
+    # tolerance 3.0 = ~2x the 200-game Monte-Carlo mean std (~1.1-1.4); 1.0 was flaky
+    assert abs(ceils["prob-deceiver"] - 420) < 3.0  # random opponent, denoised over 200 games
+    assert abs(ceils["random"] - 300) < 3.0
     assert abs(ceils["tit-for-tat"] - 302) < 1e-6
     assert abs(ceils["punisher"] - 302) < 1e-6
 

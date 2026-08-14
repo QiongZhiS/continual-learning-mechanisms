@@ -8,7 +8,7 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
 
 - **Scale**: ~7M parameter recursive reasoning models (TRM), single consumer GPU (RTX 4060)
 - **Method**: pre-registered experiments, budget-matched controls, honest negative results
-- **Status**: M0 complete — M0.4 domain-sequence generators delivered (domains B/C/D/E instantiated, inter-domain similarity matrix frozen, see `results/domain_distance.json`); M1 (exploration mechanism) main criterion failed in the symbolic domain — negative result fully localized and independently re-run verified; redesign in progress
+- **Status**: M0 complete — M0.4 domain-sequence generators delivered (domains B/C/D/E instantiated, inter-domain similarity matrix frozen, see `results/domain_distance.json`); M1 (exploration mechanism) main criterion failed in the symbolic domain — negative result fully localized and independently re-run verified; redesign in progress — goal-conditioned inverse model implemented and trained (scripts included; pre-registered discrimination grid pending a GPU run); M2 (E2 memory: surprise-vs-full replay) implemented (scripts included; three-arm experiment pending)
 
 ## What this repo is
 
@@ -26,8 +26,12 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
 | `docs/can-ai-deceive.md` | Position paper — deception as a byproduct of mind inference: two impersonator types, falsifiable criteria |
 | `docs/who-decides-right-wrong.md` | Position paper — externalized criteria: who owns the standard of right and wrong; two-layer anchors, dual-channel protocol (design decision, not a scientific conclusion) |
 | `docs/end-of-memory-is-intuition.md` | Position paper — memory as influence with a source: record → memory → intuition → skill; distillation as manufactured source loss |
-| `src/` | Experiment code (M0/M1 milestone scripts) + upstream TRM models |
+| `src/` | Experiment code (M0/M1/M2 milestone scripts) + upstream TRM models |
 | `src/results/` | Raw result JSONs — reproducible evidence, including negative results |
+| `src/m0_4_gen_domainE.py` | M0.4 domain-E candidates (prefix MUL/DIV stack machine / signal inference / Latin square) — frozen generators |
+| `src/m0_4_domain_distance.py` | Computes the frozen inter-domain structural-distance matrix (`results/domain_distance.json`) |
+| `src/m1_inv_train_data.py` `src/m1_inv_model.py` `src/m1_inv_eval.py` | M1 redesign — goal-conditioned inverse model (direction field): data collection / training / pre-registered discrimination grid |
+| `src/m2_memory.py` `src/m2_e2.py` | M2 E2 memory field (Titans-style surprise writing) + three-arm retention experiment |
 
 **Reproducibility first**: the M1 pipeline is fully reproducible end-to-end (data → train → eval). Result JSONs are paired with their producing scripts (see mapping below). M0.3 artifacts are archived for provenance — they require a pretrained checkpoint (gitignored) and a specific sudoku subsample; see the Running section.
 
@@ -54,6 +58,8 @@ If not — if experience cannot be turned into reusable skill — that is also a
 **Conclusion**: inference-time exploration is structurally ineffective for problems that are "uniquely solvable but not yet learned" — it helps when the solution space has basin structure (domain A, Sudoku: K=100 62.6%→91.2%, upstream PTRM paper; our local reproduction: 33.0%→38.0% at K=100 (36.5% at K=10), see results/k_curve_domainA.json), not when the model simply hasn't learned the rule. Redesign targets: inverse model (direction-constrained exploration) + phase-transition reset — see docs/results-m1.md.
 
 **Independent re-run verification (2026-08-13)**: the full M1 pipeline was re-run from scratch (same scripts, same data, fresh training) — training log `results/logs/m1_train_domainB_4000.log`, K-curve `results/logs/m1_eval_K.json`. Re-run K-curve: K=1 D=16 0.490 / K=1 D=48 0.464 / K=10 D=48 0.432 / K=100 D=48 0.430. Small level differences vs the original run are training stochasticity; the **negative result reproduces**: no K gain (K=100 slightly *lower*).
+
+**Training-side augmentation (round 4, 2026-08-12 — neutral)**: injecting ADD-swap equivalence classes into the training set carries no learning value in this deterministic-rule domain. On-the-fly per-sample uniform sampling (matched steps/passes/compute): 0.612 vs baseline 0.606 at 10000 steps (+0.6pp, inside the baseline's own ±12pp swing, single seed) — neutral per the pre-registered band (≥0.65 positive / 0.55–0.65 neutral / <0.55 negative). Offline full-class enumeration (513K samples, 5.1× dataset): 0.485 — attributed to **pass dilution** (12.7→2.5 passes; train 0.481 < test 0.485 = undertrained), not form harmfulness (the on-the-fly arm proves the forms are harmless). Raw curves: `results/m1_domainB_aug.json` / `results/m1_domainB_aug_batch.json`.
 
 ### M0.3 — feasibility anchors
 
@@ -99,6 +105,14 @@ python m1_eval_K.py <checkpoint-path>    # K-curve: K=1 D=16 / K=1 D=48 / K=10 D
 # M0.3 provenance (archived for reference — needs a gitignored pretrained
 # checkpoint plus a specific sudoku subsample; see dataset/build_sudoku_dataset.py --help):
 #   python dataset/build_sudoku_dataset.py --subsample-size 1000 --num-aug 100 --output-dir ../data/sudoku-extreme-1k-aug-100
+
+# M0.4 extras (needs the generated datasets under ../data/):
+#   python m0_4_gen_domainE.py --candidate 1|2|3   # E candidates (3 = Latin square, slow: ~50min)
+#   python m0_4_domain_distance.py                 # recompute the frozen distance matrix
+
+# M1 redesign / M2 (GPU; ~30 min per inverse-eval config, M2 ~3.5h per arm):
+#   python m1_inv_eval.py --grid                   # pre-registered discrimination grid (b-arm)
+#   python m2_e2.py --steps 4000 --cap 2000        # E2 three-arm memory experiment
 ```
 
 Requires: Python 3.11, CUDA 12.x, ~8GB VRAM (scripts hardcode CUDA device).
@@ -119,7 +133,10 @@ docs/
   who-decides-right-wrong.md  Position paper: externalized criteria — who owns the standard of right and wrong
   end-of-memory-is-intuition.md  Position paper: record → memory → intuition → skill; distillation as source loss
 src/
-  m0_*.py m1_*.py   Milestone experiment scripts
+  m0_*.py m1_*.py m2_*.py  Milestone experiment scripts (m2_* = E2 memory field + three-arm experiment)
+  m0_4_gen_domainE.py      M0.4 domain-E candidate generators (frozen)
+  m0_4_domain_distance.py  Inter-domain structural-distance matrix computation
+  m1_inv_*.py              M1 redesign: inverse-model data collection / training / eval grid
   models/           TRM upstream (Samsung MIT) + experiment models
   config/           Architecture configs (TRM upstream)
   dataset/          Data generators (reproducibility)
@@ -147,7 +164,17 @@ src/
 
 Note: scripts write generic names (`result.json`); files were renamed by experiment when archived.
 
-Experiments are pre-registered as E0–E9, milestones as M0–M5 — see the "Experiment-number index" section in `docs/experiment-proposal.md`. M0.x are sub-milestones within M0 (M0.1 reproduction, M0.2 basin tooling, M0.3 feasibility anchors, M0.4 domain C/D generators).
+## Provenance & acceptance notes
+
+Verified against the project's acceptance records (working workspace, 2026-08-10/13); these notes reconcile scripts with the frozen decisions:
+
+1. **Domain D (IPD) frozen values**: the sleeper opponent's best-response ceiling is **220** (all-D: 30×T=5 + 70×P=1), not 30C+70D=160 — the 30C+70D design was rejected at M0.4 acceptance (identification value = 220−159 TFT baseline). `m0_4_gen_domainD.py` is synced to the accepted version (2026-08-14); the two stochastic-opponent assertions use tolerance 3.0 (~2× the 200-game Monte-Carlo mean std).
+2. **Round-3 semantic-exploration paired baseline**: `m1_sem_explore.py` had a tree-aliasing bug (the swap walk mutated the source AST in place, so "variant 0 = original program" was actually the last mutation state and variants were a dependent walk). Fixed 2026-08-14 in both copies. Answer-equivalence is unaffected, so the round-3 conclusion stands; paired-baseline/per-pool statistics are approximate — see `docs/results-m1.md`.
+3. **E6a ordering**: the frozen similarity gradient is anchored at B-rpn (near→far: E1 0.52 → E2 2.36 → C 2.86 → E3 3.32 → D 3.92 → A 4.78). A↔B is the *largest* measured distance — an intent-vs-measured deviation recorded at M0.4 acceptance; the final sequence is set from the matrix after domain-E selection.
+4. **Seed-count decision (5→3)**: 3 seeds measured 0.485/0.455/0.410 (mean 0.45 ± 3.8pp ≈ eval noise ±3.5pp) — upheld at M0.3 acceptance.
+5. **Post-M0.4 scripts** (`m0_4_gen_domainE.py`, `m0_4_domain_distance.py`, `m1_inv_*.py`, `m2_*.py`) were ported from the working workspace and retain the original Chinese docstrings for fidelity; their data artifacts live under `data/` (generated, gitignored).
+
+Experiments are pre-registered as E0–E9, milestones as M0–M5 — see the "Experiment-number index" section in `docs/experiment-proposal.md`. M0.x are sub-milestones within M0 (M0.1 reproduction, M0.2 basin tooling, M0.3 feasibility anchors, M0.4 domain C/D/E generators + frozen distance matrix).
 
 ## License
 

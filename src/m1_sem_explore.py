@@ -89,11 +89,19 @@ def copy_tree(node):
     return Node(node.op, copy_tree(node.left), copy_tree(node.right))
 
 
-def random_walk(node, add_nodes, steps, rng):
-    """Random walk of steps moves; each move swaps the subtrees of a randomly chosen ADD node"""
+def random_walk(node, steps, rng):
+    """Random walk of steps moves; each move swaps the subtrees of a randomly chosen ADD node.
+
+    BUGFIX (2026-08-14): swaps now target nodes of the freshly copied tree. The previous
+    implementation swapped nodes of the ORIGINAL tree in place (aliasing): variant 0
+    ("original program") silently accumulated every walk's last mutation, and variants were
+    a dependent Markov walk instead of i.i.d. draws. Archived round-3 results stand (swaps
+    preserve the answer), but paired-baseline/per-pool statistics are approximate -- see
+    docs/results-m1.md."""
     out = copy_tree(node)
+    targets = collect_add(out, [])
     for _ in range(steps):
-        target = add_nodes[rng.integers(len(add_nodes))]
+        target = targets[rng.integers(len(targets))]
         target.left, target.right = target.right, target.left
     return out
 
@@ -111,7 +119,7 @@ def variants(node, K, rng):
         guard += 1
         if max_steps == 0:
             break  # no ADD: use only the original
-        t = random_walk(node, adds, rng.integers(1, max_steps + 1), rng)
+        t = random_walk(node, rng.integers(1, max_steps + 1), rng)
         s = tuple(serialize(t))
         if s not in seen:
             seen.add(s)
