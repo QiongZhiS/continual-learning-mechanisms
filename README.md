@@ -26,6 +26,10 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
 | `docs/can-ai-deceive.md` | Position paper — deception as a byproduct of mind inference: two impersonator types, falsifiable criteria |
 | `docs/who-decides-right-wrong.md` | Position paper — externalized criteria: who owns the standard of right and wrong; two-layer anchors, dual-channel protocol (design decision, not a scientific conclusion) |
 | `docs/end-of-memory-is-intuition.md` | Position paper — memory as influence with a source: record → memory → intuition → skill; distillation as manufactured source loss |
+| `docs/agreement-form.md` | Position paper — how promises count: agreements as sedimented compromise; maintainability criterion; public-goods & conflicting-interest signaling environments; pre-registered design |
+| `docs/skill-automation.md` | Position paper — knowing how vs. knowing that: behavioral pass ≠ skill; CoT-stripping test; acquisition via replay; source-lost actionalization as endpoint |
+| `docs/agency-last-piece.md` | Position paper — agency as assembled from self-model, other-model, external criteria; three bridges; remonstrance as behavioral signature |
+| `docs/re-source.md` | Position paper — re-sourcing intuition: three-step protocol (counterexample impact, deliberate attention, re-created source); reverse CoT stripping |
 | `src/` | Experiment code (M0/M1/M2 milestone scripts) + upstream TRM models |
 | `src/results/` | Raw result JSONs — reproducible evidence, including negative results |
 | `src/m0_4_gen_domainE.py` | M0.4 domain-E candidates (prefix MUL/DIV stack machine / signal inference / Latin square) — frozen generators |
