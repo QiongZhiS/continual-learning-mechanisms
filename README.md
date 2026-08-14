@@ -20,6 +20,10 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
 | `docs/why-not-measure-faster.md` | Position paper — why continual learning should measure "getting faster", not only "not forgetting" |
 | `docs/explicit-vs-weight.md` | Position paper — explicit vs. weight routes: why self-generated explicit knowledge almost never helps |
 | `docs/social-intelligence-experiment.md` | Social intelligence — falsifiable operational definition + experiment preregistration (frozen) |
+| `docs/does-ai-need-sleep.md` | Position paper — skill acquisition via the replay path: why AI needs an offline window ("sleep") |
+| `docs/should-priors-update.md` | Position paper — updateable priors: strength axis vs. update axis; why strong priors are liabilities in a drifting world |
+| `docs/can-ai-know-itself.md` | Position paper — self-knowledge as self-prediction: damping balance, external anchor, echo-chamber trap |
+| `docs/can-ai-deceive.md` | Position paper — deception as a byproduct of mind inference: two impersonator types, falsifiable criteria |
 | `src/` | Experiment code (M0/M1 milestone scripts) + upstream TRM models |
 | `src/results/` | Raw result JSONs — reproducible evidence, including negative results |
 
@@ -106,6 +110,10 @@ docs/
   results-m1.md           M1 negative result — full localization report
   why-not-measure-faster.md  Position paper: measure "getting faster", not only "not forgetting"
   explicit-vs-weight.md       Position paper: explicit vs. weight routes in AI learning
+  does-ai-need-sleep.md       Position paper: skill acquisition via the replay path ("sleep" = offline window)
+  should-priors-update.md     Position paper: updateable priors — strength axis vs. update axis
+  can-ai-know-itself.md       Position paper: self-knowledge as self-prediction — damping, external anchor
+  can-ai-deceive.md           Position paper: deception as a byproduct of mind inference
 src/
   m0_*.py m1_*.py   Milestone experiment scripts
   models/           TRM upstream (Samsung MIT) + experiment models
