@@ -78,10 +78,29 @@ Deleting **all** opponent information cannot serve as Theory-of-Mind evidence �
 - Multiple-comparison correction: applied across the criterion tests (Bonferroni/Holm).
 - Threshold sensitivity: primary criterion reported at ε = 0.1 with sensitivity band 0.05/0.2.
 
-## 6. Open questions (explicitly not claimed here)
+## 6. Agreement-form preregistration (design, will be tested)
+
+The agreement form (sedimented compromise) was declared the next preregistration target in this document and in the deception article. This section freezes its design. It is a pre-registration: no results, no state — criteria are written before any training runs, and failing them counts as failure.
+
+**Environment A: public goods game (multi-player).** N agents repeatedly invest in a shared pool; the pool is multiplied and split equally. Record each agent's investment sequence; identify stable cooperative subgroups (pairs whose investment rate stays above threshold for M consecutive rounds).
+
+**Environment B: signaling game with divergent interests (Crawford-Sobel type).** A sender and a receiver have partially aligned interests; the sender emits a signal, the receiver acts on it. Signals may be biased; the receiver must calibrate.
+
+**Primary criterion (frozen): an agreement exists iff the defection temptation stays positive yet stays unused.** Defection must remain profitable (otherwise cooperation is mere necessity, the pure-coordination failure mode); defection must remain unchosen (otherwise there is no agreement, only balance of terror); and both must persist over time (a stable choice, not a one-off). This distinguishes agreement from pure-coordination alignment: not "everyone does the same thing", but "a cooperative structure persists despite ongoing conflict of interest".
+
+**Trivial-solution exclusion (frozen, run before judging the primary criterion):** explicitly run trivial strategy families — always-defect, random, greedy — and show they fail the criterion; otherwise the criterion design is void.
+
+**No-agreement control:** remove any one maintenance mechanism (communication, punishment, repeated interaction) and the cooperative structure must degrade significantly — otherwise "agreement" is an environmental artifact, not agent behavior.
+
+**Failure handling (frozen, three cases declared separately):**
+1. **Primary criterion fails** → the agreement-form criterion design must be revised or abandoned.
+2. **Mechanism ablation fails** (removing a mechanism does not collapse cooperation) → that constitution-layer hypothesis is falsified; the criterion layer is unaffected.
+3. **Trivial-solution exclusion fails** → the criterion design is void and must be redesigned — this is not a falsification of the definition.
+
+## 7. Open questions (explicitly not claimed here)
 
 - **Where do values come from?** Position statement: values can be observed and updated through interaction (agreements as sedimented compromise). Honest caveat: the current preregistration injects the payoff matrix rather than measuring preference structure; value-measurement arms (e.g., switching payoff matrices) are a stated research direction, not yet frozen.
-- **The agreement form** (public-goods / costly signaling): next preregistration.
+- **Are values constant or variable?** The agreement form offers an experimental entry: switching the payoff matrix (preference structure) as a variable and observing whether the agreement reconstructs — reconstructable agreement implies updateable values; frozen agreement implies frozen values. Not yet frozen.
 
 ---
 
