@@ -143,7 +143,7 @@ Experiments are pre-registered as E0–E9, milestones as M0–M5 — see the "Ex
 - **Upstream TRM code**: `src/models/`, `src/config/`, `src/dataset/`, `src/pretrain.py`, `src/eval_ptrm.py`, `src/puzzle_dataset.py`, `src/utils/`, `src/requirements.txt` derive from [TinyRecursiveModels](https://github.com/SamsungSAILMontreal/TinyRecursiveModels) (MIT, © Samsung Electronics) with local modifications — see `src/TRM-LICENSE.txt`
 - **Documents and result data** (`docs/`, `src/results/`): CC-BY 4.0
 
-## Open-source statement (GOAI competition)
+## Open-source statement
 
 1. **Scope**: all code, documents, and result data in this repository are open source — no proprietary components
 2. **Licenses**: code MIT, documents & result data CC-BY 4.0 (see above)
