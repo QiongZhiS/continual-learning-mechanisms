@@ -1,0 +1,12 @@
+{
+  "tag": "c_unit_1.0_0.0",
+  "alpha": 1.0,
+  "sigma": 0.0,
+  "norm": "unit",
+  "vote_exact": 0.474,
+  "rollout_mean_exact": 0.4689,
+  "mean_unique_votes": 1.88,
+  "pct_single_variant": 0.444,
+  "seconds": 1944.1,
+  "gpu_mem_MB": 1577
+}

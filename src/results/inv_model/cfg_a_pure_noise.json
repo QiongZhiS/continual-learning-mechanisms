@@ -1,0 +1,12 @@
+{
+  "tag": "a_pure_noise",
+  "alpha": 0.0,
+  "sigma": 0.2,
+  "norm": "unit",
+  "vote_exact": 0.488,
+  "rollout_mean_exact": 0.4734,
+  "mean_unique_votes": 2.07,
+  "pct_single_variant": 0.398,
+  "seconds": 1923.2,
+  "gpu_mem_MB": 1396
+}

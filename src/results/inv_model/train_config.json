@@ -1,0 +1,17 @@
+{
+  "params": 410688,
+  "lr": 0.001,
+  "batch": 512,
+  "epochs_done": 20,
+  "best_epoch": 19,
+  "best_val_loss": 0.5806565276051956,
+  "aug_sigma": 0.2,
+  "sub_pos": 24,
+  "P": 97,
+  "H": 512,
+  "D": 48,
+  "repr_dim": 257,
+  "n_correct_puzzles": 768,
+  "n_samples": 36096,
+  "total_seconds": 75.3
+}

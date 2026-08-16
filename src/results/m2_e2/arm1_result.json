@@ -1,0 +1,130 @@
+[
+  {
+    "step": 500,
+    "keep_A": 0.11499999463558197,
+    "prog_B": 0.25600001215934753,
+    "loss": 0.37754458733549556,
+    "mem": {
+      "strategy": "full",
+      "capacity": 2000,
+      "n": 2000,
+      "mean_surprise": 47.0929,
+      "domains": [
+        "A"
+      ]
+    },
+    "t_sec": 610
+  },
+  {
+    "step": 1000,
+    "keep_A": 0.17999999225139618,
+    "prog_B": 0.3240000009536743,
+    "loss": 0.3072343246619894,
+    "mem": {
+      "strategy": "full",
+      "capacity": 2000,
+      "n": 2000,
+      "mean_surprise": 47.0929,
+      "domains": [
+        "A"
+      ]
+    },
+    "t_sec": 1254
+  },
+  {
+    "step": 1500,
+    "keep_A": 0.14999999105930328,
+    "prog_B": 0.2939999997615814,
+    "loss": 0.3189450646655156,
+    "mem": {
+      "strategy": "full",
+      "capacity": 2000,
+      "n": 2000,
+      "mean_surprise": 47.0929,
+      "domains": [
+        "A"
+      ]
+    },
+    "t_sec": 1899
+  },
+  {
+    "step": 2000,
+    "keep_A": 0.11499999463558197,
+    "prog_B": 0.2880000174045563,
+    "loss": 0.3391884461599539,
+    "mem": {
+      "strategy": "full",
+      "capacity": 2000,
+      "n": 2000,
+      "mean_surprise": 47.0929,
+      "domains": [
+        "A"
+      ]
+    },
+    "t_sec": 2544
+  },
+  {
+    "step": 2500,
+    "keep_A": 0.12999999523162842,
+    "prog_B": 0.34200000762939453,
+    "loss": 0.2823232617163053,
+    "mem": {
+      "strategy": "full",
+      "capacity": 2000,
+      "n": 2000,
+      "mean_surprise": 47.0929,
+      "domains": [
+        "A"
+      ]
+    },
+    "t_sec": 2960
+  },
+  {
+    "step": 3000,
+    "keep_A": 0.13499999046325684,
+    "prog_B": 0.36400002241134644,
+    "loss": 0.3120503244258118,
+    "mem": {
+      "strategy": "full",
+      "capacity": 2000,
+      "n": 2000,
+      "mean_surprise": 47.0929,
+      "domains": [
+        "A"
+      ]
+    },
+    "t_sec": 3620
+  },
+  {
+    "step": 3500,
+    "keep_A": 0.1599999964237213,
+    "prog_B": 0.4180000126361847,
+    "loss": 0.3691771897033256,
+    "mem": {
+      "strategy": "full",
+      "capacity": 2000,
+      "n": 2000,
+      "mean_surprise": 47.0929,
+      "domains": [
+        "A"
+      ]
+    },
+    "t_sec": 4016
+  },
+  {
+    "step": 4000,
+    "keep_A": 0.1599999964237213,
+    "prog_B": 0.4440000355243683,
+    "loss": 0.35469492962615995,
+    "mem": {
+      "strategy": "full",
+      "capacity": 2000,
+      "n": 2000,
+      "mean_surprise": 47.0929,
+      "domains": [
+        "A"
+      ]
+    },
+    "t_sec": 4688
+  }
+]
