@@ -8,7 +8,7 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
 
 - **Scale**: ~7M parameter recursive reasoning models (TRM), single consumer GPU (RTX 4060)
 - **Method**: pre-registered experiments, budget-matched controls, honest negative results
-- **Status**: M0 complete — M0.4 domain-sequence generators delivered (domains B/C/D/E instantiated, inter-domain similarity matrix frozen, see `results/domain_distance.json`); M1 (exploration mechanism) main criterion failed in the symbolic domain — negative result fully localized and independently re-run verified; redesign in progress — goal-conditioned inverse model implemented and trained (scripts included; pre-registered discrimination grid pending a GPU run); M2 (E2 memory: surprise-vs-full replay) implemented (scripts included; three-arm experiment pending)
+- **Status**: M0 complete — M0.4 domain-sequence generators delivered (domains B/C/D/E instantiated, inter-domain similarity matrix frozen, see `results/domain_distance.json`); M1 (exploration mechanism) main criterion failed in the symbolic domain — negative result fully localized and independently re-run verified; redesign candidate (goal-conditioned inverse model) **discriminated 2026-08-14: PASSED=False** — direction-field exploration shows no gain over pure noise (full 9-config grid + matrix.json in `results/inv_model/`), exploration bit permanently closed per pre-registration; M2 (E2 memory) **three-arm experiment completed 2026-08-15** — replay retains domain A (0.160 vs 0.000 no-memory control), surprise-write capacity-efficiency hypothesis falsified (0.050 < full-write 0.160), replay interface (r=0.25) confirmed for E3-D; E2b decay curve baseline recorded (t=0), G-gate E3 probe in progress
 
 ## What this repo is
 
@@ -32,6 +32,10 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
 | `docs/re-source.md` | Position paper — re-sourcing intuition: three-step protocol (counterexample impact, deliberate attention, re-created source); reverse CoT stripping |
 | `src/` | Experiment code (M0/M1/M2 milestone scripts) + upstream TRM models |
 | `src/results/` | Raw result JSONs — reproducible evidence, including negative results |
+| `src/results/inv_model/` | M1 inverse-model discrimination grid — 9 configs + matrix.json (PASSED=False, exploration bit closed) |
+| `src/results/m2_e2/` | M2 E2 three-arm memory experiment — retention curves (replay retains A: 0.160; surprise-write falsified) |
+| `src/results/inv_model/` | M1 inverse-model discrimination grid — 9 configs + matrix.json (PASSED=False, exploration bit closed) |
+| `src/results/m2_e2/` | M2 E2 three-arm memory experiment — retention curves (replay retains A: 0.160; surprise-write falsified) |
 | `src/m0_4_gen_domainE.py` | M0.4 domain-E candidates (prefix MUL/DIV stack machine / signal inference / Latin square) — frozen generators |
 | `src/m0_4_domain_distance.py` | Computes the frozen inter-domain structural-distance matrix (`results/domain_distance.json`) |
 | `src/m1_inv_train_data.py` `src/m1_inv_model.py` `src/m1_inv_eval.py` | M1 redesign — goal-conditioned inverse model (direction field): data collection / training / pre-registered discrimination grid |
