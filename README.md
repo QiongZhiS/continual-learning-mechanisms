@@ -8,7 +8,12 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
 
 - **Scale**: ~7M parameter recursive reasoning models (TRM), single consumer GPU (RTX 4060)
 - **Method**: pre-registered experiments, budget-matched controls, honest negative results
-- **Status**: M0 complete — M0.4 domain-sequence generators delivered (domains B/C/D/E instantiated, inter-domain similarity matrix frozen, see `results/domain_distance.json`); M1 (exploration mechanism) main criterion failed in the symbolic domain — negative result fully localized and independently re-run verified; redesign candidate (goal-conditioned inverse model) **discriminated 2026-08-14: PASSED=False** — direction-field exploration shows no gain over pure noise (full 9-config grid + matrix.json in `results/inv_model/`), exploration bit permanently closed per pre-registration; M2 (E2 memory) **three-arm experiment completed 2026-08-15** — replay retains domain A (0.160 vs 0.000 no-memory control), surprise-write capacity-efficiency hypothesis falsified (0.050 < full-write 0.160), replay interface (r=0.25) confirmed for E3-D; E2b decay curve **zero decay through t=3d (2026-08-18: arm1 0.160 / arm2 0.050 identical to t=0, tau >> 3d)**; G-gate E3 probe **NO-GO (2026-08-17)** — T median ratios 1.00/1.20/1.28 all > 0.7 (raw data in `results/m3_gate/`), M3 full-factorial paused; **five-way diagnostics converged (2026-08-18)**: high-confidence error records carry statistical structure (result-magnitude axis) but are **not learnable** (night LoRA overconfidence: confident-error rate 35.4% vs control 19.7% at unchanged total error rate), and full-replay sampling is also NO-GO (median ratios 1.00/1.50/1.20) — sampling mode excluded as the cause, **M3 expectation re-estimated downward**, E3-D proceeds with full replay (v0.30)
+- **Status**: M0 complete (M0.4 domain-sequence generators delivered, inter-domain distance matrix frozen) → M1 exploration mechanism **falsified** (exploration bit permanently closed) → M2 E2 memory **completed** (replay retains, surprise-write falsified) → E2b decay **zero decay through t=3d** (tau >> 3d) → **G-gate NO-GO** + five-way diagnostics converged → **M3 expectation re-estimated downward**; E3-D proceeds with full replay (v0.30)
+  - **M1 (2026-08-14)**: goal-conditioned inverse model discriminated **PASSED=False** — direction-field exploration shows no gain over pure noise (full 9-config grid + matrix.json in `results/inv_model/`); exploration bit permanently closed per pre-registration
+  - **M2 (2026-08-15)**: three-arm E2 — replay retains domain A (0.160 vs 0.000 no-memory control); surprise-write capacity-efficiency hypothesis falsified (0.050 < full-write 0.160); replay interface (r=0.25) confirmed for E3-D
+  - **E2b**: zero decay through t=3d (2026-08-18: arm1 0.160 / arm2 0.050 identical to t=0, tau >> 3d)
+  - **G-gate (2026-08-17)**: E3 go/no-go probe **NO-GO** — T median ratios 1.00/1.20/1.28 all > 0.7 (raw data in `results/m3_gate/`); M3 full-factorial paused
+  - **Five-way diagnostics (2026-08-18)**: high-confidence error records carry statistical structure (result-magnitude axis) but are **not learnable** (night-LoRA overconfidence: confident-error rate 35.4% vs control 19.7% at unchanged total error rate); full-replay sampling also NO-GO (median ratios 1.00/1.50/1.20) → **sampling mode excluded as the cause**; M3 expectation re-estimated downward (details in `results/m3_gate_diag/` and `docs/results-m3-gate.md`)
 
 ## What this repo is
 
@@ -17,6 +22,9 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
 | `docs/experiment-proposal.md` | Experiment proposal — hypotheses, criteria, pre-registration |
 | `docs/skill-definition.md` | Operational definition of *skill* — proposal, falsifiable |
 | `docs/results-m1.md` | M1 negative result — full localization report |
+| `docs/results-m1-inverse-model.md` | M1 inverse-model discrimination record — PASSED=False, exploration bit closed |
+| `docs/results-m2-e2.md` | M2 E2 three-arm memory experiment — acceptance record |
+| `docs/results-m3-gate.md` | M3 G-gate NO-GO — discrimination record + five-way diagnostics outcome |
 | `docs/why-not-measure-faster.md` | Position paper — why continual learning should measure "getting faster", not only "not forgetting" |
 | `docs/explicit-vs-weight.md` | Position paper — explicit vs. weight routes: why self-generated explicit knowledge almost never helps |
 | `docs/social-intelligence-experiment.md` | Social intelligence — falsifiable operational definition + experiment preregistration (frozen) |
@@ -34,8 +42,8 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
 | `src/results/` | Raw result JSONs — reproducible evidence, including negative results |
 | `src/results/inv_model/` | M1 inverse-model discrimination grid — 9 configs + matrix.json (PASSED=False, exploration bit closed) |
 | `src/results/m2_e2/` | M2 E2 three-arm memory experiment — retention curves (replay retains A: 0.160; surprise-write falsified) |
-| `src/results/inv_model/` | M1 inverse-model discrimination grid — 9 configs + matrix.json (PASSED=False, exploration bit closed) |
-| `src/results/m2_e2/` | M2 E2 three-arm memory experiment — retention curves (replay retains A: 0.160; surprise-write falsified) |
+| `src/results/m3_gate/` | M3 G-gate (E3 go/no-go probe) — judge.json + per-arm result/summary (NO-GO: median ratios 1.00/1.20/1.28) |
+| `src/results/m3_gate_diag/` | G-gate five-way diagnostics — error-record quality (diag1) + full-replay sampling 3-seed run (diag3), 2026-08-18 |
 | `src/m0_4_gen_domainE.py` | M0.4 domain-E candidates (prefix MUL/DIV stack machine / signal inference / Latin square) — frozen generators |
 | `src/m0_4_domain_distance.py` | Computes the frozen inter-domain structural-distance matrix (`results/domain_distance.json`) |
 | `src/m1_inv_train_data.py` `src/m1_inv_model.py` `src/m1_inv_eval.py` | M1 redesign — goal-conditioned inverse model (direction field): data collection / training / pre-registered discrimination grid |
@@ -140,6 +148,9 @@ docs/
   can-ai-deceive.md           Position paper: deception as a byproduct of mind inference
   who-decides-right-wrong.md  Position paper: externalized criteria — who owns the standard of right and wrong
   end-of-memory-is-intuition.md  Position paper: record → memory → intuition → skill; distillation as source loss
+  results-m1-inverse-model.md  M1 inverse-model discrimination record (PASSED=False, exploration bit closed)
+  results-m2-e2.md             M2 E2 three-arm memory experiment acceptance record
+  results-m3-gate.md           M3 G-gate NO-GO discrimination record + five-way diagnostics outcome
 src/
   m0_*.py m1_*.py m2_*.py  Milestone experiment scripts (m2_* = E2 memory field + three-arm experiment)
   m0_4_gen_domainE.py      M0.4 domain-E candidate generators (frozen)
@@ -169,6 +180,8 @@ src/
 | `results/curve.json` | M0.3 | Domain-A ceiling curve |
 | `results/m0_3_*.json` | M0.3 | LoRA / self-distillation / seed variance results |
 | `results/domain_distance.json` | M0.4 | Frozen inter-domain similarity matrix (7 domains × 6 z-scored features) + near→far gradient anchored at B-rpn |
+| `results/m3_gate/judge.json` + `results/m3_gate/{ctl,d}_s{0,1,2}_*` | M3 G-gate | go/no-go verdict (NO-GO) + per-arm T curves (3 seeds x 2 arms) |
+| `results/m3_gate_diag/*.json` | G-gate diagnostics | Error-record quality (diag1, 7 files) + full-replay sampling 3-seed run (diag3) |
 
 Note: scripts write generic names (`result.json`); files were renamed by experiment when archived.
 
