@@ -47,9 +47,21 @@
 
 ## 六、Pre-registered consequences (v0.28 §4 E3 triggered)
 
-- **M3 full-factorial paused**; four-way diagnostics: ① error-record quality ② replay ratio r sensitivity ③ LoRA capacity ④ night-finetune frequency
+- **M3 full-factorial paused**; five-way diagnostics: ① error-record quality ② replay ratio r sensitivity ③ replay sampling mode (priority vs full) ④ LoRA capacity ⑤ night-finetune frequency
 - Diagnostic output = corrected config (then resume M3) or confirmation "current distillation config does not accelerate" (re-estimate M3 expectation)
 - G-gate outcome (go/no-go + raw data) archived with the M3 report per pre-registration
+
+## 七、Five-way diagnostics outcome (2026-08-18 · data in `src/results/m3_gate_diag/`)
+
+| Direction | Result |
+|---|---|
+| ① Error-record quality (completed) | High-confidence errors (conf>0.9 & wrong) carry **statistical structure** (result-magnitude difficulty axis: error rate 80-97% for results 6-8 vs 12-16% for result 9) but are **not learnable** — after night LoRA, d-arm confident-error rate ≈2× control (35.4% vs 19.7%) at unchanged total error rate (54.3% vs 54.9%): the error signal is absorbed as overconfidence, not correctness. Night error counts 279/115/181 exactly reproduced |
+| ② Replay ratio r sensitivity | Not run — low value (see convergence) |
+| ③ Replay sampling mode priority vs full (completed, 3 seeds) | Full-replay (uniform) d-arm T medians **4000/7500/7500** vs control 4000/5000/6250 → ratios **1.00/1.50/1.20, still NO-GO** (seed-0 improvement 0.88 was sampling noise) — **sampling mode is not the cause** |
+| ④ LoRA capacity | Not run — low value (see convergence) |
+| ⑤ Night-finetune frequency | Not run — low value (see convergence) |
+
+**Convergence verdict (v0.32)**: directions ① and ③ point to the same mechanism failure — the "error → correctness" conversion does not hold on the 7M base + domain B, independent of replay sampling mode. The attribution boundary (probe used priority sampling, falsified by E2) is **closed**: NO-GO is attributable to the mechanism itself, not to the falsified sampling. **M3 expectation re-estimated downward**; E3-D proceeds with full replay per v0.30 (not worse + E2 retention evidence) without changing the NO-GO conclusion.
 
 ---
 
