@@ -38,6 +38,7 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
 | `docs/skill-automation.md` | Position paper — knowing how vs. knowing that: behavioral pass ≠ skill; CoT-stripping test; acquisition via replay; source-lost actionalization as endpoint |
 | `docs/agency-last-piece.md` | Position paper — agency as assembled from self-model, other-model, external criteria; three bridges; remonstrance as behavioral signature |
 | `docs/re-source.md` | Position paper — re-sourcing intuition: three-step protocol (counterexample impact, deliberate attention, re-created source); reverse CoT stripping |
+| `docs/corrigibility.md` | Position paper — corrigibility as the action side of the power line: "changeable" vs. "able to change one's mind"; successful correction = behavior change ∧ mechanism-layer anchor intact; four failure forms; refusal as anchor defense |
 | `src/` | Experiment code (M0/M1/M2 milestone scripts) + upstream TRM models |
 | `src/results/` | Raw result JSONs — reproducible evidence, including negative results |
 | `src/results/inv_model/` | M1 inverse-model discrimination grid — 9 configs + matrix.json (PASSED=False, exploration bit closed) |
