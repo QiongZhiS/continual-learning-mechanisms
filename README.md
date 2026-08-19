@@ -39,6 +39,16 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
 | `docs/agency-last-piece.md` | Position paper — agency as assembled from self-model, other-model, external criteria; three bridges; remonstrance as behavioral signature |
 | `docs/re-source.md` | Position paper — re-sourcing intuition: three-step protocol (counterexample impact, deliberate attention, re-created source); reverse CoT stripping |
 | `docs/corrigibility.md` | Position paper — corrigibility as the action side of the power line: "changeable" vs. "able to change one's mind"; successful correction = behavior change ∧ mechanism-layer anchor intact; four failure forms; refusal as anchor defense |
+| `docs/whose-memory-is-it.md` | Position paper — relational memory: memory belongs to the relationship, not the individual; joint retelling as ever-present source; disagreement as first-class citizen |
+| `docs/memory-maintenance.md` | Position paper — new sources have a shelf life: re-sourcing as a maintenance operation; recharging protocol (periodic restatement, counterexample calibration, source refresh) |
+| `docs/measuring-getting-faster.md` | Position paper — measurement protocol for T(n): threshold rules, domain-sequence design, termination rules, controls and attribution, false-positive checklist |
+| `docs/continuity-across-replacement.md` | Position paper — identity across substrate replacement: three layers (record / influence / relationship); replacement protocol; anchor continuity + relational continuity |
+| `docs/can-memory-die.md` | Position paper — three forms of memory death: deletion (physical), demotion (dormancy), distillation (manufactured source loss); only deletion is real death |
+| `docs/chat-memory-gets-better.md` | Position paper — "getting to know you better" as a falsifiable promise: T_rel(n) measurement, pairing design vs. habituation, citation density, system-side probes |
+| `docs/initiative.md` | Position paper — initiative as deciding what changes you: selective absorption; the human's immutable core; three layers of constraint; remonstrance extended to power structures |
+| `docs/who-protects-judgment.md` | Position paper — protecting the way you judge right from wrong: mechanism-layer anchor, conclusion-layer openness, drift monitoring; corrosion vs. change |
+| `docs/embodied-intelligence.md` | Position paper — embodiment as action participating in knowledge formation: accumulation / selectivity / feedback; L0–L3 spectrum; virtual embodiment as legal subset |
+| `docs/knowledge-discovered-or-created.md` | Position paper — knowledge is created, not discovered: nature vetoes but does not supply; the loophole of self-reinforcement; rewriting the experimental conclusion |
 | `src/` | Experiment code (M0/M1/M2 milestone scripts) + upstream TRM models |
 | `src/results/` | Raw result JSONs — reproducible evidence, including negative results |
 | `src/results/inv_model/` | M1 inverse-model discrimination grid — 9 configs + matrix.json (PASSED=False, exploration bit closed) |
@@ -152,6 +162,17 @@ docs/
   results-m1-inverse-model.md  M1 inverse-model discrimination record (PASSED=False, exploration bit closed)
   results-m2-e2.md             M2 E2 three-arm memory experiment acceptance record
   results-m3-gate.md           M3 G-gate NO-GO discrimination record + five-way diagnostics outcome
+  corrigibility.md             Position paper: corrigibility — the action side of the power line
+  whose-memory-is-it.md        Position paper: relational memory — memory belongs to the relationship
+  memory-maintenance.md        Position paper: re-sourcing as a maintenance operation (recharging protocol)
+  measuring-getting-faster.md  Position paper: T(n) measurement protocol (thresholds, domains, termination)
+  continuity-across-replacement.md  Position paper: identity across substrate replacement (three layers)
+  can-memory-die.md            Position paper: three forms of memory death (deletion/demotion/distillation)
+  chat-memory-gets-better.md   Position paper: T_rel(n) — "getting to know you better" as a falsifiable promise
+  initiative.md                Position paper: initiative as deciding what changes you (selective absorption)
+  who-protects-judgment.md     Position paper: protecting the way you judge — anchor, openness, drift monitoring
+  embodied-intelligence.md     Position paper: embodiment = action participates in knowledge formation (L0–L3)
+  knowledge-discovered-or-created.md  Position paper: knowledge is created, not discovered (nature vetoes)
 src/
   m0_*.py m1_*.py m2_*.py  Milestone experiment scripts (m2_* = E2 memory field + three-arm experiment)
   m0_4_gen_domainE.py      M0.4 domain-E candidate generators (frozen)
