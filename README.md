@@ -16,6 +16,7 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
   - **Five-way diagnostics (2026-08-18)**: high-confidence error records carry statistical structure (result-magnitude axis) but are **not learnable** (night-LoRA overconfidence: confident-error rate 35.4% vs control 19.7% at unchanged total error rate); full-replay sampling also NO-GO (median ratios 1.00/1.50/1.20) → **sampling mode excluded as the cause**; M3 expectation re-estimated downward (details in `results/m3_gate_diag/` and `docs/results-m3-gate.md`)
   - **E4 (2026-08-20)**: combination generalization (duckbill) — dual-track vector-addition composition vs single-track, 3 seeds × 6,000 steps: duckbill median **single 0.167 vs dual 0.083** — main criterion failed (exploratory, paired d≈−0.39 ≪ d_min 3.1); E4 bit not merged into the E6a mechanism arm (details in `docs/results-m4-e4.md` and `results/m4_e4/`)
   - **Ceilings (2026-08-19)**: domain B continued to 20k steps → candidate **0.707** (`results/m1_domainB_ceiling/`); domain C calibrated across 3 configs → in-domain ceiling **1.0**, duckbill baseline 0.083 = chance (`results/m0_4_domainC_ceiling/`) — both above the 0.6 gate
+  - **Signal-quality constraint (2026-08-20)**: cross-project design note — self-distillation −16.5pp vs human labels +2.5pp (M0.3), q-head separability collapse (E1), K-curve flatness, and consistency-as-proxy are unified as one ceiling: teacher signal SNR. Design rules (verification layer, ungameable verification signals, weight-side first) for the E6a arm — see `docs/signal-quality-constraint.md`
 
 ## What this repo is
 
@@ -54,6 +55,7 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
 | `docs/who-protects-judgment.md` | Position paper — protecting the way you judge right from wrong: mechanism-layer anchor, conclusion-layer openness, drift monitoring; corrosion vs. change |
 | `docs/embodied-intelligence.md` | Position paper — embodiment as action participating in knowledge formation: accumulation / selectivity / feedback; L0–L3 spectrum; virtual embodiment as legal subset |
 | `docs/knowledge-discovered-or-created.md` | Position paper — knowledge is created, not discovered: nature vetoes but does not supply; the loophole of self-reinforcement; rewriting the experimental conclusion |
+| `docs/signal-quality-constraint.md` | Design note — signal-quality constraint: the common ceiling of learning mechanisms (evidence + design rules for the E6a arm, cross-validated with the sister toy-world project) |
 | `src/` | Experiment code (M0/M1/M2 milestone scripts) + upstream TRM models |
 | `src/results/` | Raw result JSONs — reproducible evidence, including negative results |
 | `src/results/inv_model/` | M1 inverse-model discrimination grid — 9 configs + matrix.json (PASSED=False, exploration bit closed) |
@@ -206,6 +208,7 @@ docs/
   who-protects-judgment.md     Position paper: protecting the way you judge — anchor, openness, drift monitoring
   embodied-intelligence.md     Position paper: embodiment = action participates in knowledge formation (L0–L3)
   knowledge-discovered-or-created.md  Position paper: knowledge is created, not discovered (nature vetoes)
+  signal-quality-constraint.md  Design note: teacher-signal SNR as the common ceiling; E6a-arm design rules
 src/
   m0_*.py m1_*.py m2_*.py  Milestone experiment scripts (m2_* = E2 memory field + three-arm experiment)
   m0_4_gen_domainE.py      M0.4 domain-E candidate generators (frozen)
