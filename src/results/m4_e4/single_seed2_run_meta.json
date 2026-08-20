@@ -1,0 +1,24 @@
+{
+  "experiment": "E4 组合泛化（鸭嘴兽 · single 臂）",
+  "script": "m4_e4.py",
+  "git_commit": "93479a9029fd26759987eaf6cda2a452a3f251cf",
+  "config": {
+    "arm": "single",
+    "steps": 6000,
+    "lr": 0.0001,
+    "batch_size": 128,
+    "weight_decay": 0.1,
+    "betas": [
+      0.9,
+      0.95
+    ],
+    "optimizer": "AdamW fused",
+    "eval_every": 500,
+    "sampling": "v0.23 组合分层采样（2026-08-18 修复版）",
+    "seed": 2,
+    "data": "../data/domain-c-combo（2026-08-12 冻结）",
+    "env": "PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:128; DISABLE_COMPILE=1"
+  },
+  "judge": "双轨 duckbill > 单轨 且 > 平凡基线 0.083；n=3 B1（d_min≈3.1，探索性）；配对 d（同种子对）",
+  "run_meta_written_by": "m4_e4.py（§3.5 自动落盘）"
+}

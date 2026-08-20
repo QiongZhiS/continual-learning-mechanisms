@@ -1,0 +1,21 @@
+{
+  "experiment": "域 C 天花板标定（v0.6.1 协议 · M4 前冻结输入 · gate 风险项）",
+  "script": "m0_4_train_domainC.py",
+  "git_commit": "43e30e5（含分层采样修复）",
+  "config": {
+    "steps": 10000,
+    "lr": 3e-4,
+    "batch_size": 128,
+    "weight_decay": 0.1,
+    "betas": [0.9, 0.95],
+    "optimizer": "AdamW fused",
+    "eval_every": 200,
+    "sampling": "v0.23 组合分层采样（2026-08-18 修复版）",
+    "eval": "K=1 D=16 · exact = 位 0+1 都正确（x,y）· duckbill = test 12 全新组合零次推断",
+    "seed_training_rng": 0,
+    "data": "../data/domain-c-combo（2026-08-12 冻结）",
+    "env": "PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:128; DISABLE_COMPILE=1"
+  },
+  "run_meta_written": "dsh-session（§3.5 前向纪律：开跑前预写，2026-08-18/19）",
+  "note": "天花板 = 无机制基线（纯 TRM，符合 v0.6.1 禁机制条款）；此目录 = 配置 3/3（lr 3e-4，多配置搜索档位）"
+}

@@ -8,12 +8,14 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
 
 - **Scale**: ~7M parameter recursive reasoning models (TRM), single consumer GPU (RTX 4060)
 - **Method**: pre-registered experiments, budget-matched controls, honest negative results
-- **Status**: M0 complete (M0.4 domain-sequence generators delivered, inter-domain distance matrix frozen) → M1 exploration mechanism **falsified** (exploration bit permanently closed) → M2 E2 memory **completed** (replay retains, surprise-write falsified) → E2b decay **zero decay through t=3d** (tau >> 3d) → **G-gate NO-GO** + five-way diagnostics converged → **M3 expectation re-estimated downward**; E3-D proceeds with full replay (v0.30)
+- **Status**: M0 complete (M0.4 domain-sequence generators delivered, inter-domain distance matrix frozen) → M1 exploration mechanism **falsified** (exploration bit permanently closed) → M2 E2 memory **completed** (replay retains, surprise-write falsified) → E2b decay **zero decay through t=3d** (tau >> 3d) → **G-gate NO-GO** + five-way diagnostics converged → **M3 expectation re-estimated downward**; E3-D proceeds with full replay (v0.30) → **M2 gap closed: E4 composition experiment completed — main criterion failed (exploratory), E4 bit not merged into the E6a mechanism arm** → **domain B/C ceilings calibrated** (B candidate 0.707, C = 1.0, both above the 0.6 signature-statistics gate)
   - **M1 (2026-08-14)**: goal-conditioned inverse model discriminated **PASSED=False** — direction-field exploration shows no gain over pure noise (full 9-config grid + matrix.json in `results/inv_model/`); exploration bit permanently closed per pre-registration
   - **M2 (2026-08-15)**: three-arm E2 — replay retains domain A (0.160 vs 0.000 no-memory control); surprise-write capacity-efficiency hypothesis falsified (0.050 < full-write 0.160); replay interface (r=0.25) confirmed for E3-D
   - **E2b**: zero decay through t=3d (2026-08-18: arm1 0.160 / arm2 0.050 identical to t=0, tau >> 3d)
   - **G-gate (2026-08-17)**: E3 go/no-go probe **NO-GO** — T median ratios 1.00/1.20/1.28 all > 0.7 (raw data in `results/m3_gate/`); M3 full-factorial paused
   - **Five-way diagnostics (2026-08-18)**: high-confidence error records carry statistical structure (result-magnitude axis) but are **not learnable** (night-LoRA overconfidence: confident-error rate 35.4% vs control 19.7% at unchanged total error rate); full-replay sampling also NO-GO (median ratios 1.00/1.50/1.20) → **sampling mode excluded as the cause**; M3 expectation re-estimated downward (details in `results/m3_gate_diag/` and `docs/results-m3-gate.md`)
+  - **E4 (2026-08-20)**: combination generalization (duckbill) — dual-track vector-addition composition vs single-track, 3 seeds × 6,000 steps: duckbill median **single 0.167 vs dual 0.083** — main criterion failed (exploratory, paired d≈−0.39 ≪ d_min 3.1); E4 bit not merged into the E6a mechanism arm (details in `docs/results-m4-e4.md` and `results/m4_e4/`)
+  - **Ceilings (2026-08-19)**: domain B continued to 20k steps → candidate **0.707** (`results/m1_domainB_ceiling/`); domain C calibrated across 3 configs → in-domain ceiling **1.0**, duckbill baseline 0.083 = chance (`results/m0_4_domainC_ceiling/`) — both above the 0.6 gate
 
 ## What this repo is
 
@@ -25,6 +27,9 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
 | `docs/results-m1-inverse-model.md` | M1 inverse-model discrimination record — PASSED=False, exploration bit closed |
 | `docs/results-m2-e2.md` | M2 E2 three-arm memory experiment — acceptance record |
 | `docs/results-m3-gate.md` | M3 G-gate NO-GO — discrimination record + five-way diagnostics outcome |
+| `docs/results-domainB-ceiling.md` | Domain-B ceiling calibration record — continuation 10k→20k steps, candidate 0.707 |
+| `docs/results-domainC-ceiling.md` | Domain-C ceiling calibration record — 3 configs × 10k steps, in-domain ceiling 1.0, duckbill baseline 0.083 |
+| `docs/results-m4-e4.md` | E4 combination generalization (duckbill) — dual-track vs single-track, main criterion failed (exploratory) |
 | `docs/why-not-measure-faster.md` | Position paper — why continual learning should measure "getting faster", not only "not forgetting" |
 | `docs/explicit-vs-weight.md` | Position paper — explicit vs. weight routes: why self-generated explicit knowledge almost never helps |
 | `docs/social-intelligence-experiment.md` | Social intelligence — falsifiable operational definition + experiment preregistration (frozen) |
@@ -55,10 +60,15 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
 | `src/results/m2_e2/` | M2 E2 three-arm memory experiment — retention curves (replay retains A: 0.160; surprise-write falsified) |
 | `src/results/m3_gate/` | M3 G-gate (E3 go/no-go probe) — judge.json + per-arm result/summary (NO-GO: median ratios 1.00/1.20/1.28) |
 | `src/results/m3_gate_diag/` | G-gate five-way diagnostics — error-record quality (diag1) + full-replay sampling 3-seed run (diag3), 2026-08-18 |
+| `src/results/m1_domainB_ceiling/` | Domain-B ceiling continuation — 20-point test curve, posterior best 0.707 (candidate) |
+| `src/results/m0_4_domainC_ceiling/` | Domain-C ceiling calibration — 3 configs × 10k steps (in-domain 1.0; duckbill 0.083 = chance) |
+| `src/results/m4_e4/` | E4 duckbill experiment — single/dual × 3 seeds curves (main criterion failed, exploratory) |
 | `src/m0_4_gen_domainE.py` | M0.4 domain-E candidates (prefix MUL/DIV stack machine / signal inference / Latin square) — frozen generators |
 | `src/m0_4_domain_distance.py` | Computes the frozen inter-domain structural-distance matrix (`results/domain_distance.json`) |
 | `src/m1_inv_train_data.py` `src/m1_inv_model.py` `src/m1_inv_eval.py` | M1 redesign — goal-conditioned inverse model (direction field): data collection / training / pre-registered discrimination grid |
 | `src/m2_memory.py` `src/m2_e2.py` | M2 E2 memory field (Titans-style surprise writing) + three-arm retention experiment |
+| `src/m4_e4.py` `src/run_e4_batch.ps1` | E4 combination experiment — dual-track (vector-addition composition) vs single-track, batch runner |
+| `src/m0_4_train_domainC.py` | Domain-C learnability/ceiling trainer — stratified combo sampling (bug-fixed 2026-08-18) + checkpoint resume |
 
 **Reproducibility first**: the M1 pipeline is fully reproducible end-to-end (data → train → eval). Result JSONs are paired with their producing scripts (see mapping below). M0.3 artifacts are archived for provenance — they require a pretrained checkpoint (gitignored) and a specific sudoku subsample; see the Running section.
 
@@ -97,6 +107,22 @@ If not — if experience cannot be turned into reusable skill — that is also a
 ### M0.4 — domain-sequence infrastructure (delivered 2026-08-13)
 
 Generators for the pre-registered 7-domain sequence are complete and frozen: domain B (RPN stack-machine arithmetic), domain C (feature composition), domain D (discrete game, IPD-based), and three domain-E candidates (prefix pseudo-language / signal inference / Latin square) with the pre-registered selection rule: pick the baseline-predicted lowest zero-shot-transfer candidate before any mechanism training. The inter-domain similarity matrix reports **measured** 6-feature structural distances (feature names: token_entropy, pos_entropy, fill_rate, log1p_len_var, label_entropy, vocab_used; z-scored Euclidean). Per src/domain_params.py the pre-registered freeze specifies behavioral distance (zero-shot transfer matrix), which is pending measurement; the structural matrix is auxiliary reporting. See `results/domain_distance.json`. The E6a domain ordering uses this matrix as specified in the pre-registration.
+
+### Ceiling calibration (2026-08-19) — domains B & C
+
+The pre-registered ceiling protocol (v0.6.1: mechanism-free baseline, ample budget, ≥3-config search, freeze before M4) progressed on both domains:
+
+- **Domain B** continued from the 10k-step checkpoint to 20k steps (lr 1e-4): test exact rose from 0.606 to a posterior best of **0.707** (step 19,500; last-10-point band 0.59–0.71 — known domain-B volatility) — candidate ceiling ≈ 0.70 tier, above the 0.6 gate (details: `docs/results-domainB-ceiling.md`, `results/m1_domainB_ceiling/`)
+- **Domain C** calibrated across 3 configs (lr 1e-4 / 5e-5 / 3e-4 × 10k steps): in-domain ceiling **1.0** reproduced on all three (24 combos fully memorized), while **duckbill zero-shot extrapolation = 0.083 = chance** on all three — the mechanism-free baseline shows zero transfer to unseen combos, exactly the pre-registered E4 expected baseline (details: `docs/results-domainC-ceiling.md`, `results/m0_4_domainC_ceiling/`)
+- **Gate (§3.3)**: both domains ≥ 0.6 → retained for signature statistics; the n_gate roster (A 0.48 excluded / B 0.707 / C 1.0 / D analytic pending) freezes with the M4 batch
+
+### E4 combination generalization (2026-08-20) — main criterion failed (exploratory)
+
+**Hypothesis**: high-dim vector-addition composition (cognitive-mapping anchor) enables zero-shot combination of unseen feature pairs.
+
+**Result**: **No gain**. Dual-track (standard TRM + composed-feature injection at input position 2) vs single-track control, 3 seeds × 6,000 steps: duckbill median **single 0.167 vs dual 0.083** — opposite direction; paired d ≈ −0.39 ≪ B1 d_min 3.1 (exploratory scope). The distance gradient degenerates to a single stratum on the frozen data (train covers all feature values → all 12 test combos at replacement distance 1, d\* undefined).
+
+**Consequence**: the E4 bit provides no gainful composition mechanism for the E6a mechanism arm — the arm runs E2 + E3(Config D) + E5 with the E4 bit empty (declared explicitly in the E6a report, same class as the M1 exploration-bit closure). Details: `docs/results-m4-e4.md`, `results/m4_e4/`.
 
 ### The skill definition (docs/)
 
@@ -140,6 +166,10 @@ python m1_eval_K.py <checkpoint-path>    # K-curve: K=1 D=16 / K=1 D=48 / K=10 D
 # M1 redesign / M2 (GPU; ~30 min per inverse-eval config, M2 ~3.5h per arm):
 #   python m1_inv_eval.py --grid                   # pre-registered discrimination grid (b-arm)
 #   python m2_e2.py --steps 4000 --cap 2000        # E2 three-arm memory experiment
+# Ceiling / E4 (GPU; ~1.3h per 6,000-step run, batch runner chains all 6):
+#   python m0_4_train_domainC.py --steps 10000 --lr 1e-4 --out outputs/...   # domain-C ceiling (3 configs)
+#   python m4_e4.py --arm dual --seed 0 --steps 6000                          # E4 duckbill, single run
+#   pwsh -ExecutionPolicy Bypass -File run_e4_batch.ps1                       # E4 all 6 runs (single/dual x seeds 0-2)
 ```
 
 Requires: Python 3.11, CUDA 12.x, ~8GB VRAM (scripts hardcode CUDA device).
@@ -162,6 +192,9 @@ docs/
   results-m1-inverse-model.md  M1 inverse-model discrimination record (PASSED=False, exploration bit closed)
   results-m2-e2.md             M2 E2 three-arm memory experiment acceptance record
   results-m3-gate.md           M3 G-gate NO-GO discrimination record + five-way diagnostics outcome
+  results-domainB-ceiling.md  Domain-B ceiling record (candidate 0.707, 20k steps)
+  results-domainC-ceiling.md  Domain-C ceiling record (in-domain 1.0, duckbill baseline 0.083)
+  results-m4-e4.md            E4 duckbill record (dual-track failed, exploratory)
   corrigibility.md             Position paper: corrigibility — the action side of the power line
   whose-memory-is-it.md        Position paper: relational memory — memory belongs to the relationship
   memory-maintenance.md        Position paper: re-sourcing as a maintenance operation (recharging protocol)
@@ -178,6 +211,8 @@ src/
   m0_4_gen_domainE.py      M0.4 domain-E candidate generators (frozen)
   m0_4_domain_distance.py  Inter-domain structural-distance matrix computation
   m1_inv_*.py              M1 redesign: inverse-model data collection / training / eval grid
+  m4_e4.py                 E4 duckbill experiment: dual-track vs single-track
+  run_e4_batch.ps1         E4 batch runner (6 runs)
   models/           TRM upstream (Samsung MIT) + experiment models
   config/           Architecture configs (TRM upstream)
   dataset/          Data generators (reproducibility)
@@ -204,6 +239,9 @@ src/
 | `results/domain_distance.json` | M0.4 | Frozen inter-domain similarity matrix (7 domains × 6 z-scored features) + near→far gradient anchored at B-rpn |
 | `results/m3_gate/judge.json` + `results/m3_gate/{ctl,d}_s{0,1,2}_*` | M3 G-gate | go/no-go verdict (NO-GO) + per-arm T curves (3 seeds x 2 arms) |
 | `results/m3_gate_diag/*.json` | G-gate diagnostics | Error-record quality (diag1, 7 files) + full-replay sampling 3-seed run (diag3) |
+| `results/m1_domainB_ceiling/result.json` | Ceiling, domain B | 20-point continuation curve 10k→20k steps (posterior best 0.707 @19.5k) |
+| `results/m0_4_domainC_ceiling/c{1,2,3}_lr*_result.json` | Ceiling, domain C | 3 configs × 10k steps (in-domain 1.0; duckbill 0.083) |
+| `results/m4_e4/{single,dual}_seed{0,1,2}_result.json` | E4 duckbill | Per-seed duckbill/train curves (single vs dual) |
 
 Note: scripts write generic names (`result.json`); files were renamed by experiment when archived.
 
@@ -216,6 +254,9 @@ Verified against the project's acceptance records (working workspace, 2026-08-10
 3. **E6a ordering**: the frozen similarity gradient is anchored at B-rpn (near→far: E1 0.52 → E2 2.36 → C 2.86 → E3 3.32 → D 3.92 → A 4.78). A↔B is the *largest* measured distance — an intent-vs-measured deviation recorded at M0.4 acceptance; the final sequence is set from the matrix after domain-E selection.
 4. **Seed-count decision (5→3)**: 3 seeds measured 0.485/0.455/0.410 (mean 0.45 ± 3.8pp ≈ eval noise ±3.5pp) — upheld at M0.3 acceptance.
 5. **Post-M0.4 scripts** (`m0_4_gen_domainE.py`, `m0_4_domain_distance.py`, `m1_inv_*.py`, `m2_*.py`) were ported from the working workspace and retain the original Chinese docstrings for fidelity; their data artifacts live under `data/` (generated, gitignored).
+6. **Domain-C stratified-sampling fix (2026-08-18)**: the v0.23 stratified-sampling "fix" in `m0_4_train_domainC.py` bucketed by `range(24)` over a sparsely encoded `combo_id = c*12+a` (actual cids {6..11,18..23,42..47,54..59,66..71}) — empty buckets made every run crash; it had never actually run. Fixed by bucketing over `np.unique(combo_id)`; the 2026-08-12 smoke predates the fix (old unstratified sampling).
+7. **E4 distance gradient degenerates to a single stratum**: domain-C train covers all 6 colors × 6 animals (incl. (2,10)), so all 12 test combos are "both feature values seen, pair unseen" — min replacement distance 1 for all, d\* undefined. The frozen generator's train/test split is on combos, not feature values; no new test combos were added (v0.22 freeze). Reported as an honest downgrade; the main E4 criterion is unaffected.
+8. **Domain-B ceiling candidate scope**: 0.707 is one config line (lr 1e-4) extended to 20k steps; the v0.6.1 protocol wants ≥3 configs — the M4 freeze batch either adds configs or accepts the value with the config scope stated. Domain-C ceiling 1.0 is ≥3-config confirmed.
 
 Experiments are pre-registered as E0–E9, milestones as M0–M5 — see the "Experiment-number index" section in `docs/experiment-proposal.md`. M0.x are sub-milestones within M0 (M0.1 reproduction, M0.2 basin tooling, M0.3 feasibility anchors, M0.4 domain C/D/E generators + frozen distance matrix).
 
