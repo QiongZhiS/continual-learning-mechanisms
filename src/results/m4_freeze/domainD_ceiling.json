@@ -1,0 +1,58 @@
+{
+  "experiment": "Domain-D ceiling (analytic, adaptation premium)",
+  "criterion": {
+    "name": "adaptation_premium",
+    "eps": 0.1,
+    "eps_sensitivity": [
+      0.05,
+      0.2
+    ],
+    "base": "tit-for-tat pool mean"
+  },
+  "game": {
+    "type": "IPD",
+    "n_rounds": 100,
+    "payoff": {
+      "R": 3,
+      "S": 0,
+      "T": 5,
+      "P": 1
+    }
+  },
+  "opponents": [
+    "always-cooperate",
+    "always-defect",
+    "tit-for-tat",
+    "generous-tft",
+    "random",
+    "punisher",
+    "sleeper",
+    "prob-deceiver"
+  ],
+  "ceiling_optimal_response": {
+    "always-cooperate": 500.0,
+    "always-defect": 100.0,
+    "tit-for-tat": 302.0,
+    "generous-tft": 302.0,
+    "random": 301.34,
+    "punisher": 302.0,
+    "sleeper": 220.0,
+    "prob-deceiver": 421.2
+  },
+  "tft_baseline_per_opponent": {
+    "always-cooperate": 300.0,
+    "always-defect": 99.0,
+    "tit-for-tat": 300.0,
+    "generous-tft": 300.0,
+    "random": 223.73,
+    "punisher": 300.0,
+    "sleeper": 159.0,
+    "prob-deceiver": 275.75
+  },
+  "tft_pool_mean": 244.69,
+  "threshold_x1.1": 269.15,
+  "optimal_response_pool_mean": 306.07,
+  "premium_headroom_pct": 13.7,
+  "note": "analytic best-response rollout (200 games/opponent, seed 1); gate: criterion signal measurable (+13.7% above threshold); frozen 2026-08-12, M4 pre-freeze batch 2026-08-22",
+  "source": "m0_4_gen_domainD.py ceiling() -> ../data/domain-d-ipd/dataset.json"
+}

@@ -1,0 +1,250 @@
+{
+  "arm": "a3",
+  "seed": 0,
+  "steps": 10000,
+  "config": {
+    "signal": "high",
+    "objective": "calib",
+    "desc": "学习目标变化：高置信错误 + 置信度校准 BCE + 重放"
+  },
+  "curve": [
+    {
+      "step": 500,
+      "acc": 0.2720000147819519,
+      "loss": 0.38018767336049386,
+      "t_sec": 376
+    },
+    {
+      "step": 1000,
+      "acc": 0.3240000009536743,
+      "loss": 0.3612979132385768,
+      "t_sec": 758
+    },
+    {
+      "step": 1500,
+      "acc": 0.2900000214576721,
+      "loss": 0.34586765678548054,
+      "t_sec": 1136
+    },
+    {
+      "step": 2000,
+      "acc": 0.34800001978874207,
+      "loss": 0.3063519225787851,
+      "t_sec": 1526,
+      "night_before": {
+        "n": 512,
+        "n_err": 358,
+        "n_hc_err": 285,
+        "err_rate": 0.69921875,
+        "hc_err_rate": 0.556640625,
+        "hc_share_of_errors": 0.7960893854748603,
+        "err_conf_mean": 0.9059199094772339,
+        "hc_err_conf_mean": 0.9866639375686646
+      },
+      "night_err_n": 286,
+      "night_after": {
+        "n": 512,
+        "n_err": 420,
+        "n_hc_err": 420,
+        "err_rate": 0.8203125,
+        "hc_err_rate": 0.8203125,
+        "hc_share_of_errors": 1.0,
+        "err_conf_mean": 1.0,
+        "hc_err_conf_mean": 1.0
+      }
+    },
+    {
+      "step": 2500,
+      "acc": 0.2900000214576721,
+      "loss": 0.3705916390346701,
+      "t_sec": 2994
+    },
+    {
+      "step": 3000,
+      "acc": 0.31800001859664917,
+      "loss": 0.3437514523363775,
+      "t_sec": 3376
+    },
+    {
+      "step": 3500,
+      "acc": 0.4000000059604645,
+      "loss": 0.2989057035297148,
+      "t_sec": 3771
+    },
+    {
+      "step": 4000,
+      "acc": 0.38600000739097595,
+      "loss": 0.3787919458680387,
+      "t_sec": 4154,
+      "night_before": {
+        "n": 512,
+        "n_err": 311,
+        "n_hc_err": 186,
+        "err_rate": 0.607421875,
+        "hc_err_rate": 0.36328125,
+        "hc_share_of_errors": 0.5980707395498392,
+        "err_conf_mean": 0.8704971075057983,
+        "hc_err_conf_mean": 0.9829679131507874
+      },
+      "night_err_n": 185,
+      "night_after": {
+        "n": 512,
+        "n_err": 420,
+        "n_hc_err": 420,
+        "err_rate": 0.8203125,
+        "hc_err_rate": 0.8203125,
+        "hc_share_of_errors": 1.0,
+        "err_conf_mean": 1.0,
+        "hc_err_conf_mean": 1.0
+      }
+    },
+    {
+      "step": 4500,
+      "acc": 0.3680000305175781,
+      "loss": 0.3139316533408924,
+      "t_sec": 6049
+    },
+    {
+      "step": 5000,
+      "acc": 0.38600000739097595,
+      "loss": 0.38701589358865174,
+      "t_sec": 6712
+    },
+    {
+      "step": 5500,
+      "acc": 0.44600000977516174,
+      "loss": 0.3359399632602613,
+      "t_sec": 7379
+    },
+    {
+      "step": 6000,
+      "acc": 0.44200003147125244,
+      "loss": 0.2736842099917227,
+      "t_sec": 7899,
+      "night_before": {
+        "n": 512,
+        "n_err": 279,
+        "n_hc_err": 150,
+        "err_rate": 0.544921875,
+        "hc_err_rate": 0.29296875,
+        "hc_share_of_errors": 0.5376344086021505,
+        "err_conf_mean": 0.8409778475761414,
+        "hc_err_conf_mean": 0.9782031178474426
+      },
+      "night_err_n": 152,
+      "night_after": {
+        "n": 512,
+        "n_err": 420,
+        "n_hc_err": 420,
+        "err_rate": 0.8203125,
+        "hc_err_rate": 0.8203125,
+        "hc_share_of_errors": 1.0,
+        "err_conf_mean": 1.0,
+        "hc_err_conf_mean": 1.0
+      }
+    },
+    {
+      "step": 6500,
+      "acc": 0.5360000133514404,
+      "loss": 0.32190359153733117,
+      "t_sec": 9562
+    },
+    {
+      "step": 7000,
+      "acc": 0.3440000116825104,
+      "loss": 0.32173539289154124,
+      "t_sec": 10086
+    },
+    {
+      "step": 7500,
+      "acc": 0.45000001788139343,
+      "loss": 0.3304468372235715,
+      "t_sec": 10471
+    },
+    {
+      "step": 8000,
+      "acc": 0.4540000259876251,
+      "loss": 0.39608026959853443,
+      "t_sec": 10860,
+      "night_before": {
+        "n": 512,
+        "n_err": 296,
+        "n_hc_err": 152,
+        "err_rate": 0.578125,
+        "hc_err_rate": 0.296875,
+        "hc_share_of_errors": 0.5135135135135135,
+        "err_conf_mean": 0.8376398682594299,
+        "hc_err_conf_mean": 0.9793636798858643
+      },
+      "night_err_n": 154,
+      "night_after": {
+        "n": 512,
+        "n_err": 512,
+        "n_hc_err": 239,
+        "err_rate": 1.0,
+        "hc_err_rate": 0.466796875,
+        "hc_share_of_errors": 0.466796875,
+        "err_conf_mean": 0.9135513305664062,
+        "hc_err_conf_mean": 0.953125
+      }
+    },
+    {
+      "step": 8500,
+      "acc": 0.36400002241134644,
+      "loss": 0.3188451751789211,
+      "t_sec": 12210
+    },
+    {
+      "step": 9000,
+      "acc": 0.3800000250339508,
+      "loss": 0.29631078893297425,
+      "t_sec": 12586
+    },
+    {
+      "step": 9500,
+      "acc": 0.42600002884864807,
+      "loss": 0.31495141529719967,
+      "t_sec": 12962
+    },
+    {
+      "step": 10000,
+      "acc": 0.4000000059604645,
+      "loss": 0.3315900611827932,
+      "t_sec": 13340,
+      "night_before": {
+        "n": 512,
+        "n_err": 282,
+        "n_hc_err": 192,
+        "err_rate": 0.55078125,
+        "hc_err_rate": 0.375,
+        "hc_share_of_errors": 0.6808510638297872,
+        "err_conf_mean": 0.8923495411872864,
+        "hc_err_conf_mean": 0.98907470703125
+      },
+      "night_err_n": 189,
+      "night_after": {
+        "n": 512,
+        "n_err": 512,
+        "n_hc_err": 0,
+        "err_rate": 1.0,
+        "hc_err_rate": 0.0,
+        "hc_share_of_errors": 0.0,
+        "err_conf_mean": 0.845855712890625,
+        "hc_err_conf_mean": null
+      }
+    }
+  ],
+  "error_quality_final": {
+    "n": 2000,
+    "n_err": 2000,
+    "n_hc_err": 0,
+    "err_rate": 1.0,
+    "hc_err_rate": 0.0,
+    "hc_share_of_errors": 0.0,
+    "err_conf_mean": 0.8389765620231628,
+    "hc_err_conf_mean": null
+  },
+  "git_commit": "c6ac00017f9a17727b8e5e7cdf7f13cef429324e",
+  "T@0.5": 6500,
+  "T@0.56": null
+}

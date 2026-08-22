@@ -8,7 +8,7 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
 
 - **Scale**: ~7M parameter recursive reasoning models (TRM), single consumer GPU (RTX 4060)
 - **Method**: pre-registered experiments, budget-matched controls, honest negative results
-- **Status**: M0 complete (M0.4 domain-sequence generators delivered, inter-domain distance matrix frozen) → M1 exploration mechanism **falsified** (exploration bit permanently closed) → M2 E2 memory **completed** (replay retains, surprise-write falsified) → E2b decay **zero decay through t=3d** (tau >> 3d) → **G-gate NO-GO** + five-way diagnostics converged → **M3 expectation re-estimated downward**; E3-D proceeds with full replay (v0.30) → **M2 gap closed: E4 composition experiment completed — main criterion failed (exploratory), E4 bit not merged into the E6a mechanism arm** → **domain B/C ceilings calibrated** (B candidate 0.707, C = 1.0, both above the 0.6 signature-statistics gate)
+- **Status**: M0 complete (M0.4 domain-sequence generators delivered, inter-domain distance matrix frozen) → M1 exploration mechanism **falsified** (exploration bit permanently closed) → M2 E2 memory **completed** (replay retains, surprise-write falsified) → E2b decay **zero decay through t=7d** (tau >> 7d) → **G-gate NO-GO** + five-way diagnostics converged → **M3 expectation re-estimated downward**; E3-D proceeds with full replay (v0.30) → **M2 gap closed: E4 composition experiment completed — main criterion failed (exploratory), E4 bit not merged into the E6a mechanism arm** → **domain B/C ceilings calibrated** (B candidate 0.707, C = 1.0, both above the 0.6 signature-statistics gate) → **B1 probe (M3 go/no-go, second gate): NO-GO (2026-08-22) — "error→correct" not learnable across 5 arms × 3 seeds (signal-source × learning-objective variants all fail); M3 not invested on the distillation axis; prior axis (c2/c3/c4) evaluated separately** → **M4 pre-freeze batch: n_gate = {B, C, D} + domain-D analytic ceiling (premium +13.7%) + sequence ordering (pending domain-E selection)**
   - **M1 (2026-08-14)**: goal-conditioned inverse model discriminated **PASSED=False** — direction-field exploration shows no gain over pure noise (full 9-config grid + matrix.json in `results/inv_model/`); exploration bit permanently closed per pre-registration
   - **M2 (2026-08-15)**: three-arm E2 — replay retains domain A (0.160 vs 0.000 no-memory control); surprise-write capacity-efficiency hypothesis falsified (0.050 < full-write 0.160); replay interface (r=0.25) confirmed for E3-D
   - **E2b**: zero decay through t=3d (2026-08-18: arm1 0.160 / arm2 0.050 identical to t=0, tau >> 3d)
@@ -16,6 +16,9 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
   - **Five-way diagnostics (2026-08-18)**: high-confidence error records carry statistical structure (result-magnitude axis) but are **not learnable** (night-LoRA overconfidence: confident-error rate 35.4% vs control 19.7% at unchanged total error rate); full-replay sampling also NO-GO (median ratios 1.00/1.50/1.20) → **sampling mode excluded as the cause**; M3 expectation re-estimated downward (details in `results/m3_gate_diag/` and `docs/results-m3-gate.md`)
   - **E4 (2026-08-20)**: combination generalization (duckbill) — dual-track vector-addition composition vs single-track, 3 seeds × 6,000 steps: duckbill median **single 0.167 vs dual 0.083** — main criterion failed (exploratory, paired d≈−0.39 ≪ d_min 3.1); E4 bit not merged into the E6a mechanism arm (details in `docs/results-m4-e4.md` and `results/m4_e4/`)
   - **Ceilings (2026-08-19)**: domain B continued to 20k steps → candidate **0.707** (`results/m1_domainB_ceiling/`); domain C calibrated across 3 configs → in-domain ceiling **1.0**, duckbill baseline 0.083 = chance (`results/m0_4_domainC_ceiling/`) — both above the 0.6 gate
+  - **B1 probe (2026-08-22)**: M3 go/no-go, second gate — 5 arms × 3 seeds × 10,000 steps (domain B, same carrier as the G-gate): a1 status-quo (Config-D replication) **reproduces the G-gate NO-GO + overconfidence** (hc_err 0.259→0.445, err 0.452→0.630, T@0.5 ratio 1.31); a2 low-confidence source fails same direction (hc 0.343/err 0.517); a3 calibration arm degenerated to a constant-token predictor (operationalization-level, err=1.0); a4 weight regularization fails (hc 0.330/err 0.551/T 1.38) → **verdict M3_NO_GO: "error→correct" conversion not learnable in this base/task family; M3 not invested on the distillation axis; prior axis evaluated separately** (details in `docs/results-b1-probe.md` and `results/m1_b1_probe/`)
+  - **M4 pre-freeze batch (2026-08-22)**: n_gate = {B 0.707, C 1.0, D analytic, A 0.48 excluded}; domain-D ceiling = adaptation-premium analytic optimum 306.07 vs TFT pool 244.69 (threshold ×1.1 = 269.15, headroom +13.7%); domain-sequence min-distance orderings per E candidate (B→E1→C→D→A 12.71 / B→E2→C→D→A 13.28 / B→C→E3→A→D 14.02) — final freeze pending domain-E selection (needs A→D baseline + zero-shot measurement) (details in `docs/results-m4-freeze.md`)
+  - **E2b (2026-08-22)**: zero decay through **t=7d** (arm1 0.160 / arm2 0.050 identical to t=0; tau >> 7d; t=30d pending 2026-09-14)
   - **Signal-quality constraint (2026-08-20)**: cross-project design note — self-distillation −16.5pp vs human labels +2.5pp (M0.3), q-head separability collapse (E1), K-curve flatness, and consistency-as-proxy are unified as one ceiling: teacher signal SNR. Design rules (verification layer, ungameable verification signals, weight-side first) for the E6a arm — see `docs/signal-quality-constraint.md`
 
 ## What this repo is
@@ -31,6 +34,8 @@ A falsifiable investigation into whether **learning mechanisms** — not scale �
 | `docs/results-domainB-ceiling.md` | Domain-B ceiling calibration record — continuation 10k→20k steps, candidate 0.707 |
 | `docs/results-domainC-ceiling.md` | Domain-C ceiling calibration record — 3 configs × 10k steps, in-domain ceiling 1.0, duckbill baseline 0.083 |
 | `docs/results-m4-e4.md` | E4 combination generalization (duckbill) — dual-track vs single-track, main criterion failed (exploratory) |
+| `docs/results-b1-probe.md` | B1 probe (M3 go/no-go, second gate) — error-signal learnability, 5 arms × 3 seeds, verdict NO-GO |
+| `docs/results-m4-freeze.md` | M4 pre-freeze batch — n_gate roster, domain ceilings (incl. D analytic), sequence ordering per E candidate |
 | `docs/why-not-measure-faster.md` | Position paper — why continual learning should measure "getting faster", not only "not forgetting" |
 | `docs/explicit-vs-weight.md` | Position paper — explicit vs. weight routes: why self-generated explicit knowledge almost never helps |
 | `docs/social-intelligence-experiment.md` | Social intelligence — falsifiable operational definition + experiment preregistration (frozen) |
@@ -126,6 +131,23 @@ The pre-registered ceiling protocol (v0.6.1: mechanism-free baseline, ample budg
 
 **Consequence**: the E4 bit provides no gainful composition mechanism for the E6a mechanism arm — the arm runs E2 + E3(Config D) + E5 with the E4 bit empty (declared explicitly in the E6a report, same class as the M1 exploration-bit closure). Details: `docs/results-m4-e4.md`, `results/m4_e4/`.
 
+### B1 probe (2026-08-22) — M3 go/no-go, second gate: NO-GO
+
+**Question**: the G-gate + five-way diagnostics said high-confidence errors carry statistical structure but are **not learnable** (overconfidence). Is that a *signal-source* problem (high-confidence errors contain no learnable rule), a *configuration* problem (night-LoRA objective/regularization), or a *domain* problem (domain-B q-inseparability pollutes all error signals)? Before committing 15–40 days to the M3 full factorial, a 1–3 day probe adjudicates across signal source × learning objective.
+
+**Result**: **NO-GO (M3_NO_GO)** — 5 arms × 3 seeds × 10,000 steps (domain B, same carrier as the G-gate → directly comparable):
+
+- **a1 status quo** (= G-gate Config-D replication): hc_err 0.259 → **0.445**, total err 0.452 → **0.630**, T@0.5 6500 → 8500 (ratio 1.31) — **fully reproduces the G-gate NO-GO + diagnostic-① overconfidence** (the error signal is absorbed as confidence, not rule structure)
+- **a2 low-confidence source**: same-direction failure (hc 0.343 / err 0.517), T neutral — switching the source does not make errors learnable
+- **a3 calibration** (confidence-BCE): operationalization degeneracy — the model collapsed to a constant-token predictor on all 3 seeds (CPU-verified, no NaN); counted as criterion-② failure (err=1.0)
+- **a4 weight regularization**: fails all three (hc 0.330 / err 0.551 / T ratio 1.38)
+
+**Consequence**: **M3 not invested on the distillation axis** — "error→correct" conversion is not learnable in this base/task family (5 arms × 3 seeds, v0.23 wording: the conclusion holds for the tested mechanism family). The prior axis (pre-training / architecture bias / combined) is evaluated separately (orthogonal). Three evidence streams now converge: G-gate NO-GO + five-way diagnostics + B1. Details: `docs/results-b1-probe.md`, `results/m1_b1_probe/judge.json`.
+
+### M4 pre-freeze batch (2026-08-22) — n_gate, ceilings, sequence
+
+The §3.3 freeze batch (n_gate roster + sequence start + ceiling values + ordering, frozen together before M4): **n_gate = {B 0.707, C 1.0, D analytic, A 0.48 excluded}** (3–4 domains ≥ the lower bound of 3). Domain-D's ceiling is analytic — adaptation premium: optimal-response pool mean **306.07** vs TFT pool mean 244.69 (criterion threshold ×1.1 = 269.15, headroom **+13.7%**) → the "adapt beyond TFT×1.1" signal is measurable for a 7M learner. Sequence ordering from the frozen distance matrix (min total distance, start = B anchor): **B→E1→C→D→A** (12.71) / **B→E2→C→D→A** (13.28) / **B→C→E3→A→D** (14.02) depending on which E candidate is selected; final freeze pending domain-E selection (needs an A→D continuous-trained baseline + zero-shot measurement, mechanical lowest). Details: `docs/results-m4-freeze.md`, `results/m4_freeze/domainD_ceiling.json`.
+
 ### The skill definition (docs/)
 
 A falsifiable operational definition of *skill* for the continual-learning community: **a behavioral disposition** — judged by behavior (reliability, out-of-distribution transfer, efficiency), not by implementation form (rules/vectors/weights). Key corollary: explicit information that does not change behavior is not a skill (SkillsBench: curated +16.6pp vs self-generated null).
@@ -168,10 +190,13 @@ python m1_eval_K.py <checkpoint-path>    # K-curve: K=1 D=16 / K=1 D=48 / K=10 D
 # M1 redesign / M2 (GPU; ~30 min per inverse-eval config, M2 ~3.5h per arm):
 #   python m1_inv_eval.py --grid                   # pre-registered discrimination grid (b-arm)
 #   python m2_e2.py --steps 4000 --cap 2000        # E2 three-arm memory experiment
-# Ceiling / E4 (GPU; ~1.3h per 6,000-step run, batch runner chains all 6):
+# Ceiling / E4 / B1 (GPU; ~1.3h per 6,000-step run, batch runner chains all 6):
 #   python m0_4_train_domainC.py --steps 10000 --lr 1e-4 --out outputs/...   # domain-C ceiling (3 configs)
 #   python m4_e4.py --arm dual --seed 0 --steps 6000                          # E4 duckbill, single run
 #   pwsh -ExecutionPolicy Bypass -File run_e4_batch.ps1                       # E4 all 6 runs (single/dual x seeds 0-2)
+# B1 probe (GPU; ~1.7-3.5h per 10,000-step run; needs ../data/domain-b-rpn + a domain-A checkpoint, gitignored):
+#   python m1_b1_probe.py --arm a0 --seed 0          # single arm/seed (auto-resume via result.json)
+#   pwsh -ExecutionPolicy Bypass -File run_b1_batch.ps1   # full grid 5 arms x 3 seeds + judge.json
 ```
 
 Requires: Python 3.11, CUDA 12.x, ~8GB VRAM (scripts hardcode CUDA device).
@@ -197,6 +222,8 @@ docs/
   results-domainB-ceiling.md  Domain-B ceiling record (candidate 0.707, 20k steps)
   results-domainC-ceiling.md  Domain-C ceiling record (in-domain 1.0, duckbill baseline 0.083)
   results-m4-e4.md            E4 duckbill record (dual-track failed, exploratory)
+  results-b1-probe.md         B1 probe record (M3_NO_GO — error-signal learnability, 5 arms × 3 seeds)
+  results-m4-freeze.md        M4 pre-freeze batch (n_gate, domain ceilings incl. D, sequence ordering)
   corrigibility.md             Position paper: corrigibility — the action side of the power line
   whose-memory-is-it.md        Position paper: relational memory — memory belongs to the relationship
   memory-maintenance.md        Position paper: re-sourcing as a maintenance operation (recharging protocol)
@@ -214,6 +241,9 @@ src/
   m0_4_gen_domainE.py      M0.4 domain-E candidate generators (frozen)
   m0_4_domain_distance.py  Inter-domain structural-distance matrix computation
   m1_inv_*.py              M1 redesign: inverse-model data collection / training / eval grid
+  m3_gate*.py              M3 G-gate probe + diagnostics pipeline (night-LoRA, error-record quality, full-replay)
+  m1_b1_probe.py           B1 probe: error-signal learnability (5 arms × 3 seeds, M3 go/no-go second gate)
+  run_b1_batch.ps1         B1 probe batch runner (15 runs + judge)
   m4_e4.py                 E4 duckbill experiment: dual-track vs single-track
   run_e4_batch.ps1         E4 batch runner (6 runs)
   models/           TRM upstream (Samsung MIT) + experiment models
@@ -245,6 +275,10 @@ src/
 | `results/m1_domainB_ceiling/result.json` | Ceiling, domain B | 20-point continuation curve 10k→20k steps (posterior best 0.707 @19.5k) |
 | `results/m0_4_domainC_ceiling/c{1,2,3}_lr*_result.json` | Ceiling, domain C | 3 configs × 10k steps (in-domain 1.0; duckbill 0.083) |
 | `results/m4_e4/{single,dual}_seed{0,1,2}_result.json` | E4 duckbill | Per-seed duckbill/train curves (single vs dual) |
+| `results/m1_b1_probe/judge.json` | B1 probe | Verdict (M3_NO_GO) + per-arm criterion table |
+| `results/m1_b1_probe/{a0..a4}/s{0,1,2}/summary.json` | B1 probe | 15 per-seed summaries: T@0.5/T@0.56, error-quality (err/hc_err), full curve |
+| `results/m2_e2/arm{1,2}_t7.json` | E2b | Zero-decay measurement at t=7d (0.160 / 0.050, identical to t=0) |
+| `results/m4_freeze/domainD_ceiling.json` | M4 freeze | Domain-D analytic ceiling (adaptation premium: TFT pool 244.69 → threshold 269.15 → optimum 306.07) |
 
 Note: scripts write generic names (`result.json`); files were renamed by experiment when archived.
 
@@ -260,6 +294,7 @@ Verified against the project's acceptance records (working workspace, 2026-08-10
 6. **Domain-C stratified-sampling fix (2026-08-18)**: the v0.23 stratified-sampling "fix" in `m0_4_train_domainC.py` bucketed by `range(24)` over a sparsely encoded `combo_id = c*12+a` (actual cids {6..11,18..23,42..47,54..59,66..71}) — empty buckets made every run crash; it had never actually run. Fixed by bucketing over `np.unique(combo_id)`; the 2026-08-12 smoke predates the fix (old unstratified sampling).
 7. **E4 distance gradient degenerates to a single stratum**: domain-C train covers all 6 colors × 6 animals (incl. (2,10)), so all 12 test combos are "both feature values seen, pair unseen" — min replacement distance 1 for all, d\* undefined. The frozen generator's train/test split is on combos, not feature values; no new test combos were added (v0.22 freeze). Reported as an honest downgrade; the main E4 criterion is unaffected.
 8. **Domain-B ceiling candidate scope**: 0.707 is one config line (lr 1e-4) extended to 20k steps; the v0.6.1 protocol wants ≥3 configs — the M4 freeze batch either adds configs or accepts the value with the config scope stated. Domain-C ceiling 1.0 is ≥3-config confirmed.
+9. **B1 probe (2026-08-22)**: (a) the pre-registered threshold T@0.56 is unreachable by the control within the 10,000-step budget (a0 peak 0.534 @ 6000; the ceiling record shows 0.564 only at ~10.5k steps) → the ③ criterion at 0.56 is reported *undefined* and T@0.5 (the G-gate threshold) is the operative proxy — same honest-downgrade class as the E4 distance-gradient degeneration. (b) The a3 calibration arm's confidence-BCE auxiliary loss (λ=1.0) collapsed the model to a constant-token predictor on all 3 seeds (CPU direct inference verified; weights NaN-free) — an operationalization-level degeneracy, not a clean test of calibration; counted as criterion-② failure per pre-registration. (c) The probe depends on the G-gate night-LoRA pipeline; `m3_gate.py`/`m3_gate_diag1.py`/`m3_gate_diag3_fullreplay.py` were therefore added to `src/` with this batch (previously only their result JSONs were public). (d) Scripts retain the original Chinese docstrings per the porting convention (note 5).
 
 Experiments are pre-registered as E0–E9, milestones as M0–M5 — see the "Experiment-number index" section in `docs/experiment-proposal.md`. M0.x are sub-milestones within M0 (M0.1 reproduction, M0.2 basin tooling, M0.3 feasibility anchors, M0.4 domain C/D/E generators + frozen distance matrix).
 

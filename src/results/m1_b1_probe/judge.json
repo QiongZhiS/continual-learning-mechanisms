@@ -1,0 +1,57 @@
+{
+  "a0_reference": {
+    "hc_err_rate": 0.259,
+    "err_rate": 0.452,
+    "T@0.56": null,
+    "T@0.5": 6500.0,
+    "n_seeds": 3
+  },
+  "arms": {
+    "a1": {
+      "hc_err_rate": 0.445,
+      "err_rate": 0.63,
+      "T@0.56": null,
+      "T@0.5": 8500.0,
+      "T_ratio_vs_a0": null,
+      "c1_hc_down": false,
+      "c2_err_not_up": false,
+      "c3_T_ratio_le_07": false
+    },
+    "a2": {
+      "hc_err_rate": 0.3425,
+      "err_rate": 0.5165,
+      "T@0.56": null,
+      "T@0.5": 6500.0,
+      "T_ratio_vs_a0": null,
+      "c1_hc_down": false,
+      "c2_err_not_up": false,
+      "c3_T_ratio_le_07": false
+    },
+    "a3": {
+      "hc_err_rate": 0.0,
+      "err_rate": 1.0,
+      "T@0.56": 7000.0,
+      "T@0.5": 6500.0,
+      "T_ratio_vs_a0": null,
+      "c1_hc_down": true,
+      "c2_err_not_up": false,
+      "c3_T_ratio_le_07": false
+    },
+    "a4": {
+      "hc_err_rate": 0.33,
+      "err_rate": 0.5505,
+      "T@0.56": 9000.0,
+      "T@0.5": 9000.0,
+      "T_ratio_vs_a0": null,
+      "c1_hc_down": false,
+      "c2_err_not_up": false,
+      "c3_T_ratio_le_07": false
+    }
+  },
+  "improved": [],
+  "full": [],
+  "partial": [],
+  "verdict": "M3_NO_GO",
+  "explanation": "不可学习：全部臂 ① 或 ② 失败（高置信错误率不降/总错误率升）→ M3 不按蒸馏轴投入，负结论归档（v0.23 措辞：只对实测方案成立）；先验轴 c2/c3/c4 单独评估（与蒸馏正交）",
+  "git_commit": "c6ac00017f9a17727b8e5e7cdf7f13cef429324e"
+}
